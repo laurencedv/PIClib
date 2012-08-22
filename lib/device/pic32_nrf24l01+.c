@@ -19,7 +19,6 @@
 // -- Control -- //
 // SPI Comm //
 tSPISlaveControl * nrfSPIControl;				//pointer to the nRF SPI Control structure
-
 tSPITransaction * nrfSPICommand;				//pointer to the Command Transaction
 
 //tSPIStatusFlag nrfSPIStatus;					//SPI Status byte
@@ -75,15 +74,31 @@ U8 nrfInit(U8 spiPort, volatile U32 * SSpinPortPtr, U16 SSpinMask)
 }
 
 /**
-* \fn		U8 nrfSendCommand(U8 command, U8 * parametersPtr, U8 paramNb)
+* \fn		U8 nrfSendCommand(U8 command, U8 * parameterPtr, U8 paramNb)
 * @brief	Send a command to the local NRF with parameters and save the response in the $nrfResponseBuf
 * @note		You can specify 0 to paramNb to send only the command byte and save only the Status REG in response
 * @arg		U8	command						Command to send (see nRF Commands section in header)
-* @arg		U8 * parametersPtr				Pointer to load the command's parameters to send to the local nRF
+* @arg		U8 * parameterPtr				Pointer to load the command's parameters to send to the local nRF
 * @arg		U8 paramNb						Number of byte of parameters
 * @return	U8 errorCode					STD Error Code
 */
+U8 nrfSendCommand(tNRFCommand command, U8 nrfPipeNb, U8 * parameterPtr, U8 paramNb)
+{
+	U8 wu0;
 
+	// -- Buffer the command and data -- //
+	nrfBufOut[0]= command;						//Save Command
+
+	for (wu0 = 1; wu0 <= paramNb; wu0++)		//Save paramters
+		nrfBufOut[wu0] = parameterPtr[wu0];
+	// --------------------------------- //
+
+	// -- Start the SPI transaction -- //
+	
+	// ------------------------------- //
+
+	return STD_EC_SUCCESS;
+}
 
 // ############################################## //
 

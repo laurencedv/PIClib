@@ -68,12 +68,6 @@
 #define RECEIVE	0
 #define SEND	1
 
-#ifndef SET
-	#define	SET		1
-#endif
-#ifndef CLEAR
-	#define	CLEAR	0
-#endif
 // ############################################## //
 
 

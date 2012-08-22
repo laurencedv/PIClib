@@ -149,20 +149,6 @@ Feature				||		||	EN TX + ACK	CMD	||	EN TX + ACK		||	EN Dyn Pkt Len	||	RESERVED	
 #define		NRF_PIN_SS_PIN				3					//Pin number on the PORT (0-7)
 // ------------------ //
 
-// -- nRF Commands -- //
-#define		NRF_CMD_READ_REG			0x00				//Read the Register (000A AAAA) A being the reg address
-#define		NRF_CMD_WRITE_REG			0x20				//Write the register (001A AAAA) A being the reg address
-#define		NRF_CMD_READ_RX				0x61				//Read the RX FIFO (1-32 B * 3 lvl) LSB first, data deleted after reading
-#define		NRF_CMD_WRITE_TX			0xA0				//Write to the TX FIFO (1-32 B * 3 lvl) LSB first
-#define		NRF_CMD_FLUSH_RX			0xE2				//Flush the RX FIFO
-#define		NRF_CMD_FLUSH_TX			0xE1				//Flush the TX FIFO
-#define		NRF_CMD_RESEND_TX			0xE3				//Resend continuously the last packet (must be used in TX mode) (can be clear with FLUSH_TX or WRITE_TX commands)
-#define		NRF_CMD_READ_RX_SIZE		0x60				//Read the packet size of the top packet in the RX FIFO (>32 is possible but invalid)
-#define		NRF_CMD_WRITE_TX_WITH_ACK	0xA8				//Write data to be sent with the ACK of the last received packet (used only in RX mode)
-#define		NRF_CMD_WRITE_TX_NO_ACK		0xB0				//Write to the TX FIFO but disabling auto-ACK for this only packet
-#define		NRF_CMD_NOP					0xFF				//No Operation (Status will be sent none the less)
-// ------------------ //
-
 // -- nRF Registers -- //
 #define		NRF_REG_CONFIG				0x00				//General config
 #define		NRF_REG_EN_AA				0x01				//Auto Ack control of each pipe
@@ -264,6 +250,32 @@ typedef union
 		U8 maxNb:4;											// Maximum number of time to retransmit
 	};
 }tNRFReTxConfigReg;
+
+// SPI Command //
+typedef enum
+{
+	NRF_CMD_READ_REG = 0x00,								//Read the Register (000A AAAA) A being the reg address
+	NRF_CMD_WRITE_REG = 0x20,								//Write the register (001A AAAA) A being the reg address
+	NRF_CMD_READ_RX = 0x61,									//Read the RX FIFO (1-32 B * 3 lvl) LSB first, data deleted after reading
+	NRF_CMD_WRITE_TX = 0xA0,								//Write to the TX FIFO (1-32 B * 3 lvl) LSB first
+	NRF_CMD_FLUSH_RX = 0xE2,								//Flush the RX FIFO
+	NRF_CMD_FLUSH_TX = 0xE1,								//Flush the TX FIFO
+	NRF_CMD_RESEND_TX = 0xE3,								//Resend continuously the last packet (must be used in TX mode) (can be clear with FLUSH_TX or WRITE_TX commands)
+	NRF_CMD_READ_RX_SIZE = 0x60,							//Read the packet size of the top packet in the RX FIFO (>32 is possible but invalid)
+	NRF_CMD_WRITE_TX_WITH_ACK = 0xA8,						//Write data to be sent with the ACK of the last received packet (used only in RX mode)
+	NRF_CMD_WRITE_TX_NO_ACK	= 0xB0,							//Write to the TX FIFO but disabling auto-ACK for this only packet
+	NRF_CMD_NOP = 0xFF
+}tNRFCommand;
+
+// nRF Pipe Buffer
+typedef union
+{
+	U32[4] all;
+	struct
+	{
+		
+	};
+};
 // ------------------- //
 // ############################################## //
 

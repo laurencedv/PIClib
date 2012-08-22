@@ -42,7 +42,7 @@ U8 rtccCurrentMonthDayNb = 30;							//Number of day in the Current Month
 // ############################################## //
 
 
-// ################ ADC Functions ############### //
+// ############# Real-time Functions ############ //
 // === Interrupt Handler ===== //
 /**
 * \fn		void realTimeISR(void)
