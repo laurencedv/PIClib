@@ -18,6 +18,10 @@
 // Hardware
 #include <hardware.h>
 
+// Lib
+#include <peripheral/pic32_clock.h>
+#include <peripheral/pic32_interrupt.h>
+
 // Definition
 #include <definition/stddef_megaxone.h>
 #include <definition/datatype_megaxone.h>
@@ -29,32 +33,21 @@
 
 
 // ################## Defines ################### //
-// == Input Selection ==== //
-#define ADC_INSEL_AN0		0
-#define ADC_INSEL_AN1		0x1
-#define ADC_INSEL_AN2		0x2
-#define ADC_INSEL_AN3		0x3
-#define ADC_INSEL_AN4		0x4
-#define ADC_INSEL_AN5		0x5
-#define ADC_INSEL_AN6		0x6
-#define ADC_INSEL_AN7		0x7
-#define ADC_INSEL_AN8		0x8
-#define ADC_INSEL_AN9		0x9
-#define ADC_INSEL_AN10		0xA
-#define ADC_INSEL_AN11		0xB
-#define ADC_INSEL_AN12		0xC
-#define ADC_INSEL_AN13		0xD
-#define ADC_INSEL_AN14		0xE
-#define ADC_INSEL_AN15		0xF
+// == Timing Constraint == //
+#ifndef ADC_SAMP_FREQ_MAX
+	#define ADC_SAMP_FREQ_MAX	5000000					//Maximum Sampling frequency	(NOT sample rate!!!) (absolute maximum of 7.575 MHz)
+#endif
+#ifndef ADC_TAD_FREQ_MAX
+	#define ADC_TAD_FREQ_MAX	5000000					//Maximum frequency of TAD		(absolute maximum of 15.384 MHz)
+#endif
+#define	ADC_CONV_TIME			12						//Conversion time in TAD
+#define ADC_BOOT_TIME			2000					//Stabilisation time at boot in ns
+// ======================= //
 
-#define ADC_INSEL_VREFL		0
-#define ADC_INSEL_CTMU_TEMP	0xD
-#define ADC_INSEL_IVREF		0xE
-#define ADC_INSEL_OPEN		0xF
 // == Mode Selection ===== //
-#define ADC_MODE_SINGLE		0
-#define ADC_MODE_CONTINUOUS	1
-#define ADC_MODE_ALTERNATE	2
+#define ADC_MODE_SINGLE		0x0
+#define ADC_MODE_CONTINUOUS	0x1
+#define ADC_MODE_ALTERNATE	0x2
 // == Format Selection === //
 #define ADC_FORMAT_U16		0
 #define ADC_FORMAT_S16		0x1
@@ -150,8 +143,8 @@ typedef union
 	struct
 	{
 		U32 DONE:1;				//ADC conversion done Flag
-		U32 SAMP:1;				//ADC start conversion Enable
-		U32 ASAM:1;				//ADC auto-sample Enable
+		U32 SAMP:1;				//ADC manual sample Enable
+		U32 ASAM:1;				//ADC auto sample Enable
 		U32 :1;
 		U32 CLRASAM:1;			//Stop Conversion
 		U32 SSRC:3;				//Conversion trigger Selection
@@ -252,6 +245,10 @@ typedef union
 // === Control Functions ==== //
 
 // ========================== //
+// ############################################## //
+
+// ############### Internal Define ############## //
+#define	ADC_SAMC_MAX		31
 // ############################################## //
 
 #endif

@@ -3,7 +3,7 @@
  @brief		ADC Control lib for pic32
 
  @version	0.1
- @note		
+ @note		This lib use auto-sample time function, there is no facilities to hangle the manual sample mode
  @todo		
 
  @date		February 16th 2012
@@ -48,19 +48,86 @@ U8 adcSelectPort(U8 adcPort)
 	return STD_EC_SUCCESS;
 }
 
+/**
+* \fn		U8 adcInit(U8 adcPort)
+* @brief
+* @note
+* @arg		U8 adcPort					Hardware ADC ID
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
 U8 adcInit(U8 adcPort)
 {
 	U8 errorCode;
-
 	errorCode = adcSelectPort(adcPort);
 	if (errorCode == STD_EC_SUCCESS)
 	{
-		//Do stuff
+		
+
+
+
+
+
 	}
 
 	return errorCode;
 }
 
+/**
+* \fn		U8 adcSetSampleRate(U8 adcPort, U32 desiredSampleRate)
+* @brief
+* @note		This function will return error if the timing constraint are not met
+*			Check the family reference section 17 for details on equations
+*			Return STD_EC_TOOLARGE if the desired sample rate is too large for the PBCLK
+*			Return STD_EC_INVALID if the ADC is using FRC as the clock source
+* @arg		U8 adcPort					Hardware ADC ID
+* @arg		U32 SampleRate				Sample Rate to configure
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
+{
+	U8 errorCode;
+	U8 adcs = 0;
+	U8 samc = 0;
+	U32 tempPBclock = clockGetPBCLK();
+
+	errorCode = adcSelectPort(adcPort);
+	if (errorCode == STD_EC_SUCCESS)
+	{
+		// -- Check if using PBCLK -- //
+		if (pADxCON3->ADRC == ADC_CLK_PBCLK)
+		{
+			// -- Determine the minimum adcs -- //
+			for (; (tempPBclock / ((adcs+1) << 1 )) > ADC_TAD_FREQ_MAX; adcs++);
+			// -------------------------------- //
+
+			// -- Check if it is possible -- //
+			if ((tempPBclock / (((adcs+1) << 1 ) * (ADC_CONV_TIME+1))) >= sampleRate)	//Minimum value of SAMC is 1
+			{
+				// -- Test for a valid samc with the lowest adcs possible -- //
+				for (; adcs <= 255; adcs++)
+				{
+					samc = (tempPBclock / (sampleRate * ((adcs+1) << 1 ))) - ADC_CONV_TIME;
+
+					if ((samc < ADC_SAMC_MAX) && ((adcs * tempPBclock) < ADC_TAD_FREQ_MAX))		//If it is suitable exit loop
+						break;
+				}
+				// --------------------------------------------------------- //
+
+				// -- Save the values -- //
+				pADxCON3->ADCS = adcs;
+				pADxCON3->SAMC = samc;
+				// --------------------- //
+			}
+			else
+				errorCode = STD_EC_TOOLARGE;									//Sample rate too large for the PBCLK
+			// ----------------------------- //
+		}
+		else
+			errorCode = STD_EC_INVALID;											//Using FRC
+		// -------------------------- //
+	}
+	return errorCode;
+}
 
 /**
 * \fn		U8 adcCalibrate(U8 adcPort)
@@ -111,11 +178,24 @@ U8 adcSetConfig(U8 adcPort, U32 adcConfig)
 U8 adcSetScan(U8 adcPort, tADCScanInput scanInput)
 {
 	U8 errorCode;
+	U8 inputNb = 0;
 
 	errorCode = adcSelectPort(adcPort);
 	if (errorCode == STD_EC_SUCCESS)
-		pADxCSSL->CSSL = scanInput;
+	{
+		pADxCSSL->CSSL = scanInput;			//Set the selected input
 
+		// -- Count the number of input -- //
+		while (scanInput)
+		{
+			if (scanInput && BIT0)			//Check if the LSchannel is enabled
+				inputNb++;					//Count the channel
+			scanInput >>= 1;				//Position for the next channel
+		}
+		// ------------------------------- //
+
+		pADxCON2->SMPI = (inputNb-1);
+	}
 	return errorCode;
 }
 
@@ -136,13 +216,20 @@ tADCScanInput adcGetScan(U8 adcPort)
 // === Conversion Functions ==== //
 /**
 * \fn		U32 adcGetScan(U8 adcPort)
-* @brief	Return the enabled input matrix for the scan mode of the selected ADC port
-* @note		Use tADCScanInput for the correct return value
+* @brief	
+* @note		
 * @arg		U8 adcPort					Hardware ADC ID
-* @return	tADCScanInput inputMatrix	Input Matrix enabled
+* @arg		tADCInput adcInput			Analog input to convert
+* @arg		U8 conversionNb				Number of conversion to do and round up (maximum 16)
+* @arg		U32 * resultPtr				Pointer to store the result
+* @return	U32 adcConversionID			ID of this conversion (used to check if the conversion is done)
 */
 U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U32 * resultPtr)
 {
+	// -- Handle boundary -- //
+	if (conversionNb > 16)
+		conversionNb = 16;
+	// --------------------- //
 
 
 }
