@@ -38,7 +38,7 @@
 	#define ADC_SAMP_FREQ_MAX	5000000					//Maximum Sampling frequency	(NOT sample rate!!!) (absolute maximum of 7.575 MHz)
 #endif
 #ifndef ADC_TAD_FREQ_MAX
-	#define ADC_TAD_FREQ_MAX	5000000					//Maximum frequency of TAD		(absolute maximum of 15.384 MHz)
+	#define ADC_TAD_FREQ_MAX	15000000				//Maximum frequency of TAD		(absolute maximum of 15.384 MHz)
 #endif
 #define	ADC_CONV_TIME			12						//Conversion time in TAD
 #define ADC_BOOT_TIME			2000					//Stabilisation time at boot in ns
@@ -249,6 +249,7 @@ typedef union
 
 // ############### Internal Define ############## //
 #define	ADC_SAMC_MAX		31
+#define ADC_SAMP_RATE_MAX	1000000
 // ############################################## //
 
 #endif

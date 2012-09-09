@@ -57,15 +57,10 @@ U8 adcSelectPort(U8 adcPort)
 */
 U8 adcInit(U8 adcPort)
 {
-	U8 errorCode;
-	errorCode = adcSelectPort(adcPort);
+	U8 errorCode = adcSelectPort(adcPort);
 	if (errorCode == STD_EC_SUCCESS)
 	{
 		
-
-
-
-
 
 	}
 
@@ -85,14 +80,24 @@ U8 adcInit(U8 adcPort)
 */
 U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 {
-	U8 errorCode;
 	U8 adcs = 0;
 	U8 samc = 0;
+	U8 adcState;
 	U32 tempPBclock = clockGetPBCLK();
 
-	errorCode = adcSelectPort(adcPort);
+	U8 errorCode = adcSelectPort(adcPort);
 	if (errorCode == STD_EC_SUCCESS)
 	{
+		// -- Hadle boundary -- //
+		if (sampleRate > 1000000)
+			return STD_EC_TOOLARGE;
+		// -------------------- //
+
+		// -- Stop the ADC -- //
+		adcState = pADxCON1->ON;
+		pADxCON1->ON = 0;
+		// ------------------ //
+
 		// -- Check if using PBCLK -- //
 		if (pADxCON3->ADRC == ADC_CLK_PBCLK)
 		{
@@ -103,20 +108,25 @@ U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 			// -- Check if it is possible -- //
 			if ((tempPBclock / (((adcs+1) << 1 ) * (ADC_CONV_TIME+1))) >= sampleRate)	//Minimum value of SAMC is 1
 			{
-				// -- Test for a valid samc with the lowest adcs possible -- //
-				for (; adcs <= 255; adcs++)
-				{
-					samc = (tempPBclock / (sampleRate * ((adcs+1) << 1 ))) - ADC_CONV_TIME;
 
-					if ((samc < ADC_SAMC_MAX) && ((adcs * tempPBclock) < ADC_TAD_FREQ_MAX))		//If it is suitable exit loop
-						break;
-				}
-				// --------------------------------------------------------- //
+					// -- Test for a valid samc with the lowest adcs possible -- //
+					for (; adcs <= 255; adcs++)
+					{
+						samc = (tempPBclock / (sampleRate * ((adcs+1) << 1 ))) - ADC_CONV_TIME;
 
-				// -- Save the values -- //
-				pADxCON3->ADCS = adcs;
-				pADxCON3->SAMC = samc;
-				// --------------------- //
+						if ((samc < ADC_SAMC_MAX) && ((tempPBclock / ((adcs+1) << 1 )) < ADC_TAD_FREQ_MAX))		//If it is suitable exit loop
+							break;
+					}
+					// --------------------------------------------------------- //
+
+					// -- Save the values -- //
+					pADxCON3->ADCS = adcs;
+					pADxCON3->SAMC = samc;
+					// --------------------- //
+
+					// -- Verify the actual sample rate -- //
+					for (; adcGetSampleRate(adcPort) < ADC_SAMP_RATE_MAX; (pADxCON3->SAMC)++);
+					// ----------------------------------- //
 			}
 			else
 				errorCode = STD_EC_TOOLARGE;									//Sample rate too large for the PBCLK
@@ -126,7 +136,32 @@ U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 			errorCode = STD_EC_INVALID;											//Using FRC
 		// -------------------------- //
 	}
+
+	// -- Restore the ADC State -- //
+	pADxCON1->ON = adcState;
+	// --------------------------- //
+
 	return errorCode;
+}
+/**
+* \fn		U32 adcGetSampleRate(U8 adcPort)
+* @brief	Return the actual Sample Rate of the selected ADC
+* @note		
+* @arg		U8 adcPort					Hardware ADC ID
+* @return	U32 SampleRate				Actual Sample Rate
+*/
+U32 adcGetSampleRate(U8 adcPort)
+{
+	U32 sampleRate = 0;
+
+	if (adcSelectPort(adcPort) == STD_EC_SUCCESS)
+	{
+		// -- Compute the actual Sample Rate -- //
+		sampleRate = clockGetPBCLK()/((((pADxCON3->ADCS)+1) <<1) * (ADC_CONV_TIME + pADxCON3->SAMC));
+		// ------------------------------------ //
+	}
+
+	return sampleRate;
 }
 
 /**
@@ -177,10 +212,9 @@ U8 adcSetConfig(U8 adcPort, U32 adcConfig)
 */
 U8 adcSetScan(U8 adcPort, tADCScanInput scanInput)
 {
-	U8 errorCode;
 	U8 inputNb = 0;
 
-	errorCode = adcSelectPort(adcPort);
+	U8 errorCode = adcSelectPort(adcPort);
 	if (errorCode == STD_EC_SUCCESS)
 	{
 		pADxCSSL->CSSL = scanInput;			//Set the selected input
