@@ -26,16 +26,16 @@
 
 // ############### Register Macro ############### //
 #if defined (__PIC32MX)
-	#define REG_OFFSET_CLR_32	1
-	#define REG_OFFSET_SET_32	2
-	#define REG_OFFSET_INV_32	3
+	#define REG_OFFSET_CLR_32	0x1
+	#define REG_OFFSET_SET_32	0x2
+	#define REG_OFFSET_INV_32	0x3
 
-	#define REG_OFFSET_CLR_16	2
-	#define REG_OFFSET_SET_16	4
-	#define REG_OFFSET_INV_16	6
+	#define REG_OFFSET_CLR_16	0x2
+	#define REG_OFFSET_SET_16	0x4
+	#define REG_OFFSET_INV_16	0x6
 
-	#define REG_OFFSET_CLR_8	4
-	#define REG_OFFSET_SET_8	8
+	#define REG_OFFSET_CLR_8	0x4
+	#define REG_OFFSET_SET_8	0x8
 	#define REG_OFFSET_INV_8	0xC
 #endif
 // ############################################## //

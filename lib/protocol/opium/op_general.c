@@ -50,7 +50,7 @@ U8 comWingScan(U8 comWingID)
 	// -- Detect Presence -- //
 	// ADC Read
 
-	readValue >>=4;
+	readValue >>= 4;
 
 	// Type assignation
 	switch (readValue)
@@ -68,7 +68,7 @@ U8 comWingScan(U8 comWingID)
 	// -- Initialise the wing -- //
 	if ((oldType != COMWingControlReg[comWingID].type) && (COMWingControlReg[comWingID].type != unknown))
 	{
-		COMWingControlReg[comWingID].state = detected;					//A wing as been detected
+		COMWingControlReg[comWingID].state = detected;					//A new wing as been detected
 	}
 	// ------------------------ //
 

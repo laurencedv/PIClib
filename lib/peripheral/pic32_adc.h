@@ -79,8 +79,8 @@
 typedef enum
 {
 	idle,
-	sampling,
-	converting,
+	config,
+	busy,
 	calibration,
 	error,
 }tADCState;
@@ -143,7 +143,7 @@ typedef union
 	struct
 	{
 		U32 DONE:1;				//ADC conversion done Flag
-		U32 SAMP:1;				//ADC manual sample Enable
+		U32 SAMP:1;				//ADC manual start
 		U32 ASAM:1;				//ADC auto sample Enable
 		U32 :1;
 		U32 CLRASAM:1;			//Stop Conversion

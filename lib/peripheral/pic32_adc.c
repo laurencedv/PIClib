@@ -4,7 +4,7 @@
 
  @version	0.1
  @note		This lib use auto-sample time function, there is no facilities to hangle the manual sample mode
- @todo		
+ @todo		Transform this for the rtos
 
  @date		February 16th 2012
  @author	Laurence DV
@@ -21,6 +21,7 @@ tADxCON2 * pADxCON2 = NULL;
 tADxCON3 * pADxCON3 = NULL;
 tADxCHS * pADxCHS = NULL;
 tADxCSSL * pADxCSSL = NULL;
+U32 * pADxBUF = NULL;
 
 S16 adcOffsetValue[ADC_MAX_PORT];							//Calibration offset value result
 tADCState adcState[ADC_MAX_PORT];							//ADC module actual state
@@ -30,6 +31,49 @@ U32 adcConversionID[ADC_MAX_PORT];							//ID of the last completed conversion
 
 
 // ################ ADC Functions ############### //
+// ========== ISR =========== //
+void adcISR(U8 adcPort)
+{
+	U8 wu0;
+	
+	switch (adcState[adcPort])
+	{
+		case idle:
+		{
+			//Not really supposed to be here...
+			break;
+		}
+		case config:
+		{
+			//Not really supposed to be here...
+			break;
+		}
+		case busy:
+		{
+			// -- Save the result in the destination -- //
+			for (wu0 = 0; wu0 < pADxCON2->SMPI; wu0++)
+				adcResultPtr[adcPort][wu0] = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
+			// ---------------------------------------- //
+
+			adcState[adcPort] = idle;
+			break;
+		}
+		case calibration:
+		{
+			// -- Save the calibration result -- //
+			adcOffsetValue[adcPort] = *pADxBUF;
+			// --------------------------------- //
+
+			adcState[adcPort] = idle;
+			
+			break;
+		}
+		default: adcState[adcPort] = error;
+	}
+}
+// ========================== //
+
+
 // === Control Functions ==== //
 /**
 * \fn		U8 adcSelectPort(U8 adcPort)
@@ -42,7 +86,7 @@ U8 adcSelectPort(U8 adcPort)
 {
 	switch (adcPort)
 	{
-		case ADC_1:	pADxCON1 = (tADxCON1*)&AD1CON1; pADxCON2 = (tADxCON2*)&AD1CON2; pADxCON3 = (tADxCON3*)&AD1CON3; pADxCHS = (tADxCHS*)&AD1CHS; pADxCSSL = (tADxCSSL*)&AD1CSSL;	break;
+		case ADC_1:	pADxCON1 = (tADxCON1*)&AD1CON1; pADxCON2 = (tADxCON2*)&AD1CON2; pADxCON3 = (tADxCON3*)&AD1CON3; pADxCHS = (tADxCHS*)&AD1CHS; pADxCSSL = (tADxCSSL*)&AD1CSSL; pADxBUF = &ADC1BUF0;	break;
 		default :	return STD_EC_NOTFOUND;
 	}
 	return STD_EC_SUCCESS;
@@ -50,7 +94,7 @@ U8 adcSelectPort(U8 adcPort)
 
 /**
 * \fn		U8 adcInit(U8 adcPort)
-* @brief
+* @brief	Initialize the ADC module for single mode
 * @note
 * @arg		U8 adcPort					Hardware ADC ID
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
@@ -60,8 +104,27 @@ U8 adcInit(U8 adcPort)
 	U8 errorCode = adcSelectPort(adcPort);
 	if (errorCode == STD_EC_SUCCESS)
 	{
-		
+		// -- Stop the ADC -- //
+		pADxCON1->ON = 0;
+		// ------------------ //
 
+		pADxCON1->SSRC = ADC_TRIG_AUTO;
+		pADxCON2->BUFM = 0;				//16bit buffer
+		pADxCON1->CLRASAM = 1;			//Will stop the conversion after the interrupt
+		pADxCON2->VCFG = 0;				//Set the references to AVdd and AVss
+		pADxCON2->ALTS = 0;				//Use only MUX A
+		pADxCON3->ADRC = ADC_CLK_PBCLK;	//Use PBClock as the clock source
+		pADxCON1->FORM = ADC_FORMAT_U16;//Format the result as a unsigned 16bit
+
+		// -- Init control -- //
+		adcOffsetValue[adcPort] = 0;
+		adcState[adcPort] = config;
+		// ------------------ //
+
+		// -- Start the ADC -- //
+		pADxCON1->ON = 1;
+		Nop();		//TODO wait ADC_BOOT_TIME
+		// ------------------- //
 	}
 
 	return errorCode;
@@ -75,14 +138,14 @@ U8 adcInit(U8 adcPort)
 *			Return STD_EC_TOOLARGE if the desired sample rate is too large for the PBCLK
 *			Return STD_EC_INVALID if the ADC is using FRC as the clock source
 * @arg		U8 adcPort					Hardware ADC ID
-* @arg		U32 SampleRate				Sample Rate to configure
+* @arg		U32 SampleRate				Sample Rate to configure (in sample per second)
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 {
 	U8 adcs = 0;
 	U8 samc = 0;
-	U8 adcState;
+	U8 adcStateTemp,adcON;
 	U32 tempPBclock = clockGetPBCLK();
 
 	U8 errorCode = adcSelectPort(adcPort);
@@ -94,7 +157,9 @@ U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 		// -------------------- //
 
 		// -- Stop the ADC -- //
-		adcState = pADxCON1->ON;
+		adcStateTemp = adcState[adcPort];
+		adcState[adcPort] = config;
+		adcON = pADxCON1->ON;
 		pADxCON1->ON = 0;
 		// ------------------ //
 
@@ -135,14 +200,20 @@ U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 		else
 			errorCode = STD_EC_INVALID;											//Using FRC
 		// -------------------------- //
+	
+		// -- Restore the ADC State -- //
+		adcState[adcPort] = adcStateTemp;
+		pADxCON1->ON = adcON;
+		if (adcON)
+		{
+			Nop();		//TODO wait ADC_BOOT_TIME
+		}
+		// --------------------------- //
 	}
-
-	// -- Restore the ADC State -- //
-	pADxCON1->ON = adcState;
-	// --------------------------- //
-
+	
 	return errorCode;
 }
+
 /**
 * \fn		U32 adcGetSampleRate(U8 adcPort)
 * @brief	Return the actual Sample Rate of the selected ADC
@@ -177,30 +248,16 @@ U8 adcCalibrate(U8 adcPort)
 	{
 		// -- Init for calibration -- //
 		pADxCON2->OFFCAL = 1;				//Set for calib
-				//Start the conversion
-		// -------------------------- //
+		pADxCON2->SMPI = 0;					//Do 1 conversion
+		pADxCON1->SAMP = 1;					//Start the conversion
 
-		// -- Wait and save the result -- //
-		while (!(pADxCON1->DONE));			//Wait the result
-		adcOffsetValue[adcPort] = 0;		//Save the result
-		// ------------------------------ //
+		adcState[adcPort] = calibration;
+		// -------------------------- //
 
 		return STD_EC_SUCCESS;
 	}
 }
 
-/**
-* \fn		U8 adcCalibrate(U8 adcPort)
-* @brief
-* @note
-* @arg		U8 adcPort					Hardware ADC ID
-* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
-*/
-U8 adcSetConfig(U8 adcPort, U32 adcConfig)
-{
-
-	return STD_EC_SUCCESS;
-}
 
 /**
 * \fn		U8 adcSetScan(U8 adcPort, U32 scanInput)
@@ -250,8 +307,9 @@ tADCScanInput adcGetScan(U8 adcPort)
 // === Conversion Functions ==== //
 /**
 * \fn		U32 adcGetScan(U8 adcPort)
-* @brief	
-* @note		
+* @brief	Wait for the ADC to be idle, and then initiated conversionNb of conversion on the selected channel
+* @note		This function can jam everything...
+*			Super ugly and crappy function, waiting for RTOS to be better
 * @arg		U8 adcPort					Hardware ADC ID
 * @arg		tADCInput adcInput			Analog input to convert
 * @arg		U8 conversionNb				Number of conversion to do and round up (maximum 16)
@@ -260,22 +318,45 @@ tADCScanInput adcGetScan(U8 adcPort)
 */
 U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U32 * resultPtr)
 {
-	// -- Handle boundary -- //
-	if (conversionNb > 16)
-		conversionNb = 16;
-	// --------------------- //
+	U8 errorCode;
 
+	errorCode = adcSelectPort(adcPort);
+	if (errorCode == STD_EC_SUCCESS)
+	{
+		// -- Handle boundary -- //
+		if (conversionNb > 16)
+			conversionNb = 16;
+		// --------------------- //
 
+		// Wait for the ADC to be idle
+		while (!(pADxCON1->DONE));
+
+		// -- Select the correct channel -- //
+		pADxCHS->CH0NA = 0;						//Select VrefL as the negative input
+		pADxCHS->CH0SA = adcInput;
+		// -------------------------------- //
+
+		adcResultPtr[adcPort] = resultPtr;		//Save the result pointer
+		adcState[adcPort] = busy;
+
+		pADxCON1->ASAM = 1;						//Auto mode
+		pADxCON1->CLRASAM = 1;					//Stop after SMPI nb of conversion (clear ASAM automaticaly)
+		pADxCON2->SMPI = conversionNb-1;		//Set the number of conversion to do
+
+		pADxCON1->SAMP = 1;						//Start the sampling/conversion
+	}
+
+	return errorCode;
 }
 
-U8 adcStartConvert(U8 adcPort)
+U8 adcStartScan(U8 adcPort)
 {
-
+	return STD_EC_NOTFOUND;
 }
 
-U8 adcStopConvert(U8 adcPort)
+U8 adcStopScan(U8 adcPort)
 {
-
+	return STD_EC_NOTFOUND;
 }
 // ============================= //
 // ############################################## //
