@@ -18,6 +18,7 @@
 #include <hardware.h>
 
 // Lib
+#include <stdlib.h>
 
 // Definition
 #include <definition/datatype_megaxone.h>
@@ -34,6 +35,34 @@
 
 
 // ################# Data Type ################## //
+// Link State
+typedef enum
+{
+	detect = 0,
+	election,
+	master,
+	slave
+}tOpRS485LinkState;
+
+// Link SubState
+typedef enum
+{
+	init = 0,
+	active,
+	wait
+}tOpRS485LinkSubState;
+
+// Slot control
+typedef union
+{
+	U16 all;
+	struct
+	{
+		U8 frame;
+		U8 slot;
+	};
+}tOpRS485Slot;
+
 // Control
 typedef union
 {
@@ -51,40 +80,37 @@ typedef union
 		U8 currentSlot;
 	};
 }tOpRS485Control;
-
-// Slot control
-typedef union
-{
-	U16 all;
-	struct
-	{
-		U8 frame;
-		U8 slot;
-	};
-}tOpRS485Slot;
-
-// Link State
-typedef enum
-{
-	detect = 0,
-	election,
-	master,
-	slave
-}tOpRS485LinkState;
-
-// Link SubState
-typedef enum
-{
-	init = 0,
-	active,
-	wait
-}tOpRS485LinkSubState;
 // ############################################## //
 
 
 // ################# Prototypes ################# //
 // ==== Control Functions ==== //
+/**
+* \fn		U8 opRS485Init(U8 comWingID)
+* @brief
+* @note
+* @arg		U8 comWingID					ID of the selected COM Wing
+* @return	U8 errorCode					STD Error Code
+*/
+U8 opRS485Init(U8 comWingID);
 
+/**
+* \fn		U8 opRS485Control (U8 comWingID)
+* @brief
+* @note
+* @arg		U8 comWingID					ID of the selected COM Wing
+* @return	U8 errorCode					STD Error Code
+*/
+U8 opRS485Control (U8 comWingID);
+
+/**
+* \fn		U8 opRS485Engine (U8 comWingID)
+* @brief
+* @note
+* @arg		U8 comWingID					ID of the selected COM Wing
+* @return	U8 errorCode					STD Error Code
+*/
+U8 opRS485Engine (U8 comWingID);
 // =========================== //
 // ############################################## //
 

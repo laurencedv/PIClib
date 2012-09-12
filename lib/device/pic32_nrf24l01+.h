@@ -270,12 +270,12 @@ typedef enum
 // nRF Pipe Buffer
 typedef union
 {
-	U32[4] all;
+	U32 all;
 	struct
 	{
-		
+		U8 pipe;
 	};
-};
+}tNRFPipeBuffer;
 // ------------------- //
 // ############################################## //
 

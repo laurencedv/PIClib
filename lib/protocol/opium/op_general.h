@@ -19,7 +19,9 @@
 #include <hardware.h>
 
 // Layers
-#include <protocol/opium/op_link_layer.h>
+
+// Lib
+#include <protocol/opium/op_link_rs-485.h>
 
 // Definition
 #include <definition/datatype_megaxone.h>
@@ -77,14 +79,25 @@ typedef union
 	U32 all[3];
 	struct
 	{
-		tCOMWingType type = unknown;
-		tCOMWingState state = undetected;
-		void * controlReg = NULL;
-		U8 (*comWingInit)(U8 comWingID) = NULL;
-		U8 (*comWingControl)(U8 comWingID) = NULL;
-		U8 (*comWingEngine)(U8 comWingID) = NULL;
+		tCOMWingType type;
+		tCOMWingState state;
+		void * controlReg;
+		U8 (*comWingInit)(U8 comWingID);
+		U8 (*comWingControl)(U8 comWingID);
+		U8 (*comWingEngine)(U8 comWingID);
 	};
 }tCOMWingControl;
+
+// Packet Type
+typedef enum
+{
+	nodeCommand = 0x00,
+	nodeDiagnostic = 0x01,
+	nodeFirmwareUpdate = 0x02,
+	data = 0x10,
+	netCommand = 0x40,
+	netDiagnostic = 0x41
+}tOpPacketType;
 
 // Packet Header structure
 typedef union
@@ -116,18 +129,6 @@ typedef union
 		U8 payloadSize;
 	};
 }tOpPacketHeader;
-
-// Packet Type
-typedef enum
-{
-	nodeCommand = 0x00,
-	nodeDiagnostic = 0x01,
-	nodeFirmwareUpdate = 0x02,
-	data = 0x10,
-	netCommand = 0x40,
-	netDiagnostic = 0x41
-}tOpPacketType;
-
 // ############################################## //
 
 

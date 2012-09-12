@@ -47,8 +47,8 @@ U8 opRS485Init(U8 comWingID)
 			heapAvailable -= (sizeof(tOpRS485Control)+sizeof(tOpRS485Slot));
 
 			// -- Assign Hardware -- //
-			tempOpRS485ControlReg->timerID = ;
-			tempOpRS485ControlReg->uartID = ;
+			tempOpRS485ControlReg->timerID = 0;									// TODO
+			tempOpRS485ControlReg->uartID = 0;
 			// --------------------- //
 
 			// -- Initialise Control -- //

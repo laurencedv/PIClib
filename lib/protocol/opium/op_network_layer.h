@@ -37,7 +37,7 @@
 // ################# Data Type ################## //
 typedef union
 {
-	U32 all[];
+	U32 all;
 	struct
 	{
 		U8 mode;

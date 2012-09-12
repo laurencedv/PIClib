@@ -39,6 +39,15 @@ U32 rtccTickNext;										//Next update of the rtcc (in sysTick)
 U8 rtccCurrentMonthDayNb = 30;							//Number of day in the Current Month
 #endif
 
+#if USE_RT_SOFT_COUNTER == ENABLE
+U32 softCnt[RT_SOFT_COUNTER_NB];						//Actual value of the software counter
+U32 softCntReloadVal[RT_SOFT_COUNTER_NB];				//Value to reload after the underrun of the counter
+U32 * softCntTargetPtr[RT_SOFT_COUNTER_NB];				//Target to modify at the underrun
+U32 softCntTargetVal[RT_SOFT_COUNTER_NB];				//Value to input in the target
+tSoftCounterControl softCntControl[RT_SOFT_COUNTER_NB];	//Control register of the software counter
+U8 softCntEnabled = 0;									//Number of counter enabled
+#endif
+
 // ############################################## //
 
 
@@ -61,9 +70,22 @@ U8 rtccCurrentMonthDayNb = 30;							//Number of day in the Current Month
 	//upTimeUpdate();		//Should be done Async now
 
 	intFastClearFlag(RT_TIMER_INT_VECTOR);
-}
-*/
+}*/
 
+void rtISR(void)
+{
+	sysTick++;
+
+	// -- Soft Counter -- //
+	if (softCntEnabled)
+	{
+		U8 wu0;
+		
+		for (wu0 = 0; wu0 < softCntEnabled; wu0++)
+			softCnt[wu0]--;
+	}
+	// ------------------ //
+}
 // =========================== //
 
 
@@ -166,6 +188,80 @@ tRealTime* upTimeGet(void)
 }
 // =========================== //
 
+
+// ====== Software Counter ====== //
+/**
+* \fn		U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
+* @brief	Initialise a software counter
+* @note
+* @arg		U32 cntPeriod		Number of sysTick of 1 count
+* @arg		U32 * targetPtr		Target to be modified at underRun
+* @arg		U32 targetValue		Value to set the target after a underRun
+* @arg		U8 option			Options of the counter
+* @return	U8 softCntID		ID of the initialised counter
+*/
+U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
+{
+	U8 softCntID;
+
+	// -- Check if a counter is available -- //
+	if (softCntEnabled < RT_SOFT_COUNTER_NB)
+	// ------------------------------------- //
+	{
+		// -- Set the ID -- //
+		softCntID = softCntEnabled;
+		softCntEnabled++;
+		// ---------------- //
+
+		// -- Set the target -- //
+		if (option & SOFT_CNT_TARGET_EN)
+		{
+			softCntControl[softCntID].targetEn = SOFT_CNT_TARGET_EN;
+			softCntTargetVal[softCntID] = targetValue;
+			softCntTargetPtr[softCntID] = targetPtr;
+		}
+		// -------------------- //
+
+		// -- Init the counter -- //
+		softCntControl[softCntID].reload = option & SOFT_CNT_RELOAD_EN;
+		softCntReloadVal[softCntID] = cntPeriod;
+		softCnt[softCntID] = cntPeriod;
+		softCntControl[softCntID].underRun = 0;
+		softCntControl[softCntID].enable = ENABLE;
+		// ---------------------- //
+
+	}
+	else
+		softCntID = STD_EC_OVERFLOW;
+
+	return softCntID;
+}
+
+U8 softCntEngine(void)
+{
+	U8 wu0 = 0;
+
+	for (; wu0 < softCntEnabled; wu0++)
+	{
+		// -- UnderRun condition -- //
+		if (!softCnt[wu0])
+		{
+			// -- Auto reload -- //
+			if (softCntControl[wu0].reload)
+				softCnt[wu0] = softCntReloadVal[wu0];
+			// ----------------- //
+
+			// -- Target Action -- //
+			if (softCntControl[wu0].targetEn)
+				*(softCntTargetPtr[wu0]) = softCntTargetVal[wu0];
+			// ------------------- //
+		}
+		// ------------------------ //
+	}
+}
+// ============================== //
+
+
 // ====== RTCC Function ====== //
 
 /**
@@ -186,8 +282,6 @@ void rtccInit(void)
 		rtccTime.all[wu0] = 0;
 	// --------------------------------- //
 }
-
-
 
 void rtccUpdate(void)
 {

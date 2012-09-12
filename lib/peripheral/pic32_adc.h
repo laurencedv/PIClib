@@ -113,26 +113,26 @@ typedef enum
 //ADC Scan mode input selection
 typedef enum
 {
-	an0 = 0x1,
-	an1 = 0x2,
-	an2 = 0x4,
-	an3 = 0x8,
-	an4 = 0x10,
-	an5 = 0x20,
-	an6 = 0x40,
-	an7 = 0x80,
-	an8 = 0x100,
-	an9 = 0x200,
-	an10 = 0x400,
-	an11 = 0x800,
-	an12 = 0x1000,
-	an13 = 0x2000,
-	an14 = 0x4000,
-	an15 = 0x8000,
-	vrefl = 0x1,
-	ctmuTemp = 0x2000,
-	ivref = 0x4000,
-	vss = 0x8000
+	muxAn0 = 0x1,
+	muxAn1 = 0x2,
+	muxAn2 = 0x4,
+	muxAn3 = 0x8,
+	muxAn4 = 0x10,
+	muxAn5 = 0x20,
+	muxAn6 = 0x40,
+	muxAn7 = 0x80,
+	muxAn8 = 0x100,
+	muxAn9 = 0x200,
+	muxAn10 = 0x400,
+	muxAn11 = 0x800,
+	muxAn12 = 0x1000,
+	muxAn13 = 0x2000,
+	muxAn14 = 0x4000,
+	muxAn15 = 0x8000,
+	muxVrefl = 0x1,
+	muxCtmuTemp = 0x2000,
+	muxIvref = 0x4000,
+	muxVss = 0x8000
 }tADCScanInput;
 
 // == Register Pointer == //
@@ -242,8 +242,94 @@ typedef union
 
 
 // ################# Prototypes ################# //
-// === Control Functions ==== //
+// ========== ISR =========== //
+void adcISR(U8 adcPort);
+// ========================== //
 
+
+// === Control Functions ==== //
+/**
+* \fn		U8 adcSelectPort(U8 adcPort)
+* @brief	Correctly point all reg pointers for a designated ADC port
+* @note		Will return STD_EC_NOTFOUND if an invalid port is given
+* @arg		U8 adcPort					Hardware ADC ID
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcSelectPort(U8 adcPort);
+
+/**
+* \fn		U8 adcInit(U8 adcPort)
+* @brief	Initialize the ADC module for single mode
+* @note
+* @arg		U8 adcPort					Hardware ADC ID
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcInit(U8 adcPort);
+
+/**
+* \fn		U8 adcSetSampleRate(U8 adcPort, U32 desiredSampleRate)
+* @brief
+* @note		This function will return error if the timing constraint are not met
+*			Check the family reference section 17 for details on equations
+*			Return STD_EC_TOOLARGE if the desired sample rate is too large for the PBCLK
+*			Return STD_EC_INVALID if the ADC is using FRC as the clock source
+* @arg		U8 adcPort					Hardware ADC ID
+* @arg		U32 SampleRate				Sample Rate to configure (in sample per second)
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcSetSampleRate(U8 adcPort, U32 sampleRate);
+
+/**
+* \fn		U32 adcGetSampleRate(U8 adcPort)
+* @brief	Return the actual Sample Rate of the selected ADC
+* @note
+* @arg		U8 adcPort					Hardware ADC ID
+* @return	U32 SampleRate				Actual Sample Rate
+*/
+U32 adcGetSampleRate(U8 adcPort);
+
+/**
+* \fn		U8 adcCalibrate(U8 adcPort)
+* @brief	Calibrate and offset the selected ADC
+* @note		Will return STD_EC_NOTFOUND if an invalid port is given
+* @arg		U8 adcPort					Hardware ADC ID
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcCalibrate(U8 adcPort);
+
+/**
+* \fn		U8 adcSetScan(U8 adcPort, U32 scanInput)
+* @brief	Set the enabled input matrix for the scan mode of the selected ADC port
+* @note		Use tADCScanInput for the correct input selection
+* @arg		U8 adcPort					Hardware ADC ID
+* @arg		tADCScanInput scanInput		Input Matrix to enable
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcSetScan(U8 adcPort, tADCScanInput scanInput);
+
+/**
+* \fn		U32 adcGetScan(U8 adcPort)
+* @brief	Return the enabled input matrix for the scan mode of the selected ADC port
+* @note		Use tADCScanInput for the correct return value
+* @arg		U8 adcPort					Hardware ADC ID
+* @return	tADCScanInput inputMatrix	Input Matrix enabled
+*/
+tADCScanInput adcGetScan(U8 adcPort);
+// ========================== //
+
+// == Conversion Functions == //
+/**
+* \fn		U32 adcGetScan(U8 adcPort)
+* @brief	Wait for the ADC to be idle, and then initiated conversionNb of conversion on the selected channel
+* @note		This function can jam everything...
+*			Super ugly and crappy function, waiting for RTOS to be better
+* @arg		U8 adcPort					Hardware ADC ID
+* @arg		tADCInput adcInput			Analog input to convert
+* @arg		U8 conversionNb				Number of conversion to do and round up (maximum 16)
+* @arg		U32 * resultPtr				Pointer to store the result
+* @return	U32 adcConversionID			ID of this conversion (used to check if the conversion is done)
+*/
+U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U32 * resultPtr);
 // ========================== //
 // ############################################## //
 

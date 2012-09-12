@@ -304,7 +304,7 @@ tADCScanInput adcGetScan(U8 adcPort)
 }
 // ========================== //
 
-// === Conversion Functions ==== //
+// == Conversion Functions == //
 /**
 * \fn		U32 adcGetScan(U8 adcPort)
 * @brief	Wait for the ADC to be idle, and then initiated conversionNb of conversion on the selected channel

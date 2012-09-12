@@ -58,7 +58,10 @@
 #ifndef FALSE
 	#define FALSE	0
 #endif
-	
+
+#define ENABLE	1
+#define DISABLE	0
+
 #define LEFT	0
 #define RIGHT	1
 

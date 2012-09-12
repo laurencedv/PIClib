@@ -35,25 +35,36 @@
 // ################## Defines ################### //
 #define	RT_CENTURY_PREFIX		20
 
-// -- Timer control -- //
+// == Timer control == //
 #define RT_TIMER_ID				TIMER_1
 #define RT_TIMER_INT_ID			INT_TIMER_1
 #define RT_TIMER_VECTOR			INT_VEC_TIMER_1
-// ------------------- //
+// =================== //
 
-// -- RTCC System Compile Time option -- //
+// == Software Counter == //
+#define USE_RT_SOFT_COUNTER		ENABLE				//Enable the software counter functions by setting to "ENABLE"
+#define RT_SOFT_COUNTER_NB		10					//Number of software counter to create (max 10)
+
+// Init options
+#define SOFT_CNT_RELOAD_EN		0x1					//Enable the auto reload of the counter (timer mode)
+#define SOFT_CNT_RELOAD_DIS		0x0					//Disable the auto reload of the counter
+#define SOFT_CNT_TARGET_EN		0x2					//Enable the target action at underRun
+#define SOFT_CNT_TARGET_DIS		0x0					//Disable the target action at underRun
+// ====================== //
+
+// == RTCC System Compile Time option == //
 #define RTCC_UPDATE_RATE		1000				//Update rate of the software RTCC (in sysTick)
 #define RTCC_SYSTEM				RTCC_HARDWARE
 
 #define RTCC_SOFTWARE			1
 #define RTCC_HARDWARE			2
 #define RTCC_EXTERNAL			3
-// ------------------------------------- //
+// ===================================== //
 // ############################################## //
 
 
 // ################# Data Type ################## //
-typedef union __attribute__ ((packed))
+typedef union
 {
 	U8 all[9];
 	struct
@@ -67,6 +78,19 @@ typedef union __attribute__ ((packed))
 		U16 millis;
 	};
 }tRealTime;
+
+typedef union
+{
+	U32 all;
+	struct
+	{
+		U32 enable:1;				//The counter is currently enabled
+		U32 underRun:1;				//The counter as underRun
+		U32 targetEn:1;				//The counter will modify the softCntTargetPtr with the softCntTargetVal
+		U32 reload:1;				//The counter will auto reload it-self at underRun (timer mode)
+		U32 :28;
+	};
+}tSoftCounterControl;
 // ############################################## //
 
 
@@ -111,6 +135,23 @@ void upTimeUpdate(void);
 */
 tRealTime* upTimeGet(void);
 // =========================== //
+
+
+// ====== Software Counter ====== //
+/**
+* \fn		U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
+* @brief	Initialise a software counter
+* @note
+* @arg		U32 cntPeriod		Number of sysTick of 1 count
+* @arg		U32 * targetPtr		Target to be modified at underRun
+* @arg		U32 targetValue		Value to set the target after a underRun
+* @arg		U8 option			Options of the counter
+* @return	U8 softCntID		ID of the initialised counter
+*/
+U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option);
+
+
+// ============================== //
 
 
 // ===== RTCC Functions ====== //

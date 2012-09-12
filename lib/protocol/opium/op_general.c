@@ -100,9 +100,9 @@ U8 comWingAssign(U8 comWingID)
 			}
 			case rs485:
 			{
-				tempCOMWingControlReg->comWingInit = opRS485Init;
-				tempCOMWingControlReg->comWingControl = opRS485Control;
-				tempCOMWingControlReg->comWingEngine = opRS485Engine;
+				tempCOMWingControlReg->comWingInit = &opRS485Init;
+				tempCOMWingControlReg->comWingControl = &opRS485Control;
+				tempCOMWingControlReg->comWingEngine = &opRS485Engine;
 				break;
 			}
 			case spi:
