@@ -347,7 +347,9 @@ U8 spiStart(U8 spiPort)
 
 		// -- Set the config -- //
 		*pSPIxCON = spiConfig[spiPort].registers.spiCon;
-		*pSPIxCON2 = spiConfig[spiPort].registers.spiCon2;
+		#if CPU_FAMILY == PIC32MX1xx || CPU_FAMILY == PIC32MX1xx
+			*pSPIxCON2 = spiConfig[spiPort].registers.spiCon2;
+		#endif
 		spiStatus[spiPort].FIFOlevel = 16>>(pSPIxCON->MODE);
 		// -------------------- //
 
