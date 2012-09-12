@@ -51,14 +51,18 @@ void intSetExternalEdge(tIntIRQ intIRQSource, U8 edgeDirection)
 /**
 * \fn		void _general_exception_handler (U32 cause, U32 status)
 * @brief	Exception handler for the M4K core
-* @note		The processor branch here when an exception other than interrupt and bootstrap code
+* @note		The processor branch here when an exception other than interrupt or bootstrap code
 *			is generated
-* @arg		U32 cause				The state of the CP0 Cause register at the exception time
-* @arg		U32 status				The state of the CP0 Status register at the exception time
 * @return	nothing
 */
-void _general_exception_handler (U32 cause, U32 status)
+void _general_exception_handler (void)
 {
+	U8 exceptionCause;
+	U32 exceptionAddress;
+
+	exceptionCause = (_CP0_GET_CAUSE() & 0x7C) >> 2;
+	exceptionAddress = _CP0_GET_ERROREPC();
+
 	for (;;);
 }
 // ############################################## //

@@ -63,11 +63,7 @@ U8 softCntEnabled = 0;									//Number of counter enabled
 /*
  void __ISR(RT_TIMER_INT_VECTOR, IPL7SOFT)realTimeISR(void)
 {
-	extern U32 sysTick;
-
-	sysTick++;
-
-	//upTimeUpdate();		//Should be done Async now
+	rtISR();
 
 	intFastClearFlag(RT_TIMER_INT_VECTOR);
 }*/
@@ -131,7 +127,6 @@ U8 realTimeInit(U32 tickPeriod)
 
 	return STD_EC_SUCCESS;
 }
-
 
 /**
 * \fn		void upTimeUpdate(void)
@@ -263,7 +258,6 @@ U8 softCntEngine(void)
 
 
 // ====== RTCC Function ====== //
-
 /**
 * \fn		void rtccInit(void)
 * @brief	Init the software rtcc for software and external mode
@@ -272,7 +266,6 @@ U8 softCntEngine(void)
 * @arg		nothing
 * @return	nothing
 */
-
 void rtccInit(void)
 {
 	U8 wu0;
@@ -331,7 +324,5 @@ void rtccUpdate(void)
 
 	#endif
 }
-
-
 // =========================== //
 // ############################################## //
