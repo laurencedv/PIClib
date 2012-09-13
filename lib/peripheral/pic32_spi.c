@@ -97,8 +97,8 @@ void spiMasterEngine(U8 spiPort, U32 interruptFlags)
 			// -- Transaction is done -- //
 			if (spiCurrentTransaction[spiPort]->control.done)
 			{
-				//Fetch a new transaction
-				spiFSMState[spiPort] = fetch;
+				//fetch a new transaction
+				spiFSMState[spiPort] = SPISfetch;
 
 				//Deselect the Slave
 				(localCurrentSlavePtr->SSpinPort)[PTR_REG_OFFSET_SET] = localCurrentSlavePtr->SSpinMask;
@@ -112,8 +112,8 @@ void spiMasterEngine(U8 spiPort, U32 interruptFlags)
 		// -- Transaction states -- //
 		switch (spiFSMState[spiPort])
 		{
-			// == Fetch a new Transaction ===== //
-			case fetch:
+			// == SPISSPISfetch a new Transaction ===== //
+			case SPISfetch:
 			{
 				// -- Check for pending transaction -- //
 				if (rBufGetUsedSpace(spiTransactionList[spiPort]))
@@ -129,7 +129,7 @@ void spiMasterEngine(U8 spiPort, U32 interruptFlags)
 					spiStatus[spiPort].busy = SPI_TRANSACTION_BUSY;
 
 					// Move to initialization
-					spiFSMState[spiPort] = init;
+					spiFSMState[spiPort] = SPISinit;
 				}
 				// -- No more transaction -- //
 				else
@@ -153,7 +153,7 @@ void spiMasterEngine(U8 spiPort, U32 interruptFlags)
 				break;
 			}
 			// == Initialize the Transaction == //
-			case init:
+			case SPISinit:
 			{
 				// -- Set the transaction Status -- //
 				spiCurrentTransaction[spiPort]->control.busy = SPI_TRANSACTION_BUSY;
@@ -163,12 +163,12 @@ void spiMasterEngine(U8 spiPort, U32 interruptFlags)
 				(localCurrentSlavePtr->SSpinPort)[PTR_REG_OFFSET_CLR] = localCurrentSlavePtr->SSpinMask;
 
 				// Move to transfer
-				spiFSMState[spiPort] = transfer;
+				spiFSMState[spiPort] = SPIStransfer;
 
 				break;
 			}
 			// == In Transfer ================= //
-			case transfer:
+			case SPIStransfer:
 			{
 				// === TX State ====== //
 				if (spiCurrentTransaction[spiPort]->txNbRemaining > 0)

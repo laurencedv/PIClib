@@ -417,9 +417,9 @@ typedef struct
 // Transaction FSM states
 typedef enum
 {
-	fetch,
-	init,
-	transfer
+	SPISinit,
+	SPISfetch,
+	SPIStransfer
 }tSPITransactionState;
 // ------------------------ //
 // ############################################## //

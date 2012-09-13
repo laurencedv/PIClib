@@ -150,7 +150,42 @@ tRealTime* upTimeGet(void);
 */
 U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option);
 
+/**
+* \fn		void softCntEngine(void)
+* @brief	UnderRun reaction function for software counter
+* @note		This function must be in the infinite loop of the main to ensure that the software counter will react correctly
+* @arg		nothing
+* @return	nothing
+*/
+void softCntEngine(void);
 
+/**
+* \fn		void softCntStart(U8 softCntID)
+* @brief	Start a Software Counter
+* @note
+* @arg		U8 softCntID		ID of the Software Counter
+* @return	nothing
+*/
+void softCntStart(U8 softCntID);
+
+/**
+* \fn		void softCntStop(U8 softCntID)
+* @brief	Stop a Software Counter
+* @note
+* @arg		U8 softCntID		ID of the Software Counter
+* @return	nothing
+*/
+void softCntStop(U8 softCntID);
+
+/**
+* \fn		void softCntChangePeriod(U8 softCntID, U32 newPeriod)
+* @brief	Update the period value of a Software Counter
+* @note		Change will affect the counter on the next period reload (manual of auto)
+* @arg		U8 softCntID		ID of the Software Counter
+* @arg		U32 netPeriod		New period for the counter (in sysTick)
+* @return	nothing
+*/
+void softCntUpdatePeriod(U8 softCntID, U32 newPeriod);
 // ============================== //
 
 

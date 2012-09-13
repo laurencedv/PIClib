@@ -78,7 +78,8 @@ void rtISR(void)
 		U8 wu0;
 		
 		for (wu0 = 0; wu0 < softCntEnabled; wu0++)
-			softCnt[wu0]--;
+			if (softCntControl[wu0].enable = ENABLE)
+				softCnt[wu0]--;
 	}
 	// ------------------ //
 }
@@ -192,7 +193,7 @@ tRealTime* upTimeGet(void)
 * @arg		U32 cntPeriod		Number of sysTick of 1 count
 * @arg		U32 * targetPtr		Target to be modified at underRun
 * @arg		U32 targetValue		Value to set the target after a underRun
-* @arg		U8 option			Options of the counter
+* @arg		U8 option			Options of the counter (Use the "Init Option" defines)
 * @return	U8 softCntID		ID of the initialised counter
 */
 U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
@@ -220,9 +221,7 @@ U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 		// -- Init the counter -- //
 		softCntControl[softCntID].reload = option & SOFT_CNT_RELOAD_EN;
 		softCntReloadVal[softCntID] = cntPeriod;
-		softCnt[softCntID] = cntPeriod;
 		softCntControl[softCntID].underRun = 0;
-		softCntControl[softCntID].enable = ENABLE;
 		// ---------------------- //
 
 	}
@@ -232,27 +231,84 @@ U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 	return softCntID;
 }
 
-U8 softCntEngine(void)
+/**
+* \fn		void softCntEngine(void)
+* @brief	UnderRun reaction function for software counter
+* @note		This function must be in the infinite loop of the main to ensure that the software counter will react correctly
+* @arg		nothing
+* @return	nothing
+*/
+void softCntEngine(void)
 {
 	U8 wu0 = 0;
 
 	for (; wu0 < softCntEnabled; wu0++)
 	{
-		// -- UnderRun condition -- //
-		if (!softCnt[wu0])
+		// -- If counter is enabled -- //
+		if (softCntControl[wu0].enable)
 		{
-			// -- Auto reload -- //
-			if (softCntControl[wu0].reload)
-				softCnt[wu0] = softCntReloadVal[wu0];
-			// ----------------- //
+			if (softCnt[wu0] == U32_MAX)
+				softCntControl[wu0].underRun = 1;
 
-			// -- Target Action -- //
-			if (softCntControl[wu0].targetEn)
-				*(softCntTargetPtr[wu0]) = softCntTargetVal[wu0];
-			// ------------------- //
+			// -- UnderRun condition -- //
+			if (softCntControl[wu0].underRun)
+			{
+
+
+				// -- Auto reload -- //
+				if (softCntControl[wu0].reload)
+					softCnt[wu0] = softCntReloadVal[wu0];
+				// ----------------- //
+
+				// -- Target Action -- //
+				if (softCntControl[wu0].targetEn)
+					*(softCntTargetPtr[wu0]) = softCntTargetVal[wu0];
+				// ------------------- //
+			}
+			// ------------------------ //
+
+
 		}
-		// ------------------------ //
+		// --------------------------- //
 	}
+}
+
+/**
+* \fn		void softCntStart(U8 softCntID)
+* @brief	Start a Software Counter
+* @note
+* @arg		U8 softCntID		ID of the Software Counter
+* @return	nothing
+*/
+void softCntStart(U8 softCntID)
+{
+	softCnt[softCntID] = softCntReloadVal[softCntID];	//Reload the counter
+	softCntControl[softCntID].enable = ENABLE;			//Start the counter
+}
+
+/**
+* \fn		void softCntStop(U8 softCntID)
+* @brief	Stop a Software Counter
+* @note
+* @arg		U8 softCntID		ID of the Software Counter
+* @return	nothing
+*/
+void softCntStop(U8 softCntID)
+{
+	softCntControl[softCntID].enable = DISABLE;
+}
+
+/**
+* \fn		void softCntChangePeriod(U8 softCntID, U32 newPeriod)
+* @brief	Update the period value of a Software Counter
+* @note		Change will affect the counter on the next period reload (manual of auto)
+* @arg		U8 softCntID		ID of the Software Counter
+* @arg		U32 netPeriod		New period for the counter (in sysTick)
+* @return	nothing
+*/
+void softCntUpdatePeriod(U8 softCntID, U32 newPeriod)
+{
+	softCntReloadVal[softCntID] = newPeriod;
 }
 // ============================== //
 
