@@ -33,8 +33,6 @@
 
 
 // ################## Defines ################### //
-#define	RT_CENTURY_PREFIX		20
-
 // == Timer control == //
 #define RT_TIMER_ID				TIMER_1
 #define RT_TIMER_INT_ID			INT_TIMER_1
@@ -54,23 +52,34 @@
 
 // == RTCC System Compile Time option == //
 #define RTCC_UPDATE_RATE		1000				//Update rate of the software RTCC (in sysTick)
-#define RTCC_SYSTEM				RTCC_HARDWARE
-
-#define RTCC_SOFTWARE			1
-#define RTCC_HARDWARE			2
-#define RTCC_EXTERNAL			3
+#define RTCC_SYSTEM				RTCC_SOFTWARE
 // ===================================== //
 // ############################################## //
 
 
 // ################# Data Type ################## //
+typedef enum
+{
+	january = 0,
+	february = 1,
+	march = 2,
+	april = 3,
+	may = 4,
+	june = 5,
+	july = 6,
+	august = 7,
+	september = 8,
+	october = 9,
+	november = 10,
+	december = 11
+}tRTMonth;
+
 typedef union
 {
-	U8 all[9];
 	struct
 	{
-		U8 year;
-		U8 month;
+		U16 year;
+		tRTMonth month;
 		U16 day;
 		U8 hour;
 		U8 min;
@@ -107,7 +116,7 @@ void rtISR(void);
 // =========================== //
 
 
-// ==== Timing Functions ===== //
+// ==== Control Functions ==== //
 /**
 * \fn		U8 realTimeInit(U16 tickPeriod)
 * @brief	Initialised the Real-Time system to a specified tick period
@@ -118,26 +127,17 @@ void rtISR(void);
 U8 realTimeInit(U32 tickPeriod);
 
 /**
-* \fn		void upTimeUpdate(void)
-* @brief	Update the system Up Time
-* @note		Need to be called in the realTimeISR
-* @arg		nothing
+* \fn		void rtTimeClear(tRealTime * timeToClear)
+* @brief	Reset to 0 every part of a tRealTime variable
+* @note
+* @arg		tRealTime * timeToClear		Pointer to the variable to clear
 * @return	nothing
 */
-void upTimeUpdate(void);
-
-/**
-* \fn		void realTimeISR(void)
-* @brief	Interrupt Service Routine for the realTime system
-* @note		Place it in the TMR0 vector
-* @arg		nothing
-* @return	tRealTime* pUpTime	Pointer to the upTime global variable
-*/
-tRealTime* upTimeGet(void);
+void rtTimeClear(tRealTime * timeToClear);
 // =========================== //
 
 
-// ====== Software Counter ====== //
+// ===== Software Counter ==== //
 /**
 * \fn		U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 * @brief	Initialise a software counter
@@ -186,14 +186,58 @@ void softCntStop(U8 softCntID);
 * @return	nothing
 */
 void softCntUpdatePeriod(U8 softCntID, U32 newPeriod);
-// ============================== //
+// =========================== //
+
+
+// ==== Up-Time Functions ==== //
+/**
+* \fn		void upTimeUpdate(void)
+* @brief	Update the system Up Time
+* @note		Need to be called in the realTimeISR
+* @arg		nothing
+* @return	nothing
+*/
+void upTimeUpdate(void);
+
+/**
+* \fn		void realTimeISR(void)
+* @brief	Interrupt Service Routine for the realTime system
+* @note		Place it in the TMR0 vector
+* @arg		nothing
+* @return	tRealTime* pUpTime	Pointer to the upTime global variable
+*/
+tRealTime* upTimeGet(void);
+// =========================== //
 
 
 // ===== RTCC Functions ====== //
+/**
+* \fn		void rtccInit(void)
+* @brief	Init the software rtcc for software and external mode
+* @note		realTimeInit will define the correct sysTick value to be accurate
+* @arg		nothing
+* @return	nothing
+*/
 void rtccInit(void);
+
+/**
+* \fn		void rtccUpdate(void)
+* @brief	Update the rtcc with the actual time
+* @note		This function should be call regularly for the rtccTime to be accurate
+* @arg		nothing
+* @return	nothing
+*/
 void rtccUpdate(void);
 // =========================== //
 // ############################################## //
+
+
+// ############### Internal Define ############## //
+#define RTCC_SOFTWARE			1
+#define RTCC_HARDWARE			2
+#define RTCC_EXTERNAL			3
+// ############################################## //
+
 
 #endif
 		

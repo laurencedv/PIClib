@@ -5,6 +5,7 @@
  @version	0.1.2
  @note		The sysTick Rate is also the upTime Update Rate, keep it below a second to use the realTime system
 			accurately.
+ *			The software Counters will count AT LEAST the number of systick specified, but can count a bit more (not much)
  @todo		- Make the RTCC System functionnal again
 
  @date		March 2th 2012
@@ -22,23 +23,27 @@
 
 
 // ################## Variables ################# //
-
-//SysTick system
+// == SysTick system == //
 U32 sysTick = 0;										//Number of sysTick passed
 U32 sysTickValue = 0;									//Value of a sysTick (in us)
+// ==================== //
 
-//UpTime system
+// == UpTime system == //
 U32 upTimeLast = 0;										//Last update of the upTime (in systick)
 tRealTime upTime;										//Up Time in real time
+U16 upTimeRemaininguS;									//Remaining µS after an update (to be added at the next update)
+// =================== //
 
-//RTCC system
+// == RTCC system == //
 tRealTime rtccTime;										//Real time
+const U8 dayPerMonth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};	//Number of day per month
 #if RTCC_SYSTEM	== RTCC_SOFTWARE
-U16 rtccUpdateTick;										//number of sysTick between rtccUpdate
-U32 rtccTickNext;										//Next update of the rtcc (in sysTick)
-U8 rtccCurrentMonthDayNb = 30;							//Number of day in the Current Month
+U32 rtccTimeLast;										//Last update of the rtccTime (in sytick)
+U16 rtccRemaininguS;									//Remaining µS after an update (to be added at the next update)
 #endif
+// ================= //
 
+// == Software Counter == //
 #if USE_RT_SOFT_COUNTER == ENABLE
 U32 softCnt[RT_SOFT_COUNTER_NB];						//Actual value of the software counter
 U32 softCntReloadVal[RT_SOFT_COUNTER_NB];				//Value to reload after the underrun of the counter
@@ -47,7 +52,7 @@ U32 softCntTargetVal[RT_SOFT_COUNTER_NB];				//Value to input in the target
 tSoftCounterControl softCntControl[RT_SOFT_COUNTER_NB];	//Control register of the software counter
 U8 softCntEnabled = 0;									//Number of counter enabled
 #endif
-
+// ====================== //
 // ############################################## //
 
 
@@ -60,7 +65,7 @@ U8 softCntEnabled = 0;									//Number of counter enabled
 * @arg		nothing
 * @return	nothing
 */
-/*
+/*	Vector Example
  void __ISR(RT_TIMER_INT_VECTOR, IPL7SOFT)realTimeISR(void)
 {
 	rtISR();
@@ -73,20 +78,23 @@ void rtISR(void)
 	sysTick++;
 
 	// -- Soft Counter -- //
-	if (softCntEnabled)
+	#if USE_RT_SOFT_COUNTER == ENABLE
+	U8 wu0;
+
+	for (wu0 = 0; wu0 < softCntEnabled; wu0++)		//Update all the enabled counter
 	{
-		U8 wu0;
-		
-		for (wu0 = 0; wu0 < softCntEnabled; wu0++)
-			if (softCntControl[wu0].enable = ENABLE)
-				softCnt[wu0]--;
+		if (softCnt[wu0])
+			softCnt[wu0]--;							//Counter is still decrementing
+		else
+			softCntControl[wu0].underRun = 1;		//Counter as reach bottom, flag it
 	}
+	#endif
 	// ------------------ //
 }
 // =========================== //
 
 
-// === Timing Functions ====== //
+// === Control Functions ===== //
 /**
 * \fn		U8 realTimeInit(U32 tickPeriod)
 * @brief	Initialised the Real-Time system to a specified sysTick period
@@ -99,8 +107,6 @@ void rtISR(void)
 */
 U8 realTimeInit(U32 tickPeriod)
 {
-	U8 wu0;
-
 	// -- Init and set the Timer 1 -- //
 	timerInit(RT_TIMER_ID,TMR_CS_PBCLK|TMR_FRZ_STOP);	//Timer 1 is based off PBCLK (and freezed in debug mode)
 	timerSetOverflow(RT_TIMER_ID,tickPeriod);			//Set the overflow time to the desired sysTick period
@@ -109,20 +115,18 @@ U8 realTimeInit(U32 tickPeriod)
 	intFastEnable(RT_TIMER_INT_ID);						//Enable Timer 1 interrupt
 	// ------------------------------ //
 
+	sysTickValue = tickPeriod;							//Save the tick period in µs
 
 	// -- Init the soft rtcc if needed -- //
 	#if RTCC_SYSTEM == RTCC_SOFTWARE
-	sysTickValue = tickPeriod;
-	rtccInit();
+	rtTimeClear(&rtccTime);
 	#endif
 	// ---------------------------------- //
 
-
-	// -- Reset the Up Time -- //
-	for (wu0 = 0; wu0 < 9 ; wu0++)
-		upTime.all[wu0] = 0;
+	// -- Reset the up-time -- //
+	rtTimeClear(&upTime);
 	// ----------------------- //
-
+	
 	//Start the timer
 	timerStart(RT_TIMER_ID);
 
@@ -130,57 +134,22 @@ U8 realTimeInit(U32 tickPeriod)
 }
 
 /**
-* \fn		void upTimeUpdate(void)
-* @brief	Update the system Up Time
-* @note		Need to be called in the realTimeISR
-* @arg		nothing
+* \fn		void rtTimeClear(tRealTime * timeToClear)
+* @brief	Reset to 0 every part of a tRealTime variable
+* @note
+* @arg		tRealTime * timeToClear		Pointer to the variable to clear
 * @return	nothing
 */
-void upTimeUpdate(void)
+void rtTimeClear(tRealTime * timeToClear)
 {
-	//Add the not counted Tick (in ms) to the global millis count
-	upTime.millis += (sysTick - upTimeLast)*sysTickValue;
+	U8 wu0 = 0;
+	U32 * workPtr = (U32*)timeToClear;
 
-	// -- Resplit the millis value in real time -- //
-	while (upTime.millis > 999)
+	if (timeToClear != NULL)
 	{
-		upTime.millis -= 1000;
-		upTime.sec++;
-
-		//Update the Minutes
-		while (upTime.sec > 59)
-		{
-			upTime.sec -= 60;
-			upTime.min++;
-
-			//Update the Hours
-			while (upTime.min > 59)
-			{
-				upTime.min -= 60;
-				upTime.hour++;
-
-				//Update the Days
-				while (upTime.hour > 23)
-				{
-					upTime.hour -= 24;
-					upTime.day++;
-				}
-			}
-		}
+		for (; wu0 < (sizeof(tRealTime)/4) ; wu0++)
+			workPtr[wu0] = 0;
 	}
-	// ------------------------------------------- //
-}
-
-/**
-* \fn		tRealTime* upTimeGet(void)
-* @brief	Return the actual Up Time value
-* @note		
-* @arg		nothing
-* @return	tRealTime* pUpTime	Pointer to the upTime global variable
-*/
-tRealTime* upTimeGet(void)
-{
-	return &upTime;
 }
 // =========================== //
 
@@ -210,12 +179,9 @@ U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 		// ---------------- //
 
 		// -- Set the target -- //
-		if (option & SOFT_CNT_TARGET_EN)
-		{
-			softCntControl[softCntID].targetEn = SOFT_CNT_TARGET_EN;
-			softCntTargetVal[softCntID] = targetValue;
-			softCntTargetPtr[softCntID] = targetPtr;
-		}
+		softCntControl[softCntID].targetEn = (option & SOFT_CNT_TARGET_EN) >> 1;
+		softCntTargetVal[softCntID] = targetValue;
+		softCntTargetPtr[softCntID] = targetPtr;
 		// -------------------- //
 
 		// -- Init the counter -- //
@@ -247,27 +213,24 @@ void softCntEngine(void)
 		// -- If counter is enabled -- //
 		if (softCntControl[wu0].enable)
 		{
-			if (softCnt[wu0] == U32_MAX)
-				softCntControl[wu0].underRun = 1;
-
 			// -- UnderRun condition -- //
 			if (softCntControl[wu0].underRun)
 			{
-
-
 				// -- Auto reload -- //
 				if (softCntControl[wu0].reload)
 					softCnt[wu0] = softCntReloadVal[wu0];
+				else
+					softCntControl[wu0].enable = DISABLE;
 				// ----------------- //
 
 				// -- Target Action -- //
 				if (softCntControl[wu0].targetEn)
 					*(softCntTargetPtr[wu0]) = softCntTargetVal[wu0];
 				// ------------------- //
+
+				softCntControl[wu0].underRun = 0;			//Clear the underRun flag
 			}
 			// ------------------------ //
-
-
 		}
 		// --------------------------- //
 	}
@@ -313,67 +276,150 @@ void softCntUpdatePeriod(U8 softCntID, U32 newPeriod)
 // ============================== //
 
 
-// ====== RTCC Function ====== //
+// ====== Up-Time Function ====== //
 /**
-* \fn		void rtccInit(void)
-* @brief	Init the software rtcc for software and external mode
-* @note		realTimeInit will define the correct sysTick value for 1 sec
-*			and rtccUpdate will be called in the realTimeISR
+* \fn		void upTimeUpdate(void)
+* @brief	Update the system Up Time
+* @note		Need to be called in the realTimeISR
 * @arg		nothing
 * @return	nothing
 */
-void rtccInit(void)
+void upTimeUpdate(void)
 {
-	U8 wu0;
+	U32 uStemp = upTimeRemaininguS + ((sysTick - upTimeLast) * sysTickValue);	//Exact time between update (in µs)
 
-	// -- Reset the realTime variable -- //
-	for (wu0 = 0; wu0<9 ;wu0++)
-		rtccTime.all[wu0] = 0;
-	// --------------------------------- //
+	// -- Compute the millis between update ------ //
+	while (uStemp > 999)
+	{
+		uStemp -= 1000;
+		upTime.millis++;
+	}
+	rtccRemaininguS = uStemp;
+	// -- Resplit the millis value in real time -- //
+	while (upTime.millis > 999)
+	{
+		upTime.millis -= 1000;
+		upTime.sec++;
+
+		//Update the Minutes
+		while (upTime.sec > 59)
+		{
+			upTime.sec -= 60;
+			upTime.min++;
+
+			//Update the Hours
+			while (upTime.min > 59)
+			{
+				upTime.min -= 60;
+				upTime.hour++;
+
+				//Update the Days
+				while (upTime.hour > 23)
+				{
+					upTime.hour -= 24;
+					upTime.day++;
+				}
+			}
+		}
+	}
+	// ------------------------------------------- //
 }
 
+/**
+* \fn		void upTimeSet(tRealTime * newTime)
+* @brief	Set the Up-Time to the specified value
+* @note		
+* @arg		tRealTime * newTime		Pointer to load the time
+* @return	nothing
+*/
+void upTimeSet(tRealTime * newTime)
+{
+	U8 wu0;
+	U32 * workPtr = (U32*)&upTime;
+
+	if (newTime != NULL)
+	{
+		for (wu0 = 0; wu0 < (sizeof(tRealTime)/4) ; wu0++)
+			workPtr[wu0] = ((U32*)newTime)[wu0];
+	}
+}
+
+/**
+* \fn		tRealTime* upTimeGet(void)
+* @brief	Return the actual Up Time value
+* @note
+* @arg		nothing
+* @return	tRealTime* pUpTime	Pointer to the upTime global variable
+*/
+tRealTime* upTimeGet(void)
+{
+	return &upTime;
+}
+// ============================== //
+
+
+// ======== RTCC Function ======= //
+/**
+* \fn		void rtccUpdate(void)
+* @brief	Update the rtcc with the actual time
+* @note		This function should be call regularly for the rtccTime to be accurate
+* @arg		nothing
+* @return	nothing
+*/
 void rtccUpdate(void)
 {
 	#if RTCC_SYSTEM	== RTCC_SOFTWARE
-	//Count the new second
-	upTime.sec++;
+	U32 uStemp = rtccRemaininguS + ((sysTick - rtccTimeLast) * sysTickValue);	//Exact time between update (in µs)
 
-	//Update the Minutes
-	if (upTime.sec > 59)
+	// -- Compute the millis between update ------ //
+	while (uStemp > 999)
 	{
-		upTime.sec -= 60;
-		upTime.min++;
-
-		//Update the Hours
-		if (upTime.min > 59)
+		uStemp -= 1000;
+		rtccTime.millis++;
+	}
+	rtccRemaininguS = uStemp;
+	// -- Resplit the millis value in real time -- //
+	while (rtccTime.millis > 999)
+	{
+		rtccTime.millis -= 1000;
+		rtccTime.sec++;
+		
+		//Update the Minutes
+		while (rtccTime.sec > 59)
 		{
-			upTime.min -= 60;
-			upTime.hour++;
+			rtccTime.sec -= 60;
+			rtccTime.min++;
 
-			//Update the Days
-			if (upTime.hour > 23)
+			//Update the Hours
+			while (rtccTime.min > 59)
 			{
-				upTime.hour -= 24;
-				upTime.day++;
+				rtccTime.min -= 60;
+				rtccTime.hour++;
 
-				//Update the month
-				if (upTime.day > (rtccCurrentMonthDayNb-1))
+				//Update the Days
+				while (rtccTime.hour > 23)
 				{
-					upTime.day -= rtccCurrentMonthDayNb;
+					rtccTime.hour -= 24;
+					rtccTime.day++;
 
-					//Update the current month day number
-
-					upTime.month++;
-
-					if (upTime.month > 11)
+					//Update the Months
+					while (rtccTime.day >= dayPerMonth[rtccTime.month])
 					{
-						upTime.month -= 12;
-						upTime.year++;
+						rtccTime.day -= dayPerMonth[rtccTime.month];
+						rtccTime.month++;
+
+						//Update the Years
+						while (rtccTime.month > 11)
+						{
+							rtccTime.month -= 12;
+							rtccTime.year++;
+						}
 					}
 				}
 			}
 		}
 	}
+	// ------------------------------------------- //
 	#elif RTCC_SYSTEM == RTCC_HARDWARE
 
 	#elif RTCC_SYSTEM == RTCC_EXTERNAL
