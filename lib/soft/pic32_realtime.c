@@ -90,17 +90,7 @@ void rtISR(void)
 
 	// -- Soft Counter -- //
 	#if USE_RT_SOFT_COUNTER == ENABLE
-	U8 wu0;
-
-	for (wu0 = 0; wu0 < softCntEnabled; wu0++)		//Update all the enabled counter
-	{
-		if (softCnt[wu0])
-			softCnt[wu0]--;							//Counter is still decrementing
-		else
-			softCntControl[wu0].underRun = 1;		//Counter as reach bottom, flag it
-	}
-
-	wu0 = 0;
+	U8 wu0 = 0;
 
 	while ((softCntRun) & (U16_MAX << wu0))
 	{
