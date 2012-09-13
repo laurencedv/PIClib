@@ -78,11 +78,11 @@
 //ADC Module State
 typedef enum
 {
-	idle,
-	config,
-	busy,
-	calibration,
-	error,
+	ADCidle,
+	ADCconfig,
+	ADCbusy,
+	ADCcalibration,
+	ADCerror,
 }tADCState;
 
 //ADC Normal mode input selection

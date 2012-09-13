@@ -41,7 +41,7 @@
 
 // == Software Counter == //
 #define USE_RT_SOFT_COUNTER		ENABLE				//Enable the software counter functions by setting to "ENABLE"
-#define RT_SOFT_COUNTER_NB		10					//Number of software counter to create (max 10)
+#define RT_SOFT_COUNTER_NB		10					//Number of software counter to create (max 16)
 
 // Init options
 #define SOFT_CNT_RELOAD_EN		0x1					//Enable the auto reload of the counter (timer mode)
@@ -50,10 +50,10 @@
 #define SOFT_CNT_TARGET_DIS		0x0					//Disable the target action at underRun
 // ====================== //
 
-// == RTCC System Compile Time option == //
-#define RTCC_UPDATE_RATE		1000				//Update rate of the software RTCC (in sysTick)
+// == Compile Time option == //
+#define RTCC_UPDATE_RATE		1000				//Update rate of the software RTCC and upTime(in sysTick)
 #define RTCC_SYSTEM				RTCC_SOFTWARE
-// ===================================== //
+// ========================= //
 // ############################################## //
 
 
@@ -93,11 +93,10 @@ typedef union
 	U32 all;
 	struct
 	{
-		U32 enable:1;				//The counter is currently enabled
 		U32 underRun:1;				//The counter as underRun
 		U32 targetEn:1;				//The counter will modify the softCntTargetPtr with the softCntTargetVal
 		U32 reload:1;				//The counter will auto reload it-self at underRun (timer mode)
-		U32 :28;
+		U32 :29;
 	};
 }tSoftCounterControl;
 // ############################################## //
@@ -134,6 +133,15 @@ U8 realTimeInit(U32 tickPeriod);
 * @return	nothing
 */
 void rtTimeClear(tRealTime * timeToClear);
+
+/**
+* \fn		void rtTimeEngine(void)
+* @brief	Engine to keep the rtccTime and upTime accurate and updated
+* @note		This function must be in the infinite loop
+* @arg		nothing
+* @return	nothing
+*/
+void rtTimeEngine(void);
 // =========================== //
 
 
@@ -144,16 +152,26 @@ void rtTimeClear(tRealTime * timeToClear);
 * @note
 * @arg		U32 cntPeriod		Number of sysTick of 1 count
 * @arg		U32 * targetPtr		Target to be modified at underRun
-* @arg		U32 targetValue		Value to set the target after a underRun
-* @arg		U8 option			Options of the counter
+* @arg		U32 targetValue		Value to bitwise OR the target after a underRun
+* @arg		U8 option			Options of the counter (Use the "Init Option" defines)
 * @return	U8 softCntID		ID of the initialised counter
 */
 U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option);
 
 /**
+* \fn		void softCntRelease(U8 softCntID)
+* @brief	Disable a counter
+* @note		Will stop the counter now, and will be release when it is possible
+* @arg		U8 softCntID		ID of the counter to be released
+* @return	nothing
+*/
+void softCntRelease(U8 softCntID);
+
+/**
 * \fn		void softCntEngine(void)
 * @brief	UnderRun reaction function for software counter
 * @note		This function must be in the infinite loop of the main to ensure that the software counter will react correctly
+*			The target will only be modify with a "|" (ex: target = 0x10 , value = 0x01 , result = 0x11)
 * @arg		nothing
 * @return	nothing
 */
@@ -200,6 +218,15 @@ void softCntUpdatePeriod(U8 softCntID, U32 newPeriod);
 void upTimeUpdate(void);
 
 /**
+* \fn		void upTimeSet(tRealTime * newTime)
+* @brief	Set the Up-Time to the specified value
+* @note
+* @arg		tRealTime * newTime		Pointer to load the time
+* @return	nothing
+*/
+void upTimeSet(tRealTime * newTime);
+
+/**
 * \fn		void realTimeISR(void)
 * @brief	Interrupt Service Routine for the realTime system
 * @note		Place it in the TMR0 vector
@@ -211,15 +238,6 @@ tRealTime* upTimeGet(void);
 
 
 // ===== RTCC Functions ====== //
-/**
-* \fn		void rtccInit(void)
-* @brief	Init the software rtcc for software and external mode
-* @note		realTimeInit will define the correct sysTick value to be accurate
-* @arg		nothing
-* @return	nothing
-*/
-void rtccInit(void);
-
 /**
 * \fn		void rtccUpdate(void)
 * @brief	Update the rtcc with the actual time
@@ -236,6 +254,10 @@ void rtccUpdate(void);
 #define RTCC_SOFTWARE			1
 #define RTCC_HARDWARE			2
 #define RTCC_EXTERNAL			3
+
+//RTCC Engine
+#define RT_ENGINE_UPDATE_RTCC	0
+#define RT_ENGINE_UPDATE_UPTIME	1
 // ############################################## //
 
 

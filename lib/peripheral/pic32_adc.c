@@ -38,37 +38,37 @@ void adcISR(U8 adcPort)
 	
 	switch (adcState[adcPort])
 	{
-		case idle:
+		case ADCidle:
 		{
 			//Not really supposed to be here...
 			break;
 		}
-		case config:
+		case ADCconfig:
 		{
 			//Not really supposed to be here...
 			break;
 		}
-		case busy:
+		case ADCbusy:
 		{
 			// -- Save the result in the destination -- //
 			for (wu0 = 0; wu0 < pADxCON2->SMPI; wu0++)
 				adcResultPtr[adcPort][wu0] = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
 			// ---------------------------------------- //
 
-			adcState[adcPort] = idle;
+			adcState[adcPort] = ADCidle;
 			break;
 		}
-		case calibration:
+		case ADCcalibration:
 		{
 			// -- Save the calibration result -- //
 			adcOffsetValue[adcPort] = *pADxBUF;
 			// --------------------------------- //
 
-			adcState[adcPort] = idle;
+			adcState[adcPort] = ADCidle;
 			
 			break;
 		}
-		default: adcState[adcPort] = error;
+		default: adcState[adcPort] = ADCerror;
 	}
 }
 // ========================== //
@@ -118,7 +118,7 @@ U8 adcInit(U8 adcPort)
 
 		// -- Init control -- //
 		adcOffsetValue[adcPort] = 0;
-		adcState[adcPort] = config;
+		adcState[adcPort] = ADCconfig;
 		// ------------------ //
 
 		// -- Start the ADC -- //
@@ -158,7 +158,7 @@ U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 
 		// -- Stop the ADC -- //
 		adcStateTemp = adcState[adcPort];
-		adcState[adcPort] = config;
+		adcState[adcPort] = ADCconfig;
 		adcON = pADxCON1->ON;
 		pADxCON1->ON = 0;
 		// ------------------ //
@@ -251,7 +251,7 @@ U8 adcCalibrate(U8 adcPort)
 		pADxCON2->SMPI = 0;					//Do 1 conversion
 		pADxCON1->SAMP = 1;					//Start the conversion
 
-		adcState[adcPort] = calibration;
+		adcState[adcPort] = ADCcalibration;
 		// -------------------------- //
 
 		return STD_EC_SUCCESS;
@@ -337,7 +337,7 @@ U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U32 * resultPtr)
 		// -------------------------------- //
 
 		adcResultPtr[adcPort] = resultPtr;		//Save the result pointer
-		adcState[adcPort] = busy;
+		adcState[adcPort] = ADCbusy;
 
 		pADxCON1->ASAM = 1;						//Auto mode
 		pADxCON1->CLRASAM = 1;					//Stop after SMPI nb of conversion (clear ASAM automaticaly)

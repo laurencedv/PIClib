@@ -53,6 +53,18 @@ typedef unsigned long long	U64;
 typedef double				F32;
 typedef long double			F64;
 
+//FSM Standard State
+typedef enum
+{
+	unknown = 0,
+	init,
+	idle,
+	busy,
+	fetch,
+	transfer,
+	error
+}tFSMState;
+
 //Limits
 #define S8_MIN				(SCHAR_MIN)
 #define S8_MAX				(SCHAR_MAX)

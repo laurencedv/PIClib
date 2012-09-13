@@ -14,6 +14,7 @@
 
 // ################## Includes ################## //
 #include "pic32_realtime.h"
+#include "op_general.h"
 // ############################################## //
 
 
@@ -28,18 +29,26 @@ U32 sysTick = 0;										//Number of sysTick passed
 U32 sysTickValue = 0;									//Value of a sysTick (in us)
 // ==================== //
 
+// == General realTime == //
+const U8 dayPerMonth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};	//Number of day per month
+tFSMState rtccEngineState = unknown;
+U8 rtccEngineSoftCntID = 0;								//ID of the Soft Counter for the rtcc Engine
+U8 rtccEngineFlag = 0;									//Rtcc Engine Flag
+U8 rtccEngineUpdatePtr = RT_ENGINE_UPDATE_RTCC;			//Tell the engine which time to update
+// ====================== //
+
 // == UpTime system == //
 U32 upTimeLast = 0;										//Last update of the upTime (in systick)
 tRealTime upTime;										//Up Time in real time
-U16 upTimeRemaininguS;									//Remaining µS after an update (to be added at the next update)
+U16 upTimeRemaininguS = 0;								//Remaining µS after an update (to be added at the next update)
 // =================== //
 
 // == RTCC system == //
 tRealTime rtccTime;										//Real time
-const U8 dayPerMonth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};	//Number of day per month
+
 #if RTCC_SYSTEM	== RTCC_SOFTWARE
-U32 rtccTimeLast;										//Last update of the rtccTime (in sytick)
-U16 rtccRemaininguS;									//Remaining µS after an update (to be added at the next update)
+U32 rtccTimeLast = 0;									//Last update of the rtccTime (in sytick)
+U16 rtccRemaininguS = 0;								//Remaining µS after an update (to be added at the next update)
 #endif
 // ================= //
 
@@ -51,6 +60,8 @@ U32 * softCntTargetPtr[RT_SOFT_COUNTER_NB];				//Target to modify at the underru
 U32 softCntTargetVal[RT_SOFT_COUNTER_NB];				//Value to input in the target
 tSoftCounterControl softCntControl[RT_SOFT_COUNTER_NB];	//Control register of the software counter
 U8 softCntEnabled = 0;									//Number of counter enabled
+U16 softCntEnable = 0;									//Bitwise soft counter enable control
+U16 softCntRun = 0;										//Bitwise soft counter running control
 #endif
 // ====================== //
 // ############################################## //
@@ -87,6 +98,17 @@ void rtISR(void)
 			softCnt[wu0]--;							//Counter is still decrementing
 		else
 			softCntControl[wu0].underRun = 1;		//Counter as reach bottom, flag it
+	}
+
+	wu0 = 0;
+
+	while ((softCntRun) & (U16_MAX << wu0))
+	{
+		if (softCnt[wu0])
+			softCnt[wu0]--;							//Counter is still decrementing
+		else
+			softCntControl[wu0].underRun = 1;		//Counter as reach bottom, flag it
+		wu0++;
 	}
 	#endif
 	// ------------------ //
@@ -151,6 +173,64 @@ void rtTimeClear(tRealTime * timeToClear)
 			workPtr[wu0] = 0;
 	}
 }
+
+/**
+* \fn		void rtTimeEngine(void)
+* @brief	Engine to keep the rtccTime and upTime accurate and updated
+* @note		This function must be in the infinite loop
+* @arg		nothing
+* @return	nothing
+*/
+void rtTimeEngine(void)
+{
+	switch (rtccEngineState)
+	{
+		// == Initial ======== //
+		case unknown:
+		{
+			rtccEngineFlag = 0;
+
+			// If there was already a softCnt assign to this engine
+			if (rtccEngineSoftCntID)
+				softCntRelease(rtccEngineSoftCntID);			//Release it
+
+			// Init a soft Counter
+			rtccEngineSoftCntID = softCntInit(RTCC_UPDATE_RATE, &rtccEngineFlag, 0xFF, SOFT_CNT_RELOAD_EN+SOFT_CNT_TARGET_EN);
+			rtccEngineState = init;
+			break;
+		}
+		// == Start counter == //
+		case init:
+		{
+			softCntStart(rtccEngineSoftCntID);					//Start the counter
+			rtccEngineState = busy;
+			break;
+		}
+		// == Action ========= //
+		case busy:
+		{
+			// -- Time to do stuff -- //
+			if (rtccEngineFlag)
+			{
+				switch (rtccEngineUpdatePtr)
+				{
+					case RT_ENGINE_UPDATE_RTCC:		rtccUpdate();	break;
+					case RT_ENGINE_UPDATE_UPTIME:	upTimeUpdate();	break;
+				}
+
+				rtccEngineUpdatePtr++;
+				if (rtccEngineUpdatePtr > 1)
+					rtccEngineUpdatePtr = 0;
+
+				rtccEngineFlag = 0;								//Clear the flag
+			}
+			// ---------------------- //
+			break;
+		}
+		default: rtccEngineState = unknown;
+		// =================== //
+	}
+}
 // =========================== //
 
 
@@ -161,7 +241,7 @@ void rtTimeClear(tRealTime * timeToClear)
 * @note
 * @arg		U32 cntPeriod		Number of sysTick of 1 count
 * @arg		U32 * targetPtr		Target to be modified at underRun
-* @arg		U32 targetValue		Value to set the target after a underRun
+* @arg		U32 targetValue		Value to bitwise OR the target after a underRun
 * @arg		U8 option			Options of the counter (Use the "Init Option" defines)
 * @return	U8 softCntID		ID of the initialised counter
 */
@@ -179,15 +259,17 @@ U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 		// ---------------- //
 
 		// -- Set the target -- //
-		softCntControl[softCntID].targetEn = (option & SOFT_CNT_TARGET_EN) >> 1;
-		softCntTargetVal[softCntID] = targetValue;
-		softCntTargetPtr[softCntID] = targetPtr;
+		softCntControl[softCntID].targetEn = (option & SOFT_CNT_TARGET_EN) >> 1;	//Set the target action option
+		softCntTargetVal[softCntID] = targetValue;						//Save the value
+		softCntTargetPtr[softCntID] = targetPtr;						//Save the target
 		// -------------------- //
 
 		// -- Init the counter -- //
-		softCntControl[softCntID].reload = option & SOFT_CNT_RELOAD_EN;
-		softCntReloadVal[softCntID] = cntPeriod;
-		softCntControl[softCntID].underRun = 0;
+		softCntStop(softCntID);											//Ensure that the counter is stopped
+		softCntEnable |= (BIT0 << softCntID);							//Enable the counter
+		softCntControl[softCntID].reload = option & SOFT_CNT_RELOAD_EN;	//Set the auto reload option
+		softCntReloadVal[softCntID] = cntPeriod;						//Save the period
+		softCntControl[softCntID].underRun = 0;							//Ensure the underRun flag is cleared
 		// ---------------------- //
 
 	}
@@ -198,41 +280,62 @@ U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 }
 
 /**
+* \fn		void softCntRelease(U8 softCntID)
+* @brief	Disable a counter
+* @note		Will stop the counter now, and will be release when it is possible
+* @arg		U8 softCntID		ID of the counter to be released
+* @return	nothing
+*/
+void softCntRelease(U8 softCntID)
+{
+	// -- Only process if the counter was enabled -- //
+	if ((softCntEnable) & (BIT0 << softCntID))
+	{
+		softCntStop(softCntID);					//Stop the counter
+		softCntEnable &= ~(BIT0 << softCntID);	//Disable the counter
+
+		// -- Release the soft counter -- //
+		while (!((softCntEnable) & (BIT0 << (softCntEnabled - 1))))		//Scan the bitwise Enable control starting by the last enabled softCnt
+			softCntEnabled--;					//Subtract 1 to the Software Counter Enabled counter
+		// ------------------------------ //
+	}
+	// --------------------------------------------- //
+}
+
+/**
 * \fn		void softCntEngine(void)
 * @brief	UnderRun reaction function for software counter
 * @note		This function must be in the infinite loop of the main to ensure that the software counter will react correctly
+*			The target will only be modify with a "|" (ex: target = 0x10 , value = 0x01 , result = 0x11)
 * @arg		nothing
 * @return	nothing
 */
 void softCntEngine(void)
 {
-	U8 wu0 = 0;
+	U8 softCntIDtemp = 0;
 
-	for (; wu0 < softCntEnabled; wu0++)
+	while ((softCntEnable) & (U16_MAX << softCntIDtemp))
 	{
-		// -- If counter is enabled -- //
-		if (softCntControl[wu0].enable)
+		// -- UnderRun condition -- //
+		if (softCntControl[softCntIDtemp].underRun)
 		{
-			// -- UnderRun condition -- //
-			if (softCntControl[wu0].underRun)
-			{
-				// -- Auto reload -- //
-				if (softCntControl[wu0].reload)
-					softCnt[wu0] = softCntReloadVal[wu0];
-				else
-					softCntControl[wu0].enable = DISABLE;
-				// ----------------- //
+			// -- Auto reload -- //
+			if (softCntControl[softCntIDtemp].reload)
+				softCnt[softCntIDtemp] = softCntReloadVal[softCntIDtemp];	//Reload the value
+			else
+				softCntStop(softCntIDtemp);						//Stop the counter
+			// ----------------- //
 
-				// -- Target Action -- //
-				if (softCntControl[wu0].targetEn)
-					*(softCntTargetPtr[wu0]) = softCntTargetVal[wu0];
-				// ------------------- //
+			// -- Target Action -- //
+			if (softCntControl[softCntIDtemp].targetEn)
+				*(softCntTargetPtr[softCntIDtemp]) |= softCntTargetVal[softCntIDtemp];
+			// ------------------- //
 
-				softCntControl[wu0].underRun = 0;			//Clear the underRun flag
-			}
-			// ------------------------ //
+			softCntControl[softCntIDtemp].underRun = 0;			//Clear the underRun flag
 		}
-		// --------------------------- //
+		// ------------------------ //
+
+		softCntIDtemp++;											//Check the next counter
 	}
 }
 
@@ -246,7 +349,7 @@ void softCntEngine(void)
 void softCntStart(U8 softCntID)
 {
 	softCnt[softCntID] = softCntReloadVal[softCntID];	//Reload the counter
-	softCntControl[softCntID].enable = ENABLE;			//Start the counter
+	softCntRun |= (BIT0 << softCntID);					//Start the counter
 }
 
 /**
@@ -258,7 +361,7 @@ void softCntStart(U8 softCntID)
 */
 void softCntStop(U8 softCntID)
 {
-	softCntControl[softCntID].enable = DISABLE;
+	softCntRun &= ~(BIT0 << softCntID);
 }
 
 /**
