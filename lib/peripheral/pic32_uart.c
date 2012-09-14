@@ -4,8 +4,10 @@
 
  @version	0.1.1
  @note
- @todo		Transfert function 9 bit mode
- 			Remove the temp buffering in the TX ISR
+ @todo		- Transfert function 9 bit mode
+ 		- Remove the temp buffering in the TX ISR
+ 		- Complete the selectPort function and "genericalise" every function for it
+ 		- Do a generic ISR function
 
  @date		February 15th 2012
  @author	Laurence DV
@@ -46,7 +48,7 @@ U8 uartSelectPort(U8 uartPort)
 	{
 		case UART_1: pUxMODE = (tUxMODE*)&U1MODE;	pUxSTA = (tUxSTA*)&U1STA;	pUxBRG = (U32*)&U1BRG;	break;
 		case UART_2: pUxMODE = (tUxMODE*)&U2MODE;	pUxSTA = (tUxSTA*)&U2STA;	pUxBRG = (U32*)&U2BRG;	break;
-	#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 		case UART_3: pUxMODE = (tUxMODE*)&U3MODE;	pUxSTA = (tUxSTA*)&U3STA;	pUxBRG = (U32*)&U3BRG;	break;
 		case UART_4: pUxMODE = (tUxMODE*)&U4MODE;	pUxSTA = (tUxSTA*)&U4STA;	pUxBRG = (U32*)&U4BRG;	break;
 		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxSTA = (tUxSTA*)&U5STA;	pUxBRG = (U32*)&U5BRG;	break;
@@ -222,7 +224,7 @@ U8 uartInit(U8 uartPort, U32 option)
 		{
 			case UART_1: intFastInit(INT_UART_1);	break;
 			case UART_2: intFastInit(INT_UART_2);	break;
-		#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+		#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 			case UART_3: intFastInit(INT_UART_3);	break;
 			case UART_4: intFastInit(INT_UART_4);	break;
 			case UART_5: intFastInit(INT_UART_5);	break;
@@ -290,9 +292,9 @@ U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 	// -- Select the correct UART -- //
 	switch (uartPort)
 	{
-		case UART_1: pUxMODE = (tUxMODE*)&U1MODE;	pUxBRG = (U32*)&U1BRG;	break;
+		case UART_1: pUxMODE = (tUxMODE*)&U1MODE;	pUxBRG = (U32*)&U1BRG; break;
 		case UART_2: pUxMODE = (tUxMODE*)&U2MODE;	pUxBRG = (U32*)&U2BRG; break;
-	#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 		case UART_3: pUxMODE = (tUxMODE*)&U3MODE;	pUxBRG = (U32*)&U3BRG; break;
 		case UART_4: pUxMODE = (tUxMODE*)&U4MODE;	pUxBRG = (U32*)&U4BRG; break;
 		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxBRG = (U32*)&U5BRG; break;
@@ -345,9 +347,9 @@ U32 uartGetBaudRate(U8 uartPort)
 	// -- Select the correct UART -- //
 	switch (uartPort)
 	{
-		case UART_1: pUxMODE = (tUxMODE*)&U1MODE;	pUxBRG = (U32*)&U1BRG;	break;
+		case UART_1: pUxMODE = (tUxMODE*)&U1MODE;	pUxBRG = (U32*)&U1BRG; break;
 		case UART_2: pUxMODE = (tUxMODE*)&U2MODE;	pUxBRG = (U32*)&U2BRG; break;
-	#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 		case UART_3: pUxMODE = (tUxMODE*)&U3MODE;	pUxBRG = (U32*)&U3BRG; break;
 		case UART_4: pUxMODE = (tUxMODE*)&U4MODE;	pUxBRG = (U32*)&U4BRG; break;
 		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxBRG = (U32*)&U5BRG; break;
@@ -381,7 +383,7 @@ U8 uartSetAddressMask(U8 uartPort, U8 addressMask)
 	{
 		case UART_1: U1STAbits.ADDR = addressMask;	break;
 		case UART_2: U2STAbits.ADDR = addressMask;	break;
-	#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 		case UART_3: U3STAbits.ADDR = addressMask;	break;
 		case UART_4: U4STAbits.ADDR = addressMask;	break;
 		case UART_5: U5STAbits.ADDR = addressMask;	break;
@@ -408,7 +410,7 @@ U8 uartGetAddressMask(U8 uartPort)
 	{
 		case UART_1: return U1STAbits.ADDR;
 		case UART_2: return U2STAbits.ADDR;
-	#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 		case UART_3: return U3STAbits.ADDR;
 		case UART_4: return U4STAbits.ADDR;
 		case UART_5: return U5STAbits.ADDR;
@@ -445,7 +447,7 @@ U8 uartSendByte(U8 uartPort,U8 byteToSend)
 		{
 			case UART_1:	setBIT(U1STA,UTXEN_MASK);	break;
 			case UART_2:	setBIT(U2STA,UTXEN_MASK);	break;
-		#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+		#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 			case UART_3:	setBIT(U3STA,UTXEN_MASK);	break;
 			case UART_4:	setBIT(U4STA,UTXEN_MASK);	break;
 			case UART_5:	setBIT(U5STA,UTXEN_MASK);	break;

@@ -50,12 +50,12 @@ U8 timerSelectPort(U8 timerPort)
 {
 	switch (timerPort)
 	{
-		case TIMER_1:	pTxCON = (tTCON*)&T1CON;	pPRx = (U32*)&PR1;	break;
+		case TIMER_1:	pTxCON = (tTCON*)&T1CON;	pPRx = (U32*)&PR1;				break;
 		case TIMER_2:	pTxCON = (tTCON*)&T2CON;	pPRx = (U32*)&PR2;	pPR32x = (U32*)&PR3;	break;
-		case TIMER_3:	pTxCON = (tTCON*)&T3CON;	pPRx = (U32*)&PR3;	break;
+		case TIMER_3:	pTxCON = (tTCON*)&T3CON;	pPRx = (U32*)&PR3;				break;
 		case TIMER_4:	pTxCON = (tTCON*)&T4CON;	pPRx = (U32*)&PR4;	pPR32x = (U32*)&PR5;	break;
-		case TIMER_5:	pTxCON = (tTCON*)&T5CON;	pPRx = (U32*)&PR5;	break;
-		default:		return STD_EC_NOTFOUND;
+		case TIMER_5:	pTxCON = (tTCON*)&T5CON;	pPRx = (U32*)&PR5;				break;
+		default:	return STD_EC_NOTFOUND;
 	}
 	return STD_EC_SUCCESS;
 }
@@ -85,9 +85,9 @@ void __ISR(_TIMER_1_VECTOR, IPL7SOFT) timer1ISR(void)
 * \fn		U8 timerInit(U8 timerPort, U32 option)
 * @brief	Initialise the selected timer with the specified options.
 * @note		Use the Setting Map in the header for correct setting to send to this function
-*			No sanity check of the settings, will return STD_EC_NOTFOUND if invalid timer ID is inputed.
-*			Option must be | or + (ex: timerInit(0, TMR_DIV_1|TMR_CS_PBCLK|TMR_16BIT))
-*			For 32bit timer must be called for each timer in the pair.
+		No sanity check of the settings, will return STD_EC_NOTFOUND if invalid timer ID is inputed.
+		Option must be | or + (ex: timerInit(0, TMR_DIV_1|TMR_CS_PBCLK|TMR_16BIT))
+		For 32bit timer must be called for each timer in the pair.
 * @arg		U8 timerPort		Hardware Timer ID
 * @arg		U32 option			Setting to configure for the timer
 * @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
@@ -111,7 +111,7 @@ U8 timerInit(U8 timerPort, U32 option)
 		{
 			//Set the prescaler
 			splittedOption.b1 = splittedOption.b2;		//check only the msb and lsb of the prescaler def
-			pTxCON->TCKPS = splittedOption.all & 0x3;		//for the timer 1 (ex: 0b101 = 0b11)
+			pTxCON->TCKPS = splittedOption.all & 0x3;	//for the timer 1 (ex: 0b101 = 0b11)
 
 			//Set the clock sync
 			pTxCON->TSYNC = splittedOption.b5;
@@ -201,7 +201,7 @@ U8 timerGetSize(U8 timerPort)
 		case TIMER_3:	return ((T2CONbits.T32 << 4)+16);
 		case TIMER_4:	return ((T4CONbits.T32 << 4)+16);
 		case TIMER_5:	return ((T4CONbits.T32 << 4)+16);
-		default:		return 0;
+		default:	return 0;
 	}
 }
 
@@ -236,7 +236,7 @@ U32 timerGetClock(U8 timerPort)
 			return (clockGetPBCLK()/(pDivTable[tempDivID]));
 		}
 		else
-			return 0;							//Return 0 if the clock is external (0 Hz)
+			return 0;					//Return 0 if the clock is external (0 Hz)
 		// ------------------------------------------ //
 	}
 }
@@ -245,8 +245,8 @@ U32 timerGetClock(U8 timerPort)
 * \fn		U8 timerSetOverflow(U8 timerPort, U32 ovfPeriod)
 * @brief	Set the timer overflow interrupt at the desired period
 * @note		This function will round up to the possible freq depending on the actual globalCLK.
-*			Only work if using the PBCLK as the clock source.
-*			Use the timerInit with the correct parameters for external clock source.
+		Only work if using the PBCLK as the clock source.
+		Use the timerInit with the correct parameters for external clock source.
 * @arg		U8 timerPort		Hardware Timer ID
 * @arg		U32 ovfPeriod		Total Period between overflow (in us)
 * @return	U8 errorCode		STD Error Code
@@ -282,13 +282,13 @@ U8 timerSetOverflow(U8 timerPort, F32 ovfPeriod)
 
 			if (ovfPeriod <= (cntPeriod * (tmrMax[pTxCON->T32] +1)))
 			{
-				pTxCON->TCKPS = timerDivID;						//Set the prescaler
+				pTxCON->TCKPS = timerDivID;		//Set the prescaler
 				okFlag = 1;
 				break;
 			}
 		}
 		if (!okFlag)
-			return STD_EC_TOOLARGE;								//We were not able to find a prescaler to fit this overflow period
+			return STD_EC_TOOLARGE;				//We were not able to find a prescaler to fit this overflow period
 		// ------------------------- //
 
 		// -- Set the Overflow Match value -- //
@@ -328,7 +328,7 @@ U32 timerGetOverflow(U8 timerPort)
 * \fn		F32 timerGetCntPeriod(U8 timerPort)
 * @brief	Return the count period of the specified timer
 * @note		Will return 0 if either the timerPort is invalid or the clock source
-*			is external
+		is external
 * @arg		U8 timerPort			Hardware Timer ID
 * @return	F32 cntPeriod			Count period (in µs)
 */
@@ -355,7 +355,7 @@ F32 timerGetCntPeriod(U8 timerPort)
 * @brief	Set the PR reg of the designated Timer to the specified value
 * @note		Data Width can vary between 16 and 32 bits but it is automaticly handled
 * @todo		Must check if T32 is set, but trying to access the odd timer
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @arg		U32 PRvalue			Value to set PR reg
 * @return	errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
@@ -372,7 +372,7 @@ U8 timerSetPR(U8 timerPort, U32 PRvalue)
 		if (pTxCON->T32)
 			*pPR32x = (PRvalue & 0xFF00)>>16;		//Save the MSpart to the odd timer
 
-		*pPRx = PRvalue & 0xFF;						//Save the LSpart to the even number
+		*pPRx = PRvalue & 0xFF;					//Save the LSpart to the even number
 		// ------------------------------- //
 	}
 
@@ -383,9 +383,9 @@ U8 timerSetPR(U8 timerPort, U32 PRvalue)
 * \fn		U32 timerGetPR(U8 timerPort)
 * @brief	Return the value of the PR reg of the designated timer
 * @note		Data Width can vary between 16 and 32 bits but it is automaticly handled
-*			Always return an Unsigned variable
+		Always return an Unsigned variable
 * @todo		Must check if T32 is set, but trying to access the odd timer
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @return	U32 PRvalue			Value of the PR reg
 */
 U32 timerGetPR(U8 timerPort)
@@ -398,9 +398,9 @@ U32 timerGetPR(U8 timerPort)
 	{
 		// -- Retreive the correct data size -- //
 		if (pTxCON->T32)
-			PRvalue = *pPR32x<<16;					//Save the MSpart from the odd timer
+			PRvalue = *pPR32x<<16;				//Save the MSpart from the odd timer
 
-		PRvalue += *pPRx;							//Save the LSpart from the even number
+		PRvalue += *pPRx;					//Save the LSpart from the even number
 		// ------------------------------------ //
 	}
 	return PRvalue;
@@ -413,7 +413,7 @@ U32 timerGetPR(U8 timerPort)
 * \fn		void timerSet(U8 timerPort, U32 data)
 * @brief	Set the selected Timer to the specified value
 * @note		Depend on wich timer is selected, the data width will vary between 16bit and 32bit
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @arg		U32 data			Data to input in the timer
 * @return	nothing
 */
@@ -433,9 +433,9 @@ void timerSet(U8 timerPort, U32 data)
 * \fn		U32 timerGet(U8 timerPort)
 * @brief	Return the value of the selected Timer
 * @note		The return size will always be 32bit but the valid width must be known
-*			Use timerGetSize() to check the data width
-*			Will return 0 if invalid timerPort is provided
-* @arg		U8 timerPort		Hardware Timer ID
+		Use timerGetSize() to check the data width
+		Will return 0 if invalid timerPort is provided
+* @arg		U8 timerPort			Hardware Timer ID
 * @return	U32					Actual value of the timer
 */
 U32 timerGet(U8 timerPort)
@@ -455,7 +455,7 @@ U32 timerGet(U8 timerPort)
 * \fn		void timerClear(U8 timerPort)
 * @brief	Reset to 0 the selected Timer
 * @note		nothing
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @return	nothing
 */
 void timerClear(U8 timerPort)

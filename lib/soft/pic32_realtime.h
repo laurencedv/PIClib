@@ -34,25 +34,25 @@
 
 // ################## Defines ################### //
 // == Timer control == //
-#define RT_TIMER_ID				TIMER_1
+#define RT_TIMER_ID			TIMER_1
 #define RT_TIMER_INT_ID			INT_TIMER_1
 #define RT_TIMER_VECTOR			INT_VEC_TIMER_1
 // =================== //
 
 // == Software Counter == //
-#define USE_RT_SOFT_COUNTER		ENABLE				//Enable the software counter functions by setting to "ENABLE"
-#define RT_SOFT_COUNTER_NB		10					//Number of software counter to create (max 16)
+#define USE_RT_SOFT_COUNTER		ENABLE			//Enable the software counter functions by setting to "ENABLE"
+#define RT_SOFT_COUNTER_NB		10			//Number of software counter to create (max 16)
 
 // Init options
-#define SOFT_CNT_RELOAD_EN		0x1					//Enable the auto reload of the counter (timer mode)
-#define SOFT_CNT_RELOAD_DIS		0x0					//Disable the auto reload of the counter
-#define SOFT_CNT_TARGET_EN		0x2					//Enable the target action at underRun
-#define SOFT_CNT_TARGET_DIS		0x0					//Disable the target action at underRun
+#define SOFT_CNT_RELOAD_EN		0x1			//Enable the auto reload of the counter (timer mode)
+#define SOFT_CNT_RELOAD_DIS		0x0			//Disable the auto reload of the counter
+#define SOFT_CNT_TARGET_EN		0x2			//Enable the target action at underRun
+#define SOFT_CNT_TARGET_DIS		0x0			//Disable the target action at underRun
 // ====================== //
 
 // == Compile Time option == //
-#define RTCC_UPDATE_RATE		1000				//Update rate of the software RTCC and upTime(in sysTick)
-#define RTCC_SYSTEM				RTCC_SOFTWARE
+#define RTCC_UPDATE_RATE		1000			//Update rate of the software RTCC and upTime(in sysTick)
+#define RTCC_SYSTEM			RTCC_SOFTWARE
 // ========================= //
 // ############################################## //
 
@@ -251,13 +251,16 @@ void rtccUpdate(void);
 
 
 // ############### Internal Define ############## //
-#define RTCC_SOFTWARE			1
-#define RTCC_HARDWARE			2
-#define RTCC_EXTERNAL			3
+#define RTCC_SOFTWARE		1
+#define RTCC_HARDWARE		2
+#define RTCC_EXTERNAL		3
 
 //RTCC Engine
 #define RT_ENGINE_UPDATE_RTCC	0
 #define RT_ENGINE_UPDATE_UPTIME	1
+
+//Soft Counter
+#define SOFT_CNT_MAX		16
 // ############################################## //
 
 

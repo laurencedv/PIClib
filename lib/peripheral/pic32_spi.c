@@ -54,11 +54,13 @@ U8 spiSelectPort(U8 spiPort)
 	#elif CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx
 		case SPI_1: pSPIxCON = (tSPIxCON*)&SPI1CON;	pSPIxSTAT = (tSPIxSTAT*)&SPI1STAT; pSPIxBRG = (U32*)&SPI1BRG;	pSPIxBUF = (U32*)&SPI1BUF;	break;
 		case SPI_2: pSPIxCON = (tSPIxCON*)&SPI2CON;	pSPIxSTAT = (tSPIxSTAT*)&SPI2STAT; pSPIxBRG = (U32*)&SPI2BRG;	pSPIxBUF = (U32*)&SPI2BUF;	break;
-	#elif CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	#elif CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 		case SPI_1: pSPIxCON = (tSPIxCON*)&SPI1CON;	pSPIxSTAT = (tSPIxSTAT*)&SPI1STAT; pSPIxBRG = (U32*)&SPI1BRG;	pSPIxBUF = (U32*)&SPI1BUF;	break;
 		case SPI_2: pSPIxCON = (tSPIxCON*)&SPI2CON;	pSPIxSTAT = (tSPIxSTAT*)&SPI2STAT; pSPIxBRG = (U32*)&SPI2BRG;	pSPIxBUF = (U32*)&SPI2BUF;	break;
 		case SPI_3: pSPIxCON = (tSPIxCON*)&SPI3CON;	pSPIxSTAT = (tSPIxSTAT*)&SPI3STAT; pSPIxBRG = (U32*)&SPI3BRG;	pSPIxBUF = (U32*)&SPI3BUF;	break;
+	#if CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 		case SPI_4: pSPIxCON = (tSPIxCON*)&SPI4CON;	pSPIxSTAT = (tSPIxSTAT*)&SPI4STAT; pSPIxBRG = (U32*)&SPI4BRG;	pSPIxBUF = (U32*)&SPI4BUF;	break;
+	#endif
 	#endif
 		default : return STD_EC_NOTFOUND;					//Invalid SPI port ID
 	}
@@ -139,8 +141,10 @@ void spiMasterEngine(U8 spiPort, U32 interruptFlags)
 					{
 						case SPI_1: intFastDisable(INT_SPI_1);	break;
 						case SPI_2: intFastDisable(INT_SPI_2);	break;
-					#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+					#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 						case SPI_3: intFastDisable(INT_SPI_3);	break;
+					#endif
+					#if CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 						case SPI_4: intFastDisable(INT_SPI_4);	break;
 					#endif
 					}
@@ -367,8 +371,10 @@ U8 spiStart(U8 spiPort)
 		{
 			case SPI_1: intFastClearFlag(INT_SPI_1);	break;
 			case SPI_2: intFastClearFlag(INT_SPI_2);	break;
-		#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+		#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 			case SPI_3: intFastClearFlag(INT_SPI_3);	break;
+		#endif
+		#if  CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 			case SPI_4: intFastClearFlag(INT_SPI_4);	break;
 		#endif
 		}
@@ -593,8 +599,10 @@ U8 spiStartTransaction(tSPITransaction * transactionPtr)
 				{
 					case SPI_1: intFastEnable(INT_SPI_1);	break;
 					case SPI_2: intFastEnable(INT_SPI_2);	break;
-				#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+				#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 					case SPI_3: intFastEnable(INT_SPI_3);	break;
+				#endif
+				#if CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 					case SPI_4: intFastEnable(INT_SPI_4);	break;
 				#endif
 				}

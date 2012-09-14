@@ -35,7 +35,7 @@
 
 // ################## Defines ################### //
 // Application dependant //
-#define UART_BUF_SIZE		100
+#define UART_BUF_SIZE				100
 // --------------------- //
 
 
@@ -54,7 +54,7 @@
 
 // Pin control
 #define UART_PIN_RXTX_BCLK			0x00300
-#define UART_PIN_RXTX_RTS_CTS		0x00200
+#define UART_PIN_RXTX_RTS_CTS			0x00200
 #define UART_PIN_RXTX_RTS			0x00100
 #define UART_PIN_RXTX				0
 
@@ -73,9 +73,9 @@
 #define UART_TX_IDLE_HIGH			0
 
 // Interrupt condition
-#define UART_TX_INT_BUF_EMPTY		0x08000
-#define UART_TX_INT_TSR_EMPTY		0x04000
-#define UART_TX_INT_BUF_HAS_SPACE	0
+#define UART_TX_INT_BUF_EMPTY			0x08000
+#define UART_TX_INT_TSR_EMPTY			0x04000
+#define UART_TX_INT_BUF_HAS_SPACE		0
 #if CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx
 	#define UART_RX_INT_BUF_FULL		0x30000
 	#define UART_RX_INT_BUF_ALMOST_FULL	0x20000
@@ -102,13 +102,13 @@
 // --------------------- //
 
 // -- UART HW ID -- //
-#define UART_1						0
-#define UART_2						1
-#if CPU_FAMILY == PIC32MX5xx || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
-	#define UART_3						2
-	#define UART_4						3
-	#define UART_5						4
-	#define UART_6						5
+#define UART_1					0
+#define UART_2					1
+#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	#define UART_3				2
+	#define UART_4				3
+	#define UART_5				4
+	#define UART_6				5
 #endif
 // ---------------- //
 // ############################################## //
@@ -122,15 +122,15 @@ typedef union
 	struct
 	{
 		U32	STSEL:1;		//Stop bit selection
-		U32 PDSEL:2;		//Data format control
+		U32 PDSEL:2;			//Data format control
 		U32 BRGH:1;			//Baudrate formula control
-		U32 RXINV:1;		//Rx polarity inversion
-		U32 ABAUD:1;		//Auto baudrate detection Enable
-		U32 LPBACK:1;		//Loopback mode
+		U32 RXINV:1;			//Rx polarity inversion
+		U32 ABAUD:1;			//Auto baudrate detection Enable
+		U32 LPBACK:1;			//Loopback mode
 		U32 WAKE:1;			//Wake on start bit in sleep mode
 		U32 UEN:2;			//Pins control
 		U32 :1;
-		U32 RTSMD:1;		//RTS mode selection
+		U32 RTSMD:1;			//RTS mode selection
 		U32 IREN:1;			//IrDA Encode/Decode Enable
 		U32 SIDL:1;			//Stop in idle mode
 		U32 FRZ:1;			//Freeze in debug mode
@@ -145,22 +145,22 @@ typedef union
 	U32 all;
 	struct
 	{
-		U32 URXDA:1;		//Rx Buf Data ready flag
+		U32 URXDA:1;			//Rx Buf Data ready flag
 		U32 OERR:1;			//Rx Buf Overrun Error flag
 		U32 FERR:1;			//Framing Error flag
 		U32 PERR:1;			//Parity Error flag
-		U32 RIDLE:1;		//Receiver Idle flag
-		U32 ADDEN:1;		//Address Character Dectection Enable
-		U32 URXISEL:2;		//Rx Interrupt selection
+		U32 RIDLE:1;			//Receiver Idle flag
+		U32 ADDEN:1;			//Address Character Dectection Enable
+		U32 URXISEL:2;			//Rx Interrupt selection
 		U32 TRMT:1;			//Tx Shift reg empty flag
-		U32 UTXBF:1;		//Tx Buf full flag
-		U32 UTXEN:1;		//Transmitter Enable
-		U32 UTXBRK:1;		//Transmit Break char Enable
-		U32 URXEN:1;		//Receiver Enable
-		U32 UTXINV:1;		//Tx polarity inversion
-		U32 UTXISEL:2;		//Tx Interrupt selection
+		U32 UTXBF:1;			//Tx Buf full flag
+		U32 UTXEN:1;			//Transmitter Enable
+		U32 UTXBRK:1;			//Transmit Break char Enable
+		U32 URXEN:1;			//Receiver Enable
+		U32 UTXINV:1;			//Tx polarity inversion
+		U32 UTXISEL:2;			//Tx Interrupt selection
 		U32 ADDR:8;			//Auto Address detection mask
-		U32 ADM_EN:1;		//Auto Address detection Enable
+		U32 ADM_EN:1;			//Auto Address detection Enable
 		U32 :7;
 	};
 }tUxSTA;
@@ -172,14 +172,14 @@ typedef union
 	struct
 	{
 		U32 :4;
-		U32 rxPolarity:1;				//Idle polarity of RX
+		U32 rxPolarity:1;		//Idle polarity of RX
 		U32 :3;
-		U32 pinMode:2;					//General pins mode selection
+		U32 pinMode:2;			//General pins mode selection
 		U32 :1;
-		U32 rtsMode:1;					//RTS mode selection
+		U32 rtsMode:1;			//RTS mode selection
 		U32 :20;
 		U32 :13;
-		U32 txPolarity:1;				//Idle polarity of TX
+		U32 txPolarity:1;		//Idle polarity of TX
 		U32 :18;
 	}pin;
 
@@ -187,11 +187,11 @@ typedef union
 	{
 		U32 :32;
 		U32 :6;
-		U32 rxMode:2;					//RX interrupt mode selection
+		U32 rxMode:2;			//RX interrupt mode selection
 		U32 :6;
-		U32 txMode:2;					//TX interrupt mode selection
+		U32 txMode:2;			//TX interrupt mode selection
 		U32 :8;
-		U32 addressDetect:1;			//Automatic Address Detection Enable
+		U32 addressDetect:1;		//Automatic Address Detection Enable
 	}interrupts;
 
 	struct
@@ -360,14 +360,14 @@ U8 uartRcvByte(U8 uartPort);
 
 // FIFO HW buffer level
 #if CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx
-	#define UART_FIFO_LVL			4
+	#define UART_FIFO_LVL		4
 #else
-	#define UART_FIFO_LVL			8
+	#define UART_FIFO_LVL		8
 #endif
 
 // Fast bit access macro
-#define UTXEN_MASK				BIT10
-#define URXEN_MASK				BIT12
+#define UTXEN_MASK			BIT10
+#define URXEN_MASK			BIT12
 // ############################################## //
 
 #endif
