@@ -33,6 +33,11 @@
 
 
 // ################## Defines ################### //
+// == Flag State == //
+#define ADC_CONV_DONE			1
+#define ADC_CONV_BUSY			0
+// ================ //
+
 // == Timing Constraint == //
 #ifndef ADC_SAMP_FREQ_MAX
 	#define ADC_SAMP_FREQ_MAX	5000000			//Maximum Sampling frequency	(NOT sample rate!!!) (absolute maximum of 7.575 MHz)
@@ -243,6 +248,13 @@ typedef union
 
 // ################# Prototypes ################# //
 // ========== ISR =========== //
+/**
+* \fn		void adcISR(U8 adcPort)
+* @brief	Interrupt Handler for any ADC port
+* @note		Place this in the correct ISR in the main
+* @arg		U8 adcPort				Hardware ADC ID
+* @return	nothing
+*/
 void adcISR(U8 adcPort);
 // ========================== //
 
@@ -322,14 +334,15 @@ tADCScanInput adcGetScan(U8 adcPort);
 * \fn		U32 adcGetScan(U8 adcPort)
 * @brief	Wait for the ADC to be idle, and then initiated conversionNb of conversion on the selected channel
 * @note		This function can jam everything...
-		Super ugly and crappy function, waiting for RTOS to be better
+*		Super ugly and crappy function, waiting for RTOS to be better
 * @arg		U8 adcPort				Hardware ADC ID
 * @arg		tADCInput adcInput			Analog input to convert
 * @arg		U8 conversionNb				Number of conversion to do and round up (maximum 16)
-* @arg		U32 * resultPtr				Pointer to store the result
+* @arg		U16 * resultPtr				Pointer to store the result
+* @arg		U8 * donePtr				Pointer to flag the completion of the conversion
 * @return	U32 adcConversionID			ID of this conversion (used to check if the conversion is done)
 */
-U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr);
+U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr, U8 * donePtr);
 // ========================== //
 // ############################################## //
 

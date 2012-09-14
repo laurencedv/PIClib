@@ -24,15 +24,27 @@ tADxCHS * pADxCHS = NULL;
 tADxCSSL * pADxCSSL = NULL;
 U32 * pADxBUF = NULL;
 
-S16 adcOffsetValue[ADC_MAX_PORT];							//Calibration offset value result
-tADCState adcState[ADC_MAX_PORT];							//ADC module actual state
-U16 * adcResultPtr[ADC_MAX_PORT];							//Pointer to store the conversion result
-U32 adcConversionID[ADC_MAX_PORT];							//ID of the last completed conversion
+S16 adcOffsetValue[ADC_MAX_PORT];					//Calibration offset value result
+tADCState adcState[ADC_MAX_PORT];					//ADC module actual state
+U16 * adcResultPtr[ADC_MAX_PORT];					//Pointer to store the conversion result
+U8 * adcDonePtr[ADC_MAX_PORT];						//Pointer to flag when the conversions are done
+U32 adcConversionID[ADC_MAX_PORT];					//ID of the last completed conversion
+
+// -- Internal Safe-guard -- //
+U8 __adcSafeDonePtr = ADC_CONV_DONE;					//Safe place to point adcDonePtr if a NULL pointer is passed
+// ------------------------- //
 // ############################################## //
 
 
 // ################ ADC Functions ############### //
 // ========== ISR =========== //
+/**
+* \fn		void adcISR(U8 adcPort)
+* @brief	Interrupt Handler for any ADC port
+* @note		Place this in the correct ISR in the main
+* @arg		U8 adcPort				Hardware ADC ID
+* @return	nothing
+*/
 void adcISR(U8 adcPort)
 {
 	U8 wu0;
@@ -51,10 +63,15 @@ void adcISR(U8 adcPort)
 		}
 		case ADCbusy:
 		{
-			// -- Save the result in the destination -- //
-			for (wu0 = 0; wu0 < pADxCON2->SMPI; wu0++)
-				adcResultPtr[adcPort][wu0] = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
-			// ---------------------------------------- //
+			if (adcResultPtr[adcPort] != &globalDump)
+			{
+				// -- Save the result in the destination -- //
+				for (wu0 = 0; wu0 < pADxCON2->SMPI; wu0++)
+					adcResultPtr[adcPort][wu0] = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
+				// ---------------------------------------- //
+			}
+
+			*adcDonePtr[adcPort] = ADC_CONV_DONE;		//Flag the completion
 
 			adcState[adcPort] = ADCidle;
 			break;
@@ -315,10 +332,11 @@ tADCScanInput adcGetScan(U8 adcPort)
 * @arg		U8 adcPort				Hardware ADC ID
 * @arg		tADCInput adcInput			Analog input to convert
 * @arg		U8 conversionNb				Number of conversion to do and round up (maximum 16)
-* @arg		U32 * resultPtr				Pointer to store the result
+* @arg		U16 * resultPtr				Pointer to store the result
+* @arg		U8 * donePtr				Pointer to flag the completion of the conversion
 * @return	U32 adcConversionID			ID of this conversion (used to check if the conversion is done)
 */
-U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr)
+U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr, U8 * donePtr)
 {
 	U8 errorCode;
 
@@ -331,21 +349,35 @@ U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr)
 		// --------------------- //
 
 		// Wait for the ADC to be idle
-		while (!(pADxCON1->DONE));
+		while (*adcDonePtr[adcPort] == ADC_CONV_BUSY);
 
 		// -- Select the correct channel -- //
 		pADxCHS->CH0NA = 0;			//Select VrefL as the negative input
 		pADxCHS->CH0SA = adcInput;
 		// -------------------------------- //
 
-		adcResultPtr[adcPort] = resultPtr;	//Save the result pointer
+		// -- Save the variables -- //
+		if (donePtr == NULL)
+			adcDonePtr[adcPort] = &__adcSafeDonePtr;//Point to a safe place
+		else
+			adcDonePtr[adcPort] = donePtr;		//Save the done pointer
+
+		if (resultPtr == NULL)
+			adcResultPtr[adcPort] = &globalDump;	//Point to a safe place
+		else
+			adcResultPtr[adcPort] = resultPtr;	//Save the result pointer
+
 		adcState[adcPort] = ADCbusy;
+		// ------------------------ //
 
-		pADxCON1->ASAM = 1;			//Auto mode
-		pADxCON1->CLRASAM = 1;			//Stop after SMPI nb of conversion (clear ASAM automaticaly)
-		pADxCON2->SMPI = conversionNb-1;	//Set the number of conversion to do
+		// -- Start the conversion -- //
+		*adcDonePtr[adcPort] = ADC_CONV_BUSY;		//Set the flag as busy
+		pADxCON1->ASAM = 1;				//Auto mode
+		pADxCON1->CLRASAM = 1;				//Stop after SMPI nb of conversion (clear ASAM automaticaly)
+		pADxCON2->SMPI = conversionNb-1;		//Set the number of conversion to do
 
-		pADxCON1->SAMP = 1;			//Start the sampling/conversion
+		pADxCON1->SAMP = 1;				//Start the sampling/conversion
+		// -------------------------- //
 	}
 
 	return errorCode;
