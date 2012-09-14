@@ -40,6 +40,7 @@
 #define BTN_PORT		A
 #define VIN_SENSE		BIT3		//AN3 - B3
 #define VIN_SENSE_PORT		B
+#define VIN_SENSE_AN		an3
 // ------------------------- //
 
 // -- OneWire -- //
@@ -82,6 +83,7 @@
 #define COM0_SCK_PORT		D
 #define COM0_ID			BIT9		//AN9 - B9
 #define COM0_ID_PORT		B
+#define COM0_ID_AN		an9
 
 #define COM1_RX			BIT14		//U4RX - D14
 #define COM1_RX_PORT		D
@@ -101,6 +103,7 @@
 #define COM1_SCK_PORT		F
 #define COM1_ID			BIT8		//AN8 - B8
 #define COM1_ID_PORT		B
+#define COM1_ID_AN		an8
 // ------------------ //
 
 // --- Interrupt mapping --- //

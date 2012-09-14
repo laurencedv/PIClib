@@ -329,7 +329,7 @@ tADCScanInput adcGetScan(U8 adcPort);
 * @arg		U32 * resultPtr				Pointer to store the result
 * @return	U32 adcConversionID			ID of this conversion (used to check if the conversion is done)
 */
-U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U32 * resultPtr);
+U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr);
 // ========================== //
 // ############################################## //
 

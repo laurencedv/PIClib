@@ -4,7 +4,8 @@
 
  @version	0.1
  @note		This lib use auto-sample time function, there is no facilities to hangle the manual sample mode
- @todo		Transform this for the rtos
+ @todo		- Transform this for the rtos
+ *		- Change adcResultPtr to be able to point different size of element
 
  @date		February 16th 2012
  @author	Laurence DV
@@ -25,7 +26,7 @@ U32 * pADxBUF = NULL;
 
 S16 adcOffsetValue[ADC_MAX_PORT];							//Calibration offset value result
 tADCState adcState[ADC_MAX_PORT];							//ADC module actual state
-U32 * adcResultPtr[ADC_MAX_PORT];							//Pointer to store the conversion result
+U16 * adcResultPtr[ADC_MAX_PORT];							//Pointer to store the conversion result
 U32 adcConversionID[ADC_MAX_PORT];							//ID of the last completed conversion
 // ############################################## //
 
@@ -189,15 +190,16 @@ U8 adcSetSampleRate(U8 adcPort, U32 sampleRate)
 					// --------------------- //
 
 					// -- Verify the actual sample rate -- //
-					for (; adcGetSampleRate(adcPort) < ADC_SAMP_RATE_MAX; (pADxCON3->SAMC)++);
+					while (adcGetSampleRate(adcPort) > ADC_SAMP_RATE_MAX)
+						pADxCON3->SAMC++;
 					// ----------------------------------- //
 			}
 			else
-				errorCode = STD_EC_TOOLARGE;									//Sample rate too large for the PBCLK
+				errorCode = STD_EC_TOOLARGE;						//Sample rate too large for the PBCLK
 			// ----------------------------- //
 		}
 		else
-			errorCode = STD_EC_INVALID;											//Using FRC
+			errorCode = STD_EC_INVALID;							//Using FRC
 		// -------------------------- //
 	
 		// -- Restore the ADC State -- //
@@ -316,7 +318,7 @@ tADCScanInput adcGetScan(U8 adcPort)
 * @arg		U32 * resultPtr				Pointer to store the result
 * @return	U32 adcConversionID			ID of this conversion (used to check if the conversion is done)
 */
-U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U32 * resultPtr)
+U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr)
 {
 	U8 errorCode;
 
