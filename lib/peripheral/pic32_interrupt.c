@@ -42,6 +42,7 @@ void intSetExternalEdge(tIntIRQ intIRQSource, U8 edgeDirection)
 		case INT_IRQ_EXT_INT_2:	INTCONbits.INT2EP = edgeDirection;	break;
 		case INT_IRQ_EXT_INT_3:	INTCONbits.INT3EP = edgeDirection;	break;
 		case INT_IRQ_EXT_INT_4:	INTCONbits.INT4EP = edgeDirection;	break;
+		default: break;
 	}
 }
 // ############################################## //
@@ -57,7 +58,7 @@ void intSetExternalEdge(tIntIRQ intIRQSource, U8 edgeDirection)
 */
 void _general_exception_handler (void)
 {
-	U8 exceptionCause;
+	tCP0Error exceptionCause;
 	U32 exceptionAddress;
 
 	exceptionCause = (_CP0_GET_CAUSE() & 0x7C) >> 2;

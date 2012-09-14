@@ -67,6 +67,24 @@
 // ############################################## //
 
 
+// ################# Datatype ################### //
+typedef enum
+{
+	CP0E_interrupt = 0,
+	CP0E_addressLoadFetch = 4,
+	CP0E_addressStore = 5,
+	CP0E_busFetch = 6,
+	CP0E_busLoadStore = 7,
+	CP0E_syscall = 8,
+	CP0E_breakPoint = 9,
+	CP0E_reserveInstruction = 10,
+	CP0E_coProcessorUnusable = 11,
+	CP0E_arithmeticOverflow = 12,
+	CP0E_trap = 13
+}tCP0Error;
+// ############################################## //
+
+
 // ################### Define ################### //
 // -- Vector Number -- //
 #if CPU_FAMILY == PIC32MX1xx || CPU_FAMILY == PIC32MX2xx

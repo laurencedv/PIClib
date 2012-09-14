@@ -574,7 +574,7 @@ U8 spiStartTransaction(tSPITransaction * transactionPtr)
 {
 	U8 tempSPIPort = transactionPtr->pSlave->spiPort;
 	U8 errorCode;
-	U32 tempAddress = transactionPtr;					// @todo Why don't use directly (&transactionPtr) ?
+	U32 tempAddress = (U32*)transactionPtr;					// @todo Why don't use directly (&transactionPtr) ?
 
 	// -- Only process if the transaction is idle -- //
 	if (transactionPtr->control.busy == SPI_TRANSACTION_IDLE)

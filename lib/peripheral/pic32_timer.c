@@ -238,7 +238,7 @@ U32 timerGetClock(U8 timerPort)
 		else
 			return 0;							//Return 0 if the clock is external (0 Hz)
 		// ------------------------------------------ //
-	}	
+	}
 }
 
 /**
@@ -321,6 +321,7 @@ U32 timerGetOverflow(U8 timerPort)
 		// Compute the overflow period
 		return ((U32)(*pPRx * cntPeriod));
 	}
+	return 0;
 }
 
 /**
