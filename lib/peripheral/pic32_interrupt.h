@@ -581,7 +581,7 @@ typedef enum
 * @arg		nothing
 * @return	U32 intGlobalState		State of the CP0 Status register before enabling
 */
-#define	intFastEnableGlobal()					INTEnableInterrupts()
+#define	intFastEnableGlobal()				INTEnableInterrupts()
 
 /**
 * \fn		intFastDisableGlobal()
@@ -590,7 +590,7 @@ typedef enum
 * @arg		nothing
 * @return	U32 intGlobalState		State of the CP0 Status register before disabling
 */
-#define	intFastDisableGlobal()					INTDisableInterrupts()
+#define	intFastDisableGlobal()				INTDisableInterrupts()
 
 /**
 * \fn		intFastRestoreGlobal(intGlobalState)
@@ -599,7 +599,7 @@ typedef enum
 * @arg		U32 intGlobalState		State of CP0 Status register to restore
 * @return	nothing
 */
-#define	intFastRestoreGlobal(intGlobalState)			INTRestoreInterrupts(intGlobalState)
+#define	intFastRestoreGlobal(intGlobalState)		INTRestoreInterrupts(intGlobalState)
 
 /**
 * \fn		intFastGetGlobal()
@@ -608,7 +608,7 @@ typedef enum
 * @arg		nothing
 * @return	U8 intGlobalState		The state of the global interrupt Enable (1: Enabled | 0: Disabled)
 */
-#define	intFastGetGlobal()					((_CP0_GET_STATUS()) & 0x1)
+#define	intFastGetGlobal()				((_CP0_GET_STATUS()) & 0x1)
 
 /**
 * \fn		intFastSetGlobal(intGlobalState)
@@ -617,137 +617,137 @@ typedef enum
 * @arg		U8 intGlobalState		The state to set the global interrupt Enable (1: Enabled | 0: Disabled)
 * @return	nothing
 */
-#define	intFastSetGlobal(intGlobalState)			(_CP0_SET_STATUS(((_CP0_GET_STATUS())|(intGlobalState & 0x1))))
+#define	intFastSetGlobal(intGlobalState)		(_CP0_SET_STATUS(((_CP0_GET_STATUS())|(intGlobalState & 0x1))))
 
 /**
 * \fn		intFastInit(intSource)
 * @brief	Macro to initialize a designated interrupt source
 * @note		Use Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to initialize
+* @arg		intSource			The name of the interrupt source to initialize
 * @return	nothing
 */
-#define intFastInit(intSource)					(intFastClearFlag(intSource));	(intFastEnable(intSource))
+#define intFastInit(intSource)				(intFastClearFlag(intSource));	(intFastEnable(intSource))
 
 /**
 * \fn		intFastEnable(intSource)
 * @brief	Macro to enable a designated interrupt source
 * @note		Use Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to enable
+* @arg		intSource			The name of the interrupt source to enable
 * @return	nothing
 */
-#define intFastEnable(intSource)				((CONCAT3(IEC,CONCAT(_REG_,intSource),SET)) = (CONCAT(_MASK_,intSource)))
+#define intFastEnable(intSource)			((CONCAT3(IEC,CONCAT(_REG_,intSource),SET)) = (CONCAT(_MASK_,intSource)))
 
 /**
 * \fn		intFastDisable(intSource)
 * @brief	Macro to disable a designated interrupt source
 * @note		Use Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to disable
+* @arg		intSource			The name of the interrupt source to disable
 * @return	nothing
 */
-#define intFastDisable(intSource)				((CONCAT3(IEC,CONCAT(_REG_,intSource),CLR)) = (CONCAT(_MASK_,intSource)))
+#define intFastDisable(intSource)			((CONCAT3(IEC,CONCAT(_REG_,intSource),CLR)) = (CONCAT(_MASK_,intSource)))
 
 /**
 * \fn		intFastGetState(intSource)
 * @brief	Macro to return the actual enable state of a designated interrupt source
 * @note		Use Interrupt source list for intSource
 *			The return value is aligned to bit0 not to the corresponding mask
-* @arg		intSource				The name of the interrupt source to return
+* @arg		intSource			The name of the interrupt source to return
 * @return	U32 intState			interrupt source enable state (1: Enabled | 0: Disabled )
 */
-#define intFastGetState(intSource)				(((CONCAT(IEC,CONCAT(_REG_,intSource))) & (CONCAT(_MASK_,intSource))) >> (CONCAT(_POS_,intSource)))
+#define intFastGetState(intSource)			(((CONCAT(IEC,CONCAT(_REG_,intSource))) & (CONCAT(_MASK_,intSource))) >> (CONCAT(_POS_,intSource)))
 
 /**
 * \fn		intFastSetState(intSource,intState)
 * @brief	Macro to set the enable state of a designated interrupt source
 * @note		Use Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to set
+* @arg		intSource			The name of the interrupt source to set
 * @arg		U32 intState			The state to set the interrupt source to (1: Enabled | 0: Disabled)
 * @return	nothing
 */
-#define intFastSetState(intSource,intState)			((CONCAT(IEC,CONCAT(_REG_,intSource))) |= (CONCAT(_MASK_,intSource)) & ((intState) << (CONCAT(_POS_,intSource))))
+#define intFastSetState(intSource,intState)		((CONCAT(IEC,CONCAT(_REG_,intSource))) |= (CONCAT(_MASK_,intSource)) & ((intState) << (CONCAT(_POS_,intSource))))
 
 /**
 * \fn		intFastGetPriority(intSource)
 * @brief	Macro to return the actual priority level of a designated interrupt source
 * @note		Use Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to return
-* @return	U8 intPrio				interrupt priority level (0 to 7)
+* @arg		intSource			The name of the interrupt source to return
+* @return	U8 intPrio			interrupt priority level (0 to 7)
 */
-#define intFastGetPriority(intSource)				(CONCAT(_IPC_,intSource))
+#define intFastGetPriority(intSource)			(CONCAT(_IPC_,intSource))
 
 /**
 * \fn		intFastSetPriority(intSource,intPrio)
 * @brief	Macro to set the priority level of a designated interrupt source
 * @note		Use the Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to return
-* @arg		U8 intPrio				interrupt priority level (0 to 7)
+* @arg		intSource			The name of the interrupt source to return
+* @arg		U8 intPrio			interrupt priority level (0 to 7)
 * @return	nothing
 */
-#define intFastSetPriority(intSource,intPrio)			((CONCAT(_IPC_,intSource)) = (intPrio))
+#define intFastSetPriority(intSource,intPrio)		((CONCAT(_IPC_,intSource)) = (intPrio))
 
 /**
 * \fn		intFastGetSubPriority(intSource)
 * @brief	Macro to return the actual sub-priority level of a designated interrupt source
 * @note		Use the Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to return
+* @arg		intSource			The name of the interrupt source to return
 * @return	U8 intSubPrio			interrupt sub-priority level (0 to 3)
 */
-#define intFastGetSubPriority(intSource)			(CONCAT(_SIPC_,intSource))
+#define intFastGetSubPriority(intSource)		(CONCAT(_SIPC_,intSource))
 
 /**
 * \fn		intFastSetSubPriority(intSource,intSubPrio)
 * @brief	Macro to set the sub-priority level of a designated interrupt source
 * @note		Use the Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to return
+* @arg		intSource			The name of the interrupt source to return
 * @arg		U8 intSubPrio			interrupt priority level (0 to 3)
 * @return	nothing
 */
-#define intFastSetSubPriority(intSource,intSubPrio)		((CONCAT(_SIPC_,intSource)) = (intSubPrio))
+#define intFastSetSubPriority(intSource,intSubPrio)	((CONCAT(_SIPC_,intSource)) = (intSubPrio))
 
 /**
 * \fn		intFastCheckFlag(intSource)
 * @brief	Macro to check the flag and the enable of a designated interrupt source
 * @note		Use the Interrupt source list for intSource
-*			This macro is 1 instruction shorter than doing intFastGetState() & intFastGetFlag()
-*			The return value is aligned to bit0 not to the corresponding mask
-* @arg		intSource				The name of the interrupt source to check
+*		This macro is 1 instruction shorter than doing intFastGetState() & intFastGetFlag()
+*		The return value is aligned to bit0 not to the corresponding mask
+* @arg		intSource			The name of the interrupt source to check
 * @return	U32 intFlagState		The state of the interrupt (1: Interrupt generated | 0: No interrupt generated)
 */
-#define intFastCheckFlag(intSource)				((((CONCAT(IEC,CONCAT(_REG_,intSource))) & (CONCAT(IFS,CONCAT(_REG_,intSource)))) & (CONCAT(_MASK_,intSource))) >> (CONCAT(_POS_,intSource)))
+#define intFastCheckFlag(intSource)			((((CONCAT(IEC,CONCAT(_REG_,intSource))) & (CONCAT(IFS,CONCAT(_REG_,intSource)))) & (CONCAT(_MASK_,intSource))) >> (CONCAT(_POS_,intSource)))
 
 /**
 * \fn		intFastGetFlag(intSource)
 * @brief	Macro to return the flag of a designated interrupt source
 * @note		Use the Interrupt source list for intSource
-*			The return value is aligned to bit0 not to the corresponding mask
-* @arg		intSource				The name of the interrupt source to return
+*		The return value is aligned to bit0 not to the corresponding mask
+* @arg		intSource			The name of the interrupt source to return
 * @return	U32 intFlagState		The state of the flag (1: Interrupt condition | 0: No interrupt condition)
 */
-#define intFastGetFlag(intSource)				(((CONCAT(IFS,CONCAT(_REG_,intSource))) & (CONCAT(_MASK_,intSource))) >> (CONCAT(_POS_,intSource)))
+#define intFastGetFlag(intSource)			(((CONCAT(IFS,CONCAT(_REG_,intSource))) & (CONCAT(_MASK_,intSource))) >> (CONCAT(_POS_,intSource)))
 
 /**
 * \fn		intFastSetFlag(intSource)
 * @brief	Macro to set the flag of a designated interrupt source
 * @note		Use the Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to set
+* @arg		intSource			The name of the interrupt source to set
 * @return	nothing
 */
-#define intFastSetFlag(intSource)				((CONCAT3(IFS,CONCAT(_REG_,intSource),SET)) = (CONCAT(_MASK_,intSource)))
+#define intFastSetFlag(intSource)			((CONCAT3(IFS,CONCAT(_REG_,intSource),SET)) = (CONCAT(_MASK_,intSource)))
 
 /**
 * \fn		intFastClearFlag(intSource)
 * @brief	Macro to clear the flag of a designated interrupt source
 * @note		Use the Interrupt source list for intSource
-* @arg		intSource				The name of the interrupt source to clear
+* @arg		intSource			The name of the interrupt source to clear
 * @return	nothing
 */
-#define intFastClearFlag(intSource)				((CONCAT3(IFS,CONCAT(_REG_,intSource),CLR)) = (CONCAT(_MASK_,intSource)))
+#define intFastClearFlag(intSource)			((CONCAT3(IFS,CONCAT(_REG_,intSource),CLR)) = (CONCAT(_MASK_,intSource)))
 
 /**
 * \fn		void intSetExternalEdge(U8 intSource, U8 edgeDirection)
 * @brief	Set the specified external interrupt source to trigger on a specified edge direction
 * @note		Use the tIntIRQ type to select the correct interrupt source
-* @arg		tIntIRQ intIRQSource	The external interrupt to configure
+* @arg		tIntIRQ intIRQSource		The external interrupt to configure
 * @arg		U8 edgeDirection		The edge direction to select
 * @return	nothing
 */
@@ -763,7 +763,7 @@ void intSetExternalEdge(tIntIRQ intIRQSource, U8 edgeDirection);
 *		is generated
 * @return	nothing
 */
-void _general_exception_handler (void);
+void _general_exception_handler(void);
 // ############################################## //
 
 

@@ -438,7 +438,7 @@ typedef enum
 * @arg		U32 interruptFlags				Interrupt flags for the corresponding SPI port (Aligned to 0)
 * @return	nothing
 */
-void spiMasterEngine(U8 spiPort, U32 interruptFlags);
+void spiMasterISR(U8 spiPort, U32 interruptFlags);
 // =========================== //
 
 
