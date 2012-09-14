@@ -56,7 +56,7 @@ U16 rtccRemaininguS = 0;								//Remaining µS after an update (to be added at t
 #if USE_RT_SOFT_COUNTER == ENABLE
 U32 softCnt[RT_SOFT_COUNTER_NB];						//Actual value of the software counter
 U32 softCntReloadVal[RT_SOFT_COUNTER_NB];				//Value to reload after the underrun of the counter
-void * softCntTargetPtr[RT_SOFT_COUNTER_NB];			//Target to modify at the underrun
+U8 * softCntTargetPtr[RT_SOFT_COUNTER_NB];				//Target to modify at the underrun
 U32 softCntTargetVal[RT_SOFT_COUNTER_NB];				//Value to input in the target
 tSoftCounterControl softCntControl[RT_SOFT_COUNTER_NB];	//Control register of the software counter
 U8 softCntEnabled = 0;									//Number of counter enabled
@@ -235,7 +235,7 @@ void rtTimeEngine(void)
 * @arg		U8 option			Options of the counter (Use the "Init Option" defines)
 * @return	U8 softCntID		ID of the initialised counter
 */
-U8 softCntInit(U32 cntPeriod, void * targetPtr, U32 targetValue, U8 option)
+U8 softCntInit(U32 cntPeriod, U8 * targetPtr, U32 targetValue, U8 option)
 {
 	U8 softCntID;
 
@@ -251,7 +251,7 @@ U8 softCntInit(U32 cntPeriod, void * targetPtr, U32 targetValue, U8 option)
 		// -- Set the target -- //
 		softCntControl[softCntID].targetEn = (option & SOFT_CNT_TARGET_EN) >> 1;	//Set the target action option
 		softCntTargetVal[softCntID] = targetValue;						//Save the value
-		if (targetPtr == NULL)
+		if (targetPtr == NULL)											//Handle NULL pointer
 			targetPtr = &globalDump;
 		softCntTargetPtr[softCntID] = targetPtr;						//Save the target
 		// -------------------- //
@@ -320,7 +320,7 @@ void softCntEngine(void)
 
 			// -- Target Action -- //
 			if (softCntControl[softCntIDtemp].targetEn)
-				*((U32*)softCntTargetPtr[softCntIDtemp]) |= softCntTargetVal[softCntIDtemp];
+				*softCntTargetPtr[softCntIDtemp] |= (softCntTargetVal[softCntIDtemp]);
 			// ------------------- //
 
 			softCntControl[softCntIDtemp].underRun = 0;				//Clear the underRun flag
@@ -382,6 +382,8 @@ void softCntUpdatePeriod(U8 softCntID, U32 newPeriod)
 void upTimeUpdate(void)
 {
 	U32 uStemp = upTimeRemaininguS + ((sysTick - upTimeLast) * sysTickValue);	//Exact time between update (in µs)
+
+	upTimeLast = sysTick;								//Save the time of the last update
 
 	// -- Compute the millis between update ------ //
 	while (uStemp > 999)
@@ -465,6 +467,8 @@ void rtccUpdate(void)
 {
 	#if RTCC_SYSTEM	== RTCC_SOFTWARE
 	U32 uStemp = rtccRemaininguS + ((sysTick - rtccTimeLast) * sysTickValue);	//Exact time between update (in µs)
+
+	rtccTimeLast = sysTick;							//Save the time of the last update
 
 	// -- Compute the millis between update ------ //
 	while (uStemp > 999)

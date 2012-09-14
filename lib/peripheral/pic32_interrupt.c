@@ -62,7 +62,7 @@ void _general_exception_handler (void)
 	U32 exceptionAddress;
 
 	exceptionCause = (_CP0_GET_CAUSE() & 0x7C) >> 2;
-	exceptionAddress = _CP0_GET_ERROREPC();
+	exceptionAddress = _CP0_GET_EPC();
 
 	for (;;);
 }
