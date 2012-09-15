@@ -38,8 +38,8 @@ U32 * pUxBRG = NULL;
 * \fn		U8 uartSelectPort(U8 uartPort)
 * @brief	Correctly point all reg pointers for a designated UART port
 * @note		Will return STD_EC_NOTFOUND if an invalid port is given
-* @arg		U8 uartPort					Hardware UART ID
-* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 uartSelectPort(U8 uartPort)
 {
@@ -54,7 +54,7 @@ U8 uartSelectPort(U8 uartPort)
 		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxSTA = (tUxSTA*)&U5STA;	pUxBRG = (U32*)&U5BRG;	break;
 		case UART_6: pUxMODE = (tUxMODE*)&U6MODE;	pUxSTA = (tUxSTA*)&U6STA;	pUxBRG = (U32*)&U6BRG;	break;
 	#endif
-		default : return STD_EC_NOTFOUND;					//Invalid Uart port ID
+		default : return STD_EC_NOTFOUND;		//Invalid Uart port ID
 	}
 
 	return STD_EC_SUCCESS;
@@ -69,9 +69,9 @@ U8 uartSelectPort(U8 uartPort)
 * \fn		void timer1ISR(void)
 * @brief	Example of an Interrupt Service Routine for the uart 1
 * @note		Place it at the UART 1 vector in the main
-*			One vector for all interrupt source
-*			Must used UART_TX_INT_BUF_EMPTY and UART_RX_INT_DATA_READY init option
-*			for this ISR to behave correctly.
+*		One vector for all interrupt source
+*		Must used UART_TX_INT_BUF_EMPTY and UART_RX_INT_DATA_READY init option
+*		for this ISR to behave correctly.
 * @arg		nothing
 * @return	nothing
 */
@@ -169,9 +169,9 @@ void __ISR(INT_VEC_UART_1, IPL5SOFT) uart1ISR(void)
 * \fn		void uartSetConfig(U8 uartPort, tUARTConfig uartLocalConfig)
 * @brief	Save the configuration to the config struct of the specified UART port
 * @note		No sanity check for any settings and it does not apply those config
-*			The config can also be directly access via the config struct
-*			For manual configuration, option must be | or + (ex: uartInit(UART_1, UART_MODE_8N1| UART_RX_INT_DATA_READY))
-* @arg		U8 uartPort					Hardware UART ID
+*		The config can also be directly access via the config struct
+*		For manual configuration, option must be | or + (ex: uartInit(UART_1, UART_MODE_8N1| UART_RX_INT_DATA_READY))
+* @arg		U8 uartPort			Hardware UART ID
 * @arg		tUARTConfig uartLocalConfig	Setting to configure for the UART
 * @return	nothing
 */
@@ -184,7 +184,7 @@ void uartSetConfig(U8 uartPort, U64 uartLocalConfig)
 * \fn		tUARTConfig uartGetConfig(U8 uartPort)
 * @brief	Return the configuration of the specified UART port
 * @note		The config can also be directly access via the config struct
-* @arg		U8 uartPort					Hardware UART ID
+* @arg		U8 uartPort			Hardware UART ID
 * @return	tUARTConfig uartLocalConfig	Setting to configure for the UART
 */
 tUARTConfig uartGetConfig(U8 uartPort)
@@ -196,13 +196,13 @@ tUARTConfig uartGetConfig(U8 uartPort)
 * \fn		U8 uartInit(U8 uartPort, U32 option)
 * @brief	Initialise and start the selected UART with the specified options.
 * @note		No sanity check of the settings
-*			Return STD_EC_NOTFOUND if invalid UART HW ID is given.
-*			Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL, 9600))
-*			This function enable the corresponding interrupt, priority must be set in the main
-*			and multi-vectored interrupt mode enabled
+*		Return STD_EC_NOTFOUND if invalid UART HW ID is given.
+*		Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL, 9600))
+*		This function enable the corresponding interrupt, but priority must be set in the main
+*		and multi-vectored interrupt mode enabled
 * @arg		U8 uartPort			Hardware UART ID
 * @arg		U32 option			Setting to configure for the UART
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartInit(U8 uartPort, U32 option)
 {
@@ -242,28 +242,28 @@ U8 uartInit(U8 uartPort, U32 option)
 		// --------------------- //
 
 		// -- Set the option -- //
-		pUxMODE->STSEL = splittedOption.b0;						//Stop bit
-		pUxMODE->PDSEL = (option & 0x6)>>1;						//Data mode
-		pUxMODE->RXINV = splittedOption.b4;						//RX Polarity
-		pUxMODE->LPBACK = splittedOption.b6;					//Loopback mode
-		pUxMODE->WAKE = splittedOption.b7;						//Wake on char
-		pUxMODE->RTSMD = splittedOption.b11;					//RTS Mode
-		pUxMODE->IREN = splittedOption.b12;						//IrDA Encode/Decode
-		pUxMODE->SIDL = splittedOption.b13;						//Idle mode
+		pUxMODE->STSEL = splittedOption.b0;			//Stop bit
+		pUxMODE->PDSEL = (option & 0x6)>>1;			//Data mode
+		pUxMODE->RXINV = splittedOption.b4;			//RX Polarity
+		pUxMODE->LPBACK = splittedOption.b6;			//Loopback mode
+		pUxMODE->WAKE = splittedOption.b7;			//Wake on char
+		pUxMODE->RTSMD = splittedOption.b11;			//RTS Mode
+		pUxMODE->IREN = splittedOption.b12;			//IrDA Encode/Decode
+		pUxMODE->SIDL = splittedOption.b13;			//Idle mode
 
-		pUxSTA->ADDEN = splittedOption.b3;						//Address Char detect
-		pUxSTA->ADM_EN = splittedOption.b3;						//Auto Address Detect mode
-		pUxSTA->UTXISEL = (option & 0xC000)>>14;				//TX Interrupt mode
-		pUxSTA->URXISEL = (option & 0x3000)>>12;				//RX Interrupt mode
+		pUxSTA->ADDEN = splittedOption.b3;			//Address Char detect
+		pUxSTA->ADM_EN = splittedOption.b3;			//Auto Address Detect mode
+		pUxSTA->UTXISEL = (option & 0xC000)>>14;		//TX Interrupt mode
+		pUxSTA->URXISEL = (option & 0x3000)>>12;		//RX Interrupt mode
 
 		if (pUxMODE->IREN)
-			pUxSTA->UTXINV = !splittedOption.b5;				//In IrDA mode the idle state is inversed
+			pUxSTA->UTXINV = !splittedOption.b5;		//In IrDA mode the idle state is inversed
 		else
-			pUxSTA->UTXINV = splittedOption.b5;					//TX polarity
+			pUxSTA->UTXINV = splittedOption.b5;		//TX polarity
 		// -------------------- //
 
 		// -- Start the uart -- //
-		pUxSTA->URXEN = 1;										//Start the receiver
+		pUxSTA->URXEN = 1;					//Start the receiver
 		pUxMODE->ON = 1;
 		// -------------------- //
 
@@ -278,15 +278,15 @@ U8 uartInit(U8 uartPort, U32 option)
 * \fn		U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 * @brief	Compute the correct BRG value for the desired baudrate
 * @note		Will round up to the nearest possible, use uartGetBaudRate() to have the exact one.
-*			Will return STD_EC_NOTFOUND if invalid timer ID is inputed.
- *			Use the actual PBCLK freq for it's computation
+*		Will return STD_EC_NOTFOUND if invalid timer ID is inputed.
+ *		Use the actual PBCLK freq for it's computation
 * @arg		U8 uartPort			Hardware UART ID
-* @arg		U32 baudRate		Desired baudrate (in bps)
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @arg		U32 baudRate			Desired baudrate (in bps)
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 {
-	U8 divider = 4;											//Default: BRGH=0 div by 16
+	U8 divider = 4;							//Default: BRGH=0 div by 16
 	U8 uartSaveState;
 
 	// -- Select the correct UART -- //
@@ -300,7 +300,7 @@ U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxBRG = (U32*)&U5BRG; break;
 		case UART_6: pUxMODE = (tUxMODE*)&U6MODE;	pUxBRG = (U32*)&U6BRG; break;
 	#endif
-		default : return STD_EC_NOTFOUND;					//Invalid Uart port ID
+		default : return STD_EC_NOTFOUND;			//Invalid Uart port ID
 	}
 	// ----------------------------- //
 
@@ -316,8 +316,8 @@ U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 	// -- Set the divider -- //
 	if (baudRate > 38400)
 	{
-		divider = 2;										//Div by 4
-		pUxMODE->BRGH = 1;									//Set the formula for High speed
+		divider = 2;						//Div by 4
+		pUxMODE->BRGH = 1;					//Set the formula for High speed
 	}
 	// --------------------- //
 
@@ -336,11 +336,11 @@ U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 * @brief	Return the actual baudrate of the selected UART
 * @note		Use the actual PBCLK freq for it's computation
 * @arg		U8 uartPort			Hardware UART ID
-* @return	U32 baudRate		Actual Baudrate (in bps)
+* @return	U32 baudRate			Actual Baudrate (in bps)
 */
 U32 uartGetBaudRate(U8 uartPort)
 {
-	U8 divider = 16;										//Default: BRGH=0 div by 16
+	U8 divider = 16;						//Default: BRGH=0 div by 16
 	U32 baudRate = 0;
 	U32 * pUxBRG;
 
@@ -355,13 +355,13 @@ U32 uartGetBaudRate(U8 uartPort)
 		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxBRG = (U32*)&U5BRG; break;
 		case UART_6: pUxMODE = (tUxMODE*)&U6MODE;	pUxBRG = (U32*)&U6BRG; break;
 	#endif
-		default : return 0;									//Invalid Uart port ID
+		default : return 0;					//Invalid Uart port ID
 	}
 	// ----------------------------- //
 
 	// -- Compute the Baud rate value -- //
 	if (pUxMODE->BRGH)
-		divider = 4;										//Div by 4
+		divider = 4;						//Div by 4
 	baudRate = (U32)( ((F32)clockGetPBCLK())/((F32)( divider * (*pUxBRG +1) )) );
 	// --------------------------------- //
 
@@ -373,8 +373,8 @@ U32 uartGetBaudRate(U8 uartPort)
 * @brief	Set the Address Mask for the automatic address detection mode
 * @note
 * @arg		U8 uartPort			Hardware UART ID
-* @arg		U8 addressMask		Value of the mask
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @arg		U8 addressMask			Value of the mask
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartSetAddressMask(U8 uartPort, U8 addressMask)
 {
@@ -389,7 +389,7 @@ U8 uartSetAddressMask(U8 uartPort, U8 addressMask)
 		case UART_5: U5STAbits.ADDR = addressMask;	break;
 		case UART_6: U6STAbits.ADDR = addressMask;	break;
 	#endif
-		default : return STD_EC_NOTFOUND;					//Invalid Uart port ID
+		default : return STD_EC_NOTFOUND;			//Invalid Uart port ID
 	}
 	// ----------------------------- //
 
@@ -401,7 +401,7 @@ U8 uartSetAddressMask(U8 uartPort, U8 addressMask)
 * @brief	Return the Address Mask for the automatic address detection mode
 * @note
 * @arg		U8 uartPort			Hardware UART ID
-* @return	U8 addressMask		Value of the mask
+* @return	U8 addressMask			Value of the mask
 */
 U8 uartGetAddressMask(U8 uartPort)
 {
@@ -416,7 +416,7 @@ U8 uartGetAddressMask(U8 uartPort)
 		case UART_5: return U5STAbits.ADDR;
 		case UART_6: return U6STAbits.ADDR;
 	#endif
-		default : return 0;									//Invalid Uart port ID
+		default : return 0;					//Invalid Uart port ID
 	}
 	// ----------------------------- //
 }
@@ -429,8 +429,8 @@ U8 uartGetAddressMask(U8 uartPort)
 * @brief	Send a single bit on the designated UART
 * @note		The byte is pushed into the Tx FIFO Ring Buffer of the UART prior to sending.
 * @arg		U8 uartPort			Hardware UART ID
-* @arg		U8 byteToSend		Byte to be sent
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @arg		U8 byteToSend			Byte to be sent
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartSendByte(U8 uartPort,U8 byteToSend)
 {
@@ -465,7 +465,7 @@ U8 uartSendByte(U8 uartPort,U8 byteToSend)
 * @brief	Receive 1 byte from the designated UART
 * @note		The byte is pulled from the Rx FIFO Ring Buffer of the UART.
 * @arg		U8 uartPort			Hardware UART ID
-* @return	U8 receivedByte		Byte received
+* @return	U8 receivedByte			Byte received
 */
 U8 uartRcvByte(U8 uartPort)
 {

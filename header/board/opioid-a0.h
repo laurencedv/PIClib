@@ -158,10 +158,14 @@
 // --- Peripheral mapping --- //
 #define COM0_UART_ID		UART_1
 #define COM0_SPI_ID		SPI_1
+#define COM0_TIMER_ID		TIMER_4
 #define COM1_UART_ID		UART_4
 #define COM1_SPI_ID		SPI_4
+#define COM1_TIMER_ID		TIMER_5
+
 #define EXT0_UART_ID		UART_3
 #define EXT1_UART_ID		UART_6
+
 #define LED_R_OC_ID		OC_2
 #define LED_G_OC_ID		OC_3
 #define LED_B_OC_ID		OC_4

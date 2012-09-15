@@ -5,7 +5,7 @@
  @version	0.1.1
  @note		
  @todo		Transfert function 9 bit mode
- 			Remove the temp buffering in the TX ISR
+ 		Remove the temp buffering in the TX ISR
 
  @date		February 15th 2011
  @author	Laurence DV
@@ -252,9 +252,9 @@ typedef union
 * \fn		void uartSetConfig(U8 uartPort, tUARTConfig uartLocalConfig)
 * @brief	Save the configuration to the config struct of the specified UART port
 * @note		No sanity check for any settings and it does not apply those config
-*			The config can also be directly access via the config struct
-*			For manual configuration, option must be | or + (ex: uartInit(UART_1, UART_MODE_8N1| UART_RX_INT_DATA_READY))
-* @arg		U8 uartPort					Hardware UART ID
+*		The config can also be directly access via the config struct
+*		For manual configuration, option must be | or + (ex: uartInit(UART_1, UART_MODE_8N1| UART_RX_INT_DATA_READY))
+* @arg		U8 uartPort			Hardware UART ID
 * @arg		tUARTConfig uartLocalConfig	Setting to configure for the UART
 * @return	nothing
 */
@@ -264,21 +264,22 @@ void uartSetConfig(U8 uartPort, U64 uartLocalConfig);
 * \fn		tUARTConfig uartGetConfig(U8 uartPort)
 * @brief	Return the configuration of the specified UART port
 * @note		The config can also be directly access via the config struct
-* @arg		U8 uartPort					Hardware UART ID
+* @arg		U8 uartPort			Hardware UART ID
 * @return	tUARTConfig uartLocalConfig	Setting to configure for the UART
 */
 tUARTConfig uartGetConfig(U8 uartPort);
 
 /**
-* \fn		U8 uartInit(U8 uartPort, U32 option, U32 baudRate)
-* @brief	Initialise the selected UART with the specified options. Also set the correct baudrate
-* @note		Will round up the baudrate value to the nearest possible, use uartGetBaudRate() to have the exact one.
-*			No sanity check of the settings, will return STD_EC_NOTFOUND if invalid UART HW ID is inputed.
-*			Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL, 9600))
+* \fn		U8 uartInit(U8 uartPort, U32 option)
+* @brief	Initialise and start the selected UART with the specified options.
+* @note		No sanity check of the settings
+*		Return STD_EC_NOTFOUND if invalid UART HW ID is given.
+*		Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL, 9600))
+*		This function enable the corresponding interrupt, but priority must be set in the main
+*		and multi-vectored interrupt mode enabled
 * @arg		U8 uartPort			Hardware UART ID
 * @arg		U32 option			Setting to configure for the UART
-* @arg		U32 baudRate		Desired baudrate (in bps)
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartInit(U8 uartPort, U32 option);
 
@@ -286,11 +287,11 @@ U8 uartInit(U8 uartPort, U32 option);
 * \fn		U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 * @brief	Compute the correct BRG value for the desired baudrate
 * @note		Will round up to the nearest possible, use uartGetBaudRate() to have the exact one.
-*			Will return STD_EC_NOTFOUND if invalid timer ID is inputed.
- *			Use the actual PBCLK freq for it's computation
+*		Will return STD_EC_NOTFOUND if invalid timer ID is inputed.
+ *		Use the actual PBCLK freq for it's computation
 * @arg		U8 uartPort			Hardware UART ID
-* @arg		U32 baudRate		Desired baudrate (in bps)
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @arg		U32 baudRate			Desired baudrate (in bps)
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartSetBaudRate(U8 uartPort, U32 baudRate);
 
@@ -299,7 +300,7 @@ U8 uartSetBaudRate(U8 uartPort, U32 baudRate);
 * @brief	Return the actual baudrate of the selected UART
 * @note		Use the actual PBCLK freq for it's computation
 * @arg		U8 uartPort			Hardware UART ID
-* @return	U32 baudRate		Actual Baudrate (in bps)
+* @return	U32 baudRate			Actual Baudrate (in bps)
 */
 U32 uartGetBaudRate(U8 uartPort);
 
@@ -308,8 +309,8 @@ U32 uartGetBaudRate(U8 uartPort);
 * @brief	Set the Address Mask for the automatic address detection mode
 * @note
 * @arg		U8 uartPort			Hardware UART ID
-* @arg		U8 addressMask		Value of the mask
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @arg		U8 addressMask			Value of the mask
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartSetAddressMask(U8 uartPort, U8 addressMask);
 
@@ -318,7 +319,7 @@ U8 uartSetAddressMask(U8 uartPort, U8 addressMask);
 * @brief	Return the Address Mask for the automatic address detection mode
 * @note
 * @arg		U8 uartPort			Hardware UART ID
-* @return	U8 addressMask		Value of the mask
+* @return	U8 addressMask			Value of the mask
 */
 U8 uartGetAddressMask(U8 uartPort);
 // ========================== //
@@ -330,8 +331,8 @@ U8 uartGetAddressMask(U8 uartPort);
 * @brief	Send a single bit on the designated UART
 * @note		The byte is pushed into the Tx FIFO Ring Buffer of the UART prior to sending.
 * @arg		U8 uartPort			Hardware UART ID
-* @arg		U8 byteToSend		Byte to be sent
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @arg		U8 byteToSend			Byte to be sent
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 uartSendByte(U8 uartPort, U8 byteToSend);
 
@@ -340,7 +341,7 @@ U8 uartSendByte(U8 uartPort, U8 byteToSend);
 * @brief	Receive 1 byte from the designated UART
 * @note		The byte is pulled from the Rx FIFO Ring Buffer of the UART.
 * @arg		U8 uartPort			Hardware UART ID
-* @return	U8 receivedByte		Byte received
+* @return	U8 receivedByte			Byte received
 */
 U8 uartRcvByte(U8 uartPort);
 // ========================== //

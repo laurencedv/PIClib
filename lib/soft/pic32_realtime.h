@@ -4,12 +4,11 @@
 
  @version	0.1.2
  @note		The sysTick Rate is also the upTime Update Rate, keep it below a second to use the realTime system
-			accurately.
+		accurately.
 
  @date		March 2th 2012
  @author	Laurence DV
 */
-
 
 
 #ifndef _PIC32_REALTIME_H
@@ -51,13 +50,14 @@
 // ====================== //
 
 // == Compile Time option == //
-#define RTCC_UPDATE_RATE		1000			//Update rate of the software RTCC and upTime(in sysTick)
-#define RTCC_SYSTEM			RTCC_SOFTWARE
+#define RTCC_UPDATE_RATE		1000			//Update rate of the software RTCC and upTime (in sysTick) (toggle between the 2)
+#define RTCC_SYSTEM			RTCC_SOFTWARE		//Which RTCC system to use
 // ========================= //
 // ############################################## //
 
 
 // ################# Data Type ################## //
+// List of months
 typedef enum
 {
 	january = 0,
@@ -74,6 +74,7 @@ typedef enum
 	december = 11
 }tRTMonth;
 
+// Struct to store time in a human-readable format
 typedef union
 {
 	struct
@@ -88,6 +89,7 @@ typedef union
 	};
 }tRealTime;
 
+// Control Register of a Software Counter
 typedef union
 {
 	U32 all;
