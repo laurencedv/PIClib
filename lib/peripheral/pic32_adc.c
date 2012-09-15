@@ -49,6 +49,8 @@ U8 __adcSafeDonePtr = ADC_CONV_DONE;					//Safe place to point adcDonePtr if a N
 void adcISR(U8 adcPort)
 {
 	U8 wu0;
+
+	adcSelectPort(adcPort);
 	
 	switch (adcState[adcPort])
 	{
@@ -67,7 +69,7 @@ void adcISR(U8 adcPort)
 			if (adcResultPtr[adcPort] != &globalDump)
 			{
 				// -- Save the result in the destination -- //
-				for (wu0 = 0; wu0 < pADxCON2->SMPI; wu0++)
+				for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
 					adcResultPtr[adcPort][wu0] = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
 				// ---------------------------------------- //
 			}
@@ -81,6 +83,7 @@ void adcISR(U8 adcPort)
 		{
 			// -- Save the calibration result -- //
 			adcOffsetValue[adcPort] = *pADxBUF;
+			pADxCON2->OFFCAL = DISABLE;
 			// --------------------------------- //
 
 			adcState[adcPort] = ADCidle;
