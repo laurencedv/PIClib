@@ -31,6 +31,7 @@ U8 * adcDonePtr[ADC_MAX_PORT];						//Pointer to flag when the conversions are d
 U32 adcConversionID[ADC_MAX_PORT];					//ID of the last completed conversion
 
 // -- Internal Safe-guard -- //
+extern U32 globalDump;
 U8 __adcSafeDonePtr = ADC_CONV_DONE;					//Safe place to point adcDonePtr if a NULL pointer is passed
 // ------------------------- //
 // ############################################## //
@@ -113,7 +114,7 @@ U8 adcSelectPort(U8 adcPort)
 /**
 * \fn		U8 adcInit(U8 adcPort)
 * @brief	Initialize the ADC module for single mode
-* @note
+* @note		Will initialise the interrupt, but the priorities must be set in the main
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
@@ -134,9 +135,18 @@ U8 adcInit(U8 adcPort)
 		pADxCON3->ADRC = ADC_CLK_PBCLK;		//Use PBClock as the clock source
 		pADxCON1->FORM = ADC_FORMAT_U16;	//Format the result as a unsigned 16bit
 
+		// -- Init the interrupt -- //
+		switch (adcPort)
+		{
+			case ADC_1:	intFastInit(INT_ADC_1);	break;
+			default:				break;
+		}
+		// ------------------------ //
+
 		// -- Init control -- //
 		adcOffsetValue[adcPort] = 0;
 		adcState[adcPort] = ADCconfig;
+		adcDonePtr[adcPort] = &__adcSafeDonePtr;
 		// ------------------ //
 
 		// -- Start the ADC -- //
@@ -149,8 +159,25 @@ U8 adcInit(U8 adcPort)
 }
 
 /**
+* \fn		void adcSetInput(tADCScanInput inputMatrix)
+* @brief	Enable Analog Input as such
+* @note		Will configure in the correct register depending of the CPU_FAMILY
+*		Don't forget to set the TRIS register as input also!
+* @arg		tADCScanInput inputMatrix		Bitwise selection of input enabled
+* @return	nothing
+*/
+void adcSetInput(tADCMuxInput inputMatrix)
+{
+#if CPU_FAMILY == PIC32MX1xx || CPU_FAMILY == PIC32MX2xx
+	// TO DO
+#elif CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx || CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+	AD1PCFG = inputMatrix;
+#endif
+}
+
+/**
 * \fn		U8 adcSetSampleRate(U8 adcPort, U32 desiredSampleRate)
-* @brief
+* @brief	Function to set the sample rate of the selected ADC
 * @note		This function will return error if the timing constraint are not met
 *		Check the family reference section 17 for details on equations
 *		Return STD_EC_TOOLARGE if the desired sample rate is too large for the PBCLK
@@ -286,7 +313,7 @@ U8 adcCalibrate(U8 adcPort)
 * @arg		tADCScanInput scanInput			Input Matrix to enable
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 adcSetScan(U8 adcPort, tADCScanInput scanInput)
+U8 adcSetScan(U8 adcPort, tADCMuxInput scanInput)
 {
 	U8 inputNb = 0;
 
@@ -316,7 +343,7 @@ U8 adcSetScan(U8 adcPort, tADCScanInput scanInput)
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	tADCScanInput inputMatrix		Input Matrix enabled
 */
-tADCScanInput adcGetScan(U8 adcPort)
+tADCMuxInput adcGetScan(U8 adcPort)
 {
 	if (adcSelectPort(adcPort) == STD_EC_SUCCESS)
 		return pADxCSSL->CSSL;

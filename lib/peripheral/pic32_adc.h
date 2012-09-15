@@ -138,7 +138,7 @@ typedef enum
 	muxCtmuTemp = 0x2000,
 	muxIvref = 0x4000,
 	muxVss = 0x8000
-}tADCScanInput;
+}tADCMuxInput;
 
 // == Register Pointer == //
 //ADxCON1
@@ -272,19 +272,29 @@ U8 adcSelectPort(U8 adcPort);
 /**
 * \fn		U8 adcInit(U8 adcPort)
 * @brief	Initialize the ADC module for single mode
-* @note
+* @note		Will initialise the interrupt, but the priorities must be set in the main
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 adcInit(U8 adcPort);
 
 /**
+* \fn		void adcSetInput(tADCScanInput inputMatrix)
+* @brief	Enable Analog Input as such
+* @note		Will configure in the correct register depending of the CPU_FAMILY
+*		Don't forget to set the TRIS register as input also!
+* @arg		tADCScanInput inputMatrix		Bitwise selection of input enabled
+* @return	nothing
+*/
+void adcSetInput(tADCMuxInput inputMatrix);
+
+/**
 * \fn		U8 adcSetSampleRate(U8 adcPort, U32 desiredSampleRate)
-* @brief
+* @brief	Function to set the sample rate of the selected ADC
 * @note		This function will return error if the timing constraint are not met
-		Check the family reference section 17 for details on equations
-		Return STD_EC_TOOLARGE if the desired sample rate is too large for the PBCLK
-		Return STD_EC_INVALID if the ADC is using FRC as the clock source
+*		Check the family reference section 17 for details on equations
+*		Return STD_EC_TOOLARGE if the desired sample rate is too large for the PBCLK
+*		Return STD_EC_INVALID if the ADC is using FRC as the clock source
 * @arg		U8 adcPort				Hardware ADC ID
 * @arg		U32 SampleRate				Sample Rate to configure (in sample per second)
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
@@ -317,7 +327,7 @@ U8 adcCalibrate(U8 adcPort);
 * @arg		tADCScanInput scanInput			Input Matrix to enable
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 adcSetScan(U8 adcPort, tADCScanInput scanInput);
+U8 adcSetScan(U8 adcPort, tADCMuxInput scanInput);
 
 /**
 * \fn		U32 adcGetScan(U8 adcPort)
@@ -326,7 +336,7 @@ U8 adcSetScan(U8 adcPort, tADCScanInput scanInput);
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	tADCScanInput inputMatrix		Input Matrix enabled
 */
-tADCScanInput adcGetScan(U8 adcPort);
+tADCMuxInput adcGetScan(U8 adcPort);
 // ========================== //
 
 // == Conversion Functions == //
