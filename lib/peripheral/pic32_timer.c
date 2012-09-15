@@ -4,9 +4,8 @@
 
  @version	0.2.3
  @note		timerSetOverflow and timerGetOverflow are really cpu intensive use wisely
-
- @todo		Shrink the ROM footprint
- 			Make a timerSelectPort function to reduce the redundant code
+		The "fast" Macro can be used with explicit argument only, no variable (ex: timerFastClear(0), not timerFastClear(variable))
+ 		The Timer 1 has only 4 prescaler option refer to the Clock Settings defines to see which one (all other timers have all the option)
 
  @date		March 2th 2012
  @author	Laurence DV
@@ -18,7 +17,7 @@
 
 
 // ################## Defines ################### //
-#define TMR_CKPS_NB		8
+#define TMR_CKPS_NB	8
 #define	TMR1_CKPS_NB	4
 // ############################################## //
 
@@ -31,9 +30,9 @@ U32 * pPR32x = NULL;
 // ----------- //
 
 // Clock configuration //
-const U16 tmrPrescalerValue[TMR_CKPS_NB] = {1,2,4,8,16,32,64,256};				//Possible prescaler values for other timers
-const U16 tmr1PrescalerValue[TMR1_CKPS_NB] = {1,8,64,256};						//Possible prescaler values for timer 1
-const U32 tmrMax[2] = {0xFFFF,0xFFFFFFFF};										//Maximum value of timers (16bit and 32 bits)
+const U16 tmrPrescalerValue[TMR_CKPS_NB] = {1,2,4,8,16,32,64,256};	//Possible prescaler values for other timers
+const U16 tmr1PrescalerValue[TMR1_CKPS_NB] = {1,8,64,256};		//Possible prescaler values for timer 1
+const U32 tmrMax[2] = {0xFFFF,0xFFFFFFFF};				//Maximum value of timers (16bit and 32 bits)
 // ------------------- //
 // ############################################## //
 
@@ -70,7 +69,7 @@ U8 timerSelectPort(U8 timerPort)
 * @arg		nothing
 * @return	nothing
 */
-/*
+/*	Example ISR Vector
 void __ISR(_TIMER_1_VECTOR, IPL7SOFT) timer1ISR(void)
 {
 
@@ -88,9 +87,9 @@ void __ISR(_TIMER_1_VECTOR, IPL7SOFT) timer1ISR(void)
 		No sanity check of the settings, will return STD_EC_NOTFOUND if invalid timer ID is inputed.
 		Option must be | or + (ex: timerInit(0, TMR_DIV_1|TMR_CS_PBCLK|TMR_16BIT))
 		For 32bit timer must be called for each timer in the pair.
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @arg		U32 option			Setting to configure for the timer
-* @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 timerInit(U8 timerPort, U32 option)
 {
@@ -110,7 +109,7 @@ U8 timerInit(U8 timerPort, U32 option)
 		if (timerPort == TIMER_1)
 		{
 			//Set the prescaler
-			splittedOption.b1 = splittedOption.b2;		//check only the msb and lsb of the prescaler def
+			splittedOption.b1 = splittedOption.b2;		//Check only the msb and lsb of the prescaler def
 			pTxCON->TCKPS = splittedOption.all & 0x3;	//for the timer 1 (ex: 0b101 = 0b11)
 
 			//Set the clock sync
@@ -151,7 +150,7 @@ U8 timerInit(U8 timerPort, U32 option)
 * \fn		void timerStart(U8 timerPort)
 * @brief	Start the selected Timer
 * @note		nothing
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @return	nothing
 */
 void timerStart(U8 timerPort)
@@ -170,7 +169,7 @@ void timerStart(U8 timerPort)
 * \fn		void timerStop(U8 timerPort)
 * @brief	Stop the selected Timer
 * @note		nothing
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @return	nothing
 */
 void timerStop(U8 timerPort)
@@ -189,7 +188,7 @@ void timerStop(U8 timerPort)
 * \fn		U8 timerGetSize(U8 timerPort)
 * @brief	Return the data width of the designated timer
 * @note		nothing
-* @arg		U8 timerPort		Hardware Timer ID
+* @arg		U8 timerPort			Hardware Timer ID
 * @return	U8 dataSize			Timer data width in bits
 */
 U8 timerGetSize(U8 timerPort)
@@ -210,9 +209,9 @@ U8 timerGetSize(U8 timerPort)
 * \fn		U32 timerGetClock(U8 timerPort)
 * @brief	Return the actual Timer clock source freq for the designated timer
 * @note		Will return 0 if either the timerPort is invalid or the clock source
-*			is external
-* @arg		U8 timerPort		Hardware Timer ID
-* @return	U32 clockFreq		Timer clock source freq (in Hz)
+*		is external
+* @arg		U8 timerPort			Hardware Timer ID
+* @return	U32 clockFreq			Timer clock source freq (in Hz)
 */
 U32 timerGetClock(U8 timerPort)
 {
@@ -245,11 +244,11 @@ U32 timerGetClock(U8 timerPort)
 * \fn		U8 timerSetOverflow(U8 timerPort, U32 ovfPeriod)
 * @brief	Set the timer overflow interrupt at the desired period
 * @note		This function will round up to the possible freq depending on the actual globalCLK.
-		Only work if using the PBCLK as the clock source.
-		Use the timerInit with the correct parameters for external clock source.
-* @arg		U8 timerPort		Hardware Timer ID
-* @arg		U32 ovfPeriod		Total Period between overflow (in us)
-* @return	U8 errorCode		STD Error Code
+*		Only work if using the PBCLK as the clock source.
+*		Use the timerInit with the correct parameters for external clock source.
+* @arg		U8 timerPort			Hardware Timer ID
+* @arg		U32 ovfPeriod			Total Period between overflow (in us)
+* @return	U8 errorCode			STD Error Code
 */
 U8 timerSetOverflow(U8 timerPort, F32 ovfPeriod)
 {
@@ -303,9 +302,9 @@ U8 timerSetOverflow(U8 timerPort, F32 ovfPeriod)
 * \fn		U32 timerGetOverflow(U8 timerPort)
 * @brief	Return the overflow period of the specified timer
 * @note		Will return 0 if either the timerPort is invalid or the clock source
-*			is external
+*		is external
 * @arg		U8 timerPort			Hardware Timer ID
-* @return	U32 ovfPeriod		Overflow period (in µs)
+* @return	U32 ovfPeriod			Overflow period (in µs)
 */
 U32 timerGetOverflow(U8 timerPort)
 {
@@ -436,7 +435,7 @@ void timerSet(U8 timerPort, U32 data)
 		Use timerGetSize() to check the data width
 		Will return 0 if invalid timerPort is provided
 * @arg		U8 timerPort			Hardware Timer ID
-* @return	U32					Actual value of the timer
+* @return	U32				Actual value of the timer
 */
 U32 timerGet(U8 timerPort)
 {

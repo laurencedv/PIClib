@@ -5,6 +5,7 @@
  @version	0.2.3
  @note		timerSetOverflow and timerGetOverflow are really cpu intensive use wisely
  		The "fast" Macro can be used with explicit argument only, no variable (ex: timerFastClear(0), not timerFastClear(variable))
+		The Timer 1 has only 4 prescaler option refer to the Clock Settings defines to see which one (all other timers have all the option)
 
  @date		March 2th 2012
  @author	Laurence DV
@@ -42,14 +43,14 @@
 #define	TMR_CS_PBCLK		0			// Internal Peripheral clock
 
 //Prescaler
-#define	TMR_DIV_256		0x7			//Timer 1
-#define	TMR_DIV_64		0x6			//Timer 1
+#define	TMR_DIV_256		0x7			// Available for timer 1
+#define	TMR_DIV_64		0x6			// Available for timer 1
 #define TMR_DIV_32		0x5
 #define	TMR_DIV_16		0x4
-#define TMR_DIV_8		0x3			//Timer 1
+#define TMR_DIV_8		0x3			// Available for timer 1
 #define	TMR_DIV_4		0x2
 #define	TMR_DIV_2		0x1
-#define	TMR_DIV_1		0			//Timer 1
+#define	TMR_DIV_1		0			// Available for timer 1
 
 //External Clock Synchronization
 #define	TMR_EXT_SYNC		0x20			// Sync timer
