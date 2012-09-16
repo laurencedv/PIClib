@@ -3,7 +3,8 @@
  @brief		ADC Control lib for pic32
 
  @version	0.1
- @note		This lib use auto-sample time function, there is no facilities to hangle the manual sample mode
+ @note		This lib use auto-sample time function, there is no facilities to handle the manual sample mode
+ 		This lib use interrupt, and assume they are correctly enabled in the main
  @todo		- Transform this for the rtos
  *		- Change adcResultPtr to be able to point different size of element
 
@@ -117,8 +118,7 @@ U8 adcSelectPort(U8 adcPort)
 /**
 * \fn		U8 adcInit(U8 adcPort)
 * @brief	Initialize the ADC module for single mode
-* @note		Will initialise the interrupt, but the priorities must be set in the main
-*		and Multi-Vector Interrupt mode must be enabled
+* @note		
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
@@ -138,14 +138,6 @@ U8 adcInit(U8 adcPort)
 		pADxCON2->ALTS = 0;			//Use only MUX A
 		pADxCON3->ADRC = ADC_CLK_PBCLK;		//Use PBClock as the clock source
 		pADxCON1->FORM = ADC_FORMAT_U16;	//Format the result as a unsigned 16bit
-
-		// -- Init the interrupt -- //
-		switch (adcPort)
-		{
-			case ADC_1:	intFastInit(INT_ADC_1);	break;
-			default:				break;
-		}
-		// ------------------------ //
 
 		// -- Init control -- //
 		adcOffsetValue[adcPort] = 0;
