@@ -103,7 +103,7 @@ void spiMasterISR(U8 spiPort, U32 interruptFlags)
 				spiFSMState[spiPort] = SPISfetch;
 
 				//Deselect the Slave
-				(localCurrentSlavePtr->SSpinPort)[PTR_REG_OFFSET_SET] = localCurrentSlavePtr->SSpinMask;
+				(localCurrentSlavePtr->SSpinPort)[REG_OFFSET_SET_32] = localCurrentSlavePtr->SSpinMask;
 
 				//Set the module status
 				spiStatus[spiPort].busy = SPI_TRANSACTION_IDLE;
@@ -114,7 +114,7 @@ void spiMasterISR(U8 spiPort, U32 interruptFlags)
 		// -- Transaction states -- //
 		switch (spiFSMState[spiPort])
 		{
-			// == SPISSPISfetch a new Transaction ===== //
+			// == SPISfetch a new Transaction ===== //
 			case SPISfetch:
 			{
 				// -- Check for pending transaction -- //
@@ -122,7 +122,7 @@ void spiMasterISR(U8 spiPort, U32 interruptFlags)
 				{
 					// Load a new transaction
 					if (rBufPullElement(spiTransactionList[spiPort], (void*)(&spiCurrentTransaction[spiPort]), 1, RBUF_FREERUN_PTR) == STD_EC_BUSY)
-						Nop(); //TODO : Delay the state (10ms)
+						Nop(); // TODO : Delay the state (10ms)
 
 					//Save the slave localy
 					localCurrentSlavePtr = spiCurrentTransaction[spiPort]->pSlave;
@@ -164,7 +164,7 @@ void spiMasterISR(U8 spiPort, U32 interruptFlags)
 				// -------------------------------- //
 
 				// Select the Slave
-				(localCurrentSlavePtr->SSpinPort)[PTR_REG_OFFSET_CLR] = localCurrentSlavePtr->SSpinMask;
+				(localCurrentSlavePtr->SSpinPort)[REG_OFFSET_CLR_32] = localCurrentSlavePtr->SSpinMask;
 
 				// Move to transfer
 				spiFSMState[spiPort] = SPIStransfer;
@@ -327,8 +327,8 @@ tSPIConfig spiGetConfig(U8 spiPort)
 * \fn		U8 spiStart(U8 spiPort)
 * @brief	Configure and start the selected SPI with it's corresponding config.
 * @note		If any error occur during the starting, will shutdown the specified SPI port and return the error code
-*			This function assume multi-vectored interrupt is enable and the ISR is correctly set in the main project file
-* @arg		U8 spiPort						Hardware SPI ID
+*		This function assume multi-vectored interrupt is enable and the ISR is correctly set in the main project file
+* @arg		U8 spiPort					Hardware SPI ID
 * @return	U8 errorCode					STD Error Code (return STD_EC_SUCCESS if successful)
 */
 U8 spiStart(U8 spiPort)
@@ -483,7 +483,7 @@ tSPISlaveControl * spiAddSlave(U8 spiPort, volatile U32 * SSpinPortPtr, U16 SSpi
 		// --------------- //
 
 		// -- Reset SSpin to a known state -- //
-		SSpinPortPtr[PTR_REG_OFFSET_SET] = SSpinPortMask;			//High is the idle state for a SSpin
+		SSpinPortPtr[REG_OFFSET_SET_32] = SSpinPortMask;	//High is the idle state for a SSpin
 		// ---------------------------------- //
 
 		// -- Init the slave -- //
@@ -511,12 +511,12 @@ U8 spiDelSlave(tSPISlaveControl * slavePtr)
 		slavePtr->control.lock = SPI_SLAVE_LOCKED;
 
 		// -- Set SSpin to a known state -- //
-		slavePtr->SSpinPort[PTR_REG_OFFSET_SET] = slavePtr->SSpinMask;	//High is the idle state for a SSpin
+		slavePtr->SSpinPort[REG_OFFSET_SET_32] = slavePtr->SSpinMask;	//High is the idle state for a SSpin
 		// -------------------------------- //
 
 		// -- Delete the information -- //
 		free(slavePtr);
-		heapAvailable += sizeof(tSPISlaveControl);						//Count the unallocated ram
+		heapAvailable += sizeof(tSPISlaveControl);		//Count the unallocated ram
 		// ---------------------------- //
 		return STD_EC_SUCCESS;
 	}

@@ -275,8 +275,6 @@ tUARTConfig uartGetConfig(U8 uartPort);
 * @note		No sanity check of the settings
 *		Return STD_EC_NOTFOUND if invalid UART HW ID is given.
 *		Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL, 9600))
-*		This function enable the corresponding interrupt, but priority must be set in the main
-*		and multi-vectored interrupt mode enabled
 * @arg		U8 uartPort			Hardware UART ID
 * @arg		U32 option			Setting to configure for the UART
 * @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)

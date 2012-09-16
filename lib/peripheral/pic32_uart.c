@@ -198,8 +198,6 @@ tUARTConfig uartGetConfig(U8 uartPort)
 * @note		No sanity check of the settings
 *		Return STD_EC_NOTFOUND if invalid UART HW ID is given.
 *		Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL, 9600))
-*		This function enable the corresponding interrupt, but priority must be set in the main
-*		and multi-vectored interrupt mode enabled
 * @arg		U8 uartPort			Hardware UART ID
 * @arg		U32 option			Setting to configure for the UART
 * @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
@@ -208,7 +206,6 @@ U8 uartInit(U8 uartPort, U32 option)
 {
 	split32 splittedOption;
 	splittedOption.all = option;
-	U16 intState;
 	U8 errorCode;
 
 	// -- Select the correct UART -- //
@@ -216,23 +213,6 @@ U8 uartInit(U8 uartPort, U32 option)
 	if (errorCode == STD_EC_SUCCESS)
 	// ----------------------------- //
 	{
-		// Disable Global Interrupt
-		intState = intFastDisableGlobal();
-
-		// Enable the correct interrupt //
-		switch (uartPort)
-		{
-			case UART_1: intFastInit(INT_UART_1);	break;
-			case UART_2: intFastInit(INT_UART_2);	break;
-		#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
-			case UART_3: intFastInit(INT_UART_3);	break;
-			case UART_4: intFastInit(INT_UART_4);	break;
-			case UART_5: intFastInit(INT_UART_5);	break;
-			case UART_6: intFastInit(INT_UART_6);	break;
-		#endif
-		}
-		// ---------------------------- //
-
 		// -- Init the buffer -- //
 		uartRxBuf[uartPort] = rBufCreate(UART_BUF_SIZE,sizeof(U8));
 		if (uartRxBuf[uartPort] == NULL)
@@ -266,9 +246,6 @@ U8 uartInit(U8 uartPort, U32 option)
 		pUxSTA->URXEN = 1;					//Start the receiver
 		pUxMODE->ON = 1;
 		// -------------------- //
-
-		// Restore Interrupt state
-		intFastRestoreGlobal(intState);
 	}
 
 	return errorCode;
