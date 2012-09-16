@@ -67,24 +67,6 @@
 // ############################################## //
 
 
-// ################# Datatype ################### //
-typedef enum
-{
-	CP0E_interrupt = 0,
-	CP0E_addressLoadFetch = 4,
-	CP0E_addressStore = 5,
-	CP0E_busFetch = 6,
-	CP0E_busLoadStore = 7,
-	CP0E_syscall = 8,
-	CP0E_breakPoint = 9,
-	CP0E_reserveInstruction = 10,
-	CP0E_coProcessorUnusable = 11,
-	CP0E_arithmeticOverflow = 12,
-	CP0E_trap = 13
-}tCP0Error;
-// ############################################## //
-
-
 // ################### Define ################### //
 // -- Vector Number -- //
 #if CPU_FAMILY == PIC32MX1xx || CPU_FAMILY == PIC32MX2xx
@@ -336,6 +318,22 @@ typedef enum
 
 
 // ################# Data Type ################## //
+// CP0 Error Type
+typedef enum
+{
+	CP0E_interrupt = 0,
+	CP0E_addressLoadFetch = 4,
+	CP0E_addressStore = 5,
+	CP0E_busFetch = 6,
+	CP0E_busLoadStore = 7,
+	CP0E_syscall = 8,
+	CP0E_breakPoint = 9,
+	CP0E_reserveInstruction = 10,
+	CP0E_coProcessorUnusable = 11,
+	CP0E_arithmeticOverflow = 12,
+	CP0E_trap = 13
+}tCP0Error;
+
 // -- IRQ Number -- //
 #if CPU_FAMILY == PIC32MX1xx || CPU_FAMILY == PIC32MX2xx
 typedef enum
@@ -573,7 +571,12 @@ typedef enum
 // ############################################## //
 
 
-// ############# Interrupts Functions ########### //
+// ################# Prototypes ################# //
+
+// ############################################## //
+
+
+// ################# Fast Macro ################# //
 /**
 * \fn		intFastEnableGlobal()
 * @brief	Macro to enable the global interrupt Enable
@@ -650,7 +653,7 @@ typedef enum
 * \fn		intFastGetState(intSource)
 * @brief	Macro to return the actual enable state of a designated interrupt source
 * @note		Use Interrupt source list for intSource
-*			The return value is aligned to bit0 not to the corresponding mask
+*		The return value is aligned to bit0 not to the corresponding mask
 * @arg		intSource			The name of the interrupt source to return
 * @return	U32 intState			interrupt source enable state (1: Enabled | 0: Disabled )
 */
@@ -743,12 +746,98 @@ typedef enum
 */
 #define intFastClearFlag(intSource)			((CONCAT3(IFS,CONCAT(_REG_,intSource),CLR)) = (CONCAT(_MASK_,intSource)))
 
+// ############################################## //
+
+
+
+
+// ############# Interrupts Functions ########### //
+/**
+* \fn		void intInit(intIRQSource)
+* @brief	Initialize an interrupt
+* @note		Will clear it's flag prior to enabling it
+* @arg		tIntIRQ intIRQSource		Which interrupt to init
+* @return	nothing
+*/
+#define intInit(intIRQSource)				_intSetReg(&IFS0,intIRQSource,DISABLE); _intSetReg(&IEC0,intIRQSource,ENABLE)
+
+/**
+* \fn		void intSetState(intIRQSource, state)
+* @brief	Set the state of a specific interrupt
+* @note		Use tIntIRQ to know which interrupt is available
+*		Use ENABLE or DISABLE for $state
+* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @arg		U8 state			State to set the interrupt
+* @return	nothing
+*/
+#define intSetState(intIRQSource, state)		_intSetReg(&IEC0,intIRQSource,state)
+
+/**
+* \fn		void intGetState(intIRQSource, state)
+* @brief	Get the state of a specific interrupt
+* @note		Use tIntIRQ to know which interrupt is available
+*		The state is return as ENABLE or DISABLE
+* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @return	U8 state			State of the interrupt
+*/
+#define intGetState(intIRQSource)			_intGetReg(&IEC0,intIRQSource)
+
+/**
+* \fn		void intSetFlag(intIRQSource, state)
+* @brief	Set the state of the flag of a specific interrupt
+* @note		Use tIntIRQ to know which interrupt is available
+*		Use ENABLE or DISABLE for $state
+* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @arg		U8 state			State to set the flag
+* @return	nothing
+*/
+#define intSetFlag(intIRQSource, state)			_intSetReg(&IFS0,intIRQSource,state)
+
+/**
+* \fn		void intGetFlag(intIRQSource, state)
+* @brief	Get the state of the flag of a specific interrupt
+* @note		Use tIntIRQ to know which interrupt is available
+*		The state is return as ENABLE or DISABLE
+* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @return	U8 state			State of the flag
+*/
+#define intGetFlag(intIRQSource)			_intGetReg(&IFS0,intIRQSource)
+
+/**
+* \fn		void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl)
+* @brief	Set the priority and the sub-priority of an interrupt
+* @note
+* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @arg		U8 priorityLvl			Level of priority for the interrupt
+ * @arg		U8 subPriorityLvl		Level of sub-priority for the interrupt
+* @return	nothing
+*/
+void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl);
+
+/**
+* \fn		U8 intGetPriority(tIntIRQ intIRQSource)
+* @brief	Return the priority level of an interrupt
+* @note
+* @arg		tIntIRQ intIRQSource		Which interrupt to get
+* @return	U8 priorityLvl			Level of priority of the interrupt
+*/
+U8 intGetPriority(tIntIRQ intIRQSource);
+
+/**
+* \fn		U8 intGetSubPriority(tIntIRQ intIRQSource)
+* @brief	Return the sub-priority level of an interrupt
+* @note
+* @arg		tIntIRQ intIRQSource		Which interrupt to get
+* @return	U8 subPriorityLvl		Level of sub-priority of the interrupt
+*/
+U8 intGetSubPriority(tIntIRQ intIRQSource);
+
 /**
 * \fn		void intSetExternalEdge(U8 intSource, U8 edgeDirection)
-* @brief	Set the specified external interrupt source to trigger on a specified edge direction
+* @brief	Set the specified external interrupt source to trigger on a specific edge transition
 * @note		Use the tIntIRQ type to select the correct interrupt source
 * @arg		tIntIRQ intIRQSource		The external interrupt to configure
-* @arg		U8 edgeDirection		The edge direction to select
+* @arg		U8 edgeDirection		The edge transition to select
 * @return	nothing
 */
 void intSetExternalEdge(tIntIRQ intIRQSource, U8 edgeDirection);
@@ -1637,7 +1726,7 @@ void _general_exception_handler(void);
 	#define _POS_INT_I2C_2					_POS_INT_I2C_2_COL
 
 #elif CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx
-//Individual mask
+//Individual positions
 	#define _POS_INT_CORE_TIMER				0
 	#define _POS_INT_CORE_SOFT_0				1
 	#define _POS_INT_CORE_SOFT_1				2
@@ -1901,7 +1990,7 @@ void _general_exception_handler(void);
 	#define _REG_INT_I2C_2					1
 
 #elif CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx
-//Individual positions
+//Individual registers
 	#define _REG_INT_CORE_TIMER				0
 	#define _REG_INT_CORE_SOFT_0				0
 	#define _REG_INT_CORE_SOFT_1				0
@@ -1957,7 +2046,7 @@ void _general_exception_handler(void);
 	#define _REG_INT_FLASH_CONTROL_EVENT			1
 	#define _REG_INT_USB					1
 
-//Group positions
+//Group registers
 	#define _REG_INT_TIMER_23				_REG_INT_TIMER_2
 	#define _REG_INT_TIMER_45				_REG_INT_TIMER_4
 	#define _REG_INT_UART_1					_REG_INT_UART_1_ERR
@@ -1968,7 +2057,7 @@ void _general_exception_handler(void);
 	#define _REG_INT_I2C_2					_REG_INT_I2C_2_COL
 
 #elif CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
-//Individual positions
+//Individual registers
 	#define _REG_INT_CORE_TIMER				0
 	#define _REG_INT_CORE_SOFT_0				0
 	#define _REG_INT_CORE_SOFT_1				0
@@ -2064,7 +2153,7 @@ void _general_exception_handler(void);
 	#define _REG_INT_UART_5_RX				2
 	#define _REG_INT_UART_5_TX				2
 
-//Group positions
+//Group registers
 	#define _REG_INT_TIMER_23				_REG_INT_TIMER_2
 	#define _REG_INT_TIMER_45				_REG_INT_TIMER_4
 	#define _REG_INT_UART_1					_REG_INT_UART_1_ERR

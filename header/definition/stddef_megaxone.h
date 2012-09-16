@@ -29,14 +29,17 @@
 	#define REG_OFFSET_CLR_32	0x1
 	#define REG_OFFSET_SET_32	0x2
 	#define REG_OFFSET_INV_32	0x3
+	#define REG_OFFSET_NEXT_32	0x4
 
 	#define REG_OFFSET_CLR_16	0x2
 	#define REG_OFFSET_SET_16	0x4
 	#define REG_OFFSET_INV_16	0x6
+	#define REG_OFFSET_NEXT_16	0x8
 
 	#define REG_OFFSET_CLR_8	0x4
 	#define REG_OFFSET_SET_8	0x8
 	#define REG_OFFSET_INV_8	0xC
+	#define REG_OFFSET_NEXT_8	0x10
 #endif
 // ############################################## //
 

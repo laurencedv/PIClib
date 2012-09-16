@@ -18,6 +18,11 @@
 #include <definition/datatype_megaxone.h>
 #include <definition/stddef_megaxone.h>
 
+// Lib
+//#include <peripheral/pic32_spi.h>
+//#include <peripheral/pic32_uart.h>
+//#include <peripheral/pic32_timer.h>
+
 // Dev Macro
 #include <tool/bitmanip_megaxone.h>
 
