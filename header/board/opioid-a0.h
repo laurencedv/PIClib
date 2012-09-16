@@ -1,17 +1,17 @@
 /*!
  @file		uOpioid-revB0.h
- @brief		Hardware definition file for the Opioid rev.A0 node
+ @brief		Hardware definition file for the Opioid A0 node
  
  @version	0.1
- @note		This file define each generic pin available on the Opioid rev.A0 and
- 			include all specific definition for different EXT or COM wings
+ @note		This file define each generic pin available on the Opioid revision A0 and
+ 		include all specific definition for different EXT or COM wings
 
  @date		May 14th 2011
  @author	Laurence DV
 */
 
-#ifndef _OPIOID_REVA0_H
-#define _OPIOID_REVA0_H 1
+#ifndef _OPIOID_A0_H
+#define _OPIOID_A0_H 1
 
 // ################## Includes ################## //
 // Definition
@@ -19,6 +19,7 @@
 #include <definition/stddef_megaxone.h>
 
 // Lib
+//#include <peripheral/pic32_interrupt.h>
 //#include <peripheral/pic32_spi.h>
 //#include <peripheral/pic32_uart.h>
 //#include <peripheral/pic32_timer.h>
@@ -34,6 +35,22 @@
 
 
 // ################## Defines ################### //
+// --- Peripheral mapping --- //
+#define COM0_UART_ID		UART_1
+#define COM0_SPI_ID		SPI_1
+#define COM0_TIMER_ID		TIMER_4
+#define COM1_UART_ID		UART_4
+#define COM1_SPI_ID		SPI_4
+#define COM1_TIMER_ID		TIMER_5
+
+#define EXT0_UART_ID		UART_3
+#define EXT1_UART_ID		UART_6
+
+#define LED_R_OC_ID		OC_2
+#define LED_G_OC_ID		OC_3
+#define LED_B_OC_ID		OC_4
+// -------------------------- //
+
 // --- Basic peripherals --- //
 #define LED_B			BIT3		//OC4 - D3
 #define LED_B_PORT		D
@@ -117,64 +134,54 @@
 // --- Interrupt mapping --- //
 #define COM0_SPI_VECTOR		INT_VEC_SPI_1
 #define COM0_SPI_INT_ID		INT_SPI_1
-#define COM0_SPI_INT_IRQ	INT_IRQ_SPI_1
+#define COM0_SPI_INT_IRQ	IRQ_SPI_1
 #define COM0_IRQ0_VECTOR	INT_VEC_INPUT_CHANGE
 #define COM0_IRQ0_INT_ID	INT_INPUT_CHANGE
-#define COM0_IRQ0_INT_IRQ	INT_IRQ_INPUT_CHANGE
+#define COM0_IRQ0_INT_IRQ	IRQ_INPUT_CHANGE
 #define COM0_IRQ1_VECTOR	INT_VEC_INPUT_CHANGE
 #define COM0_IRQ1_INT_ID	INT_INPUT_CHANGE
-#define COM0_IRQ1_INT_IRQ	INT_IRQ_INPUT_CHANGE
+#define COM0_IRQ1_INT_IRQ	IRQ_INPUT_CHANGE
 #define COM0_UART_VECTOR	INT_VEC_UART_1
 #define COM0_UART_INT_ID	INT_UART_1
-#define COM0_UART_INT_IRQ	INT_IRQ_UART_1
+#define COM0_UART_INT_IRQ	IRQ_UART_1
+#define COM0_TIMER_VECTOR	INT_VEC_TIMER_4
+#define COM0_TIMER_INT_ID	INT_TIMER_4
+#define COM0_TIMER_INT_IRQ	IRQ_TIMER_4
 
 #define COM1_SPI_VECTOR		INT_VEC_SPI_4
 #define COM1_SPI_INT_ID		INT_SPI_4
-#define COM1_SPI_INT_IRQ	INT_IRQ_SPI_4
+#define COM1_SPI_INT_IRQ	IRQ_SPI_4
 #define COM1_IRQ0_VECTOR	INT_VEC_INPUT_CHANGE
 #define COM1_IRQ0_INT_ID	INT_INPUT_CHANGE
-#define COM1_IRQ0_INT_IRQ	INT_IRQ_INPUT_CHANGE
+#define COM1_IRQ0_INT_IRQ	IRQ_INPUT_CHANGE
 #define COM1_IRQ1_VECTOR	INT_VEC_INPUT_CHANGE
 #define COM1_IRQ1_INT_ID	INT_INPUT_CHANGE
-#define COM1_IRQ1_INT_IRQ	INT_IRQ_INPUT_CHANGE
+#define COM1_IRQ1_INT_IRQ	IRQ_INPUT_CHANGE
 #define COM1_UART_VECTOR	INT_VEC_UART_4
 #define COM1_UART_INT_ID	INT_UART_4
-#define COM1_UART_INT_IRQ	INT_IRQ_UART_4
+#define COM1_UART_INT_IRQ	IRQ_UART_4
+#define COM1_TIMER_VECTOR	INT_VEC_TIMER_5
+#define COM1_TIMER_INT_ID	INT_TIMER_5
+#define COM1_TIMER_INT_IRQ	IRQ_TIMER_5
 
 #define EXT0_IRQ_VECTOR		INT_VEC_EXT_INT_1
 #define EXT0_IRQ_INT_ID		INT_EXT_INT_1
-#define EXT0_IRQ_INT_IRQ	INT_IRQ_EXT_INT_1
+#define EXT0_IRQ_INT_IRQ	IRQ_EXT_INT_1
 #define EXT0_UART_VECTOR	INT_VEC_UART_3
 #define EXT0_UART_INT_ID	INT_UART_3
-#define EXT0_UART_INT_IRQ	INT_IRQ_UART_3
+#define EXT0_UART_INT_IRQ	IRQ_UART_3
 
 #define EXT1_IRQ_VECTOR		INT_VEC_EXT_INT_2
 #define EXT1_IRQ_INT_ID		INT_EXT_INT_2
-#define EXT1_IRQ_INT_IRQ	INT_IRQ_EXT_INT_2
+#define EXT1_IRQ_INT_IRQ	IRQ_EXT_INT_2
 #define EXT1_UART_VECTOR	INT_VEC_UART_6
 #define EXT1_UART_INT_ID	INT_UART_6
-#define EXT1_UART_INT_IRQ	INT_IRQ_UART_6
+#define EXT1_UART_INT_IRQ	IRQ_UART_6
 
 #define BTN_VECTOR		INT_VEC_EXT_INT_3
 #define BTN_INT_ID		INT_EXT_INT_3
-#define BTN_INT_IRQ		INT_IRQ_EXT_INT_3
+#define BTN_INT_IRQ		IRQ_EXT_INT_3
 // ------------------------- //
-
-// --- Peripheral mapping --- //
-#define COM0_UART_ID		UART_1
-#define COM0_SPI_ID		SPI_1
-#define COM0_TIMER_ID		TIMER_4
-#define COM1_UART_ID		UART_4
-#define COM1_SPI_ID		SPI_4
-#define COM1_TIMER_ID		TIMER_5
-
-#define EXT0_UART_ID		UART_3
-#define EXT1_UART_ID		UART_6
-
-#define LED_R_OC_ID		OC_2
-#define LED_G_OC_ID		OC_3
-#define LED_B_OC_ID		OC_4
-// -------------------------- //
 
 // --- OpIUM Layer Mapping --- //
 #define COM_WING_NB		2
@@ -182,5 +189,6 @@
 // --------------------------- //
 
 // ############################################## //
+
 
 #endif

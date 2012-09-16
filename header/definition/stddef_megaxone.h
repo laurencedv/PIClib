@@ -2,10 +2,10 @@
  @file		stddef_megaxone.h
  @brief		Standard syntax definition and macro
 
- @version	0.3.3
+ @version	0.3.4
  @note
 
- @date		August 4th 2012
+ @date		September 15th 2012
  @author	Laurence DV
 */
 
@@ -18,7 +18,7 @@
 
 
 // ############ Developpement Macro ############# //
-#define CONCAT(a,b)			XCONCAT(a,b)
+#define CONCAT(a,b)		XCONCAT(a,b)
 #define	CONCAT3(a,b,c)		(CONCAT(CONCAT(a,b),c))
 #define XCONCAT(a,b)		a ## b
 // ############################################## //

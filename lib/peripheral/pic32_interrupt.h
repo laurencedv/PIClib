@@ -2,16 +2,14 @@
  @file		pic32_interrupts.h
  @brief		Interrupt lib for pic32
 
- @version	0.2.2
+ @version	0.3.0
  @note		Use the name in the Interrupts Source List to access an interrupt with any macro
 		Use the Vector number in the _ISR Macro wherever you want
-		Use the IRQ only with the run-time functions (not done yet)
- @todo		Run-time functions
-		Init functions
-		Test usefulness and exactness of IRQ number for group selection (only pic32mx1xx and 2xx for now)
+		Use the IRQ only with the run-time functions
+ @todo		Test usefulness and exactness of IRQ number for group selection (only pic32mx1xx and 2xx for now)
 
- @date		May 30th 2012
- @author	Jonathan LL && Laurence DV
+ @date		September 15th 2012
+ @author	Laurence DV
 */
 
 
@@ -338,233 +336,260 @@ typedef enum
 #if CPU_FAMILY == PIC32MX1xx || CPU_FAMILY == PIC32MX2xx
 typedef enum
 {
-	INT_IRQ_CORE_TIMER = 0,
-	INT_IRQ_CORE_SOFT_0 = 1,
-	INT_IRQ_CORE_SOFT_1 = 2,
-	INT_IRQ_EXT_INT_0 = 3,
-	INT_IRQ_TIMER_1 = 4,
-	INT_IRQ_INPUT_CAPTURE_1_ERR = 5,
-	INT_IRQ_INPUT_CAPTURE_1 = 6,
-	INT_IRQ_OUTPUT_COMPARE_1 = 7,
-	INT_IRQ_EXT_INT_1 = 8,
-	INT_IRQ_TIMER_2 = 9,
-	INT_IRQ_INPUT_CAPTURE_2_ERR = 10,
-	INT_IRQ_INPUT_CAPTURE_2 = 11,
-	INT_IRQ_OUTPUT_COMPARE_2 = 12,
-	INT_IRQ_EXT_INT_2 = 13,
-	INT_IRQ_TIMER_3 = 14,
-	INT_IRQ_INPUT_CAPTURE_3_ERR = 15,
-	INT_IRQ_INPUT_CAPTURE_3 = 16,
-	INT_IRQ_OUTPUT_COMPARE_3 = 17,
-	INT_IRQ_EXT_INT_3 = 18,
-	INT_IRQ_TIMER_4 = 19,
-	INT_IRQ_INPUT_CAPTURE_4_ERR = 20,
-	INT_IRQ_INPUT_CAPTURE_4 = 21,
-	INT_IRQ_OUTPUT_COMPARE_4 = 22,
-	INT_IRQ_EXT_INT_4 = 23,
-	INT_IRQ_TIMER_5 = 24,
-	INT_IRQ_INPUT_CAPTURE_5_ERR = 25,
-	INT_IRQ_INPUT_CAPTURE_5 = 26,
-	INT_IRQ_OUTPUT_COMPARE_5 = 27,
-	INT_IRQ_ADC_1 = 28,
-	INT_IRQ_FAIL_SAFE_CLOCK_MON = 29,
-	INT_IRQ_RTCC = 30,
-	INT_IRQ_FLASH_CONTROL_EVENT = 31,
-	INT_IRQ_COMPARATOR_1 = 32,
-	INT_IRQ_COMPARATOR_2 = 33,
-	INT_IRQ_COMPARATOR_3 = 34,
-	INT_IRQ_USB = 35,
-	INT_IRQ_SPI_1 = 36,
-	INT_IRQ_SPI_1_ERR = 36,
-	INT_IRQ_SPI_1_RX = 37,
-	INT_IRQ_SPI_1_TX = 38,
-	INT_IRQ_UART_1 = 39,
-	INT_IRQ_UART_1_ERR = 39,
-	INT_IRQ_UART_1_RX = 40,
-	INT_IRQ_UART_1_TX = 41,
-	INT_IRQ_I2C_1 = 42,
-	INT_IRQ_I2C_1_COL = 42,
-	INT_IRQ_I2C_1_SLAVE = 43,
-	INT_IRQ_I2C_1_MASTER = 44,
-	INT_IRQ_INPUT_CHANGE = 45,
-	INT_IRQ_INPUT_CHANGE_PORT_A = 45,
-	INT_IRQ_INPUT_CHANGE_PORT_B = 46,
-	INT_IRQ_INPUT_CHANGE_PORT_C = 47,
-	INT_IRQ_PMP = 48,
-	INT_IRQ_PMP_ERR = 49,
-	INT_IRQ_SPI_2 = 50,
-	INT_IRQ_SPI_2_ERR = 50,
-	INT_IRQ_SPI_2_RX = 51,
-	INT_IRQ_SPI_2_TX = 52,
-	INT_IRQ_UART_2 = 53,
-	INT_IRQ_UART_2_ERR = 53,
-	INT_IRQ_UART_2_RX = 54,
-	INT_IRQ_UART_2_TX = 55,
-	INT_IRQ_I2C_2 = 56,
-	INT_IRQ_I2C_2_COL = 56,
-	INT_IRQ_I2C_2_SLAVE = 57,
-	INT_IRQ_I2C_2_MASTER = 58,
-	INT_IRQ_CTMU = 59,
-	INT_IRQ_DMA_0 = 60,
-	INT_IRQ_DMA_1 = 61,
-	INT_IRQ_DMA_2 = 62,
-	INT_IRQ_DMA_3 = 63
+	IRQ_CORE_TIMER = 0,
+	IRQ_CORE_SOFT_0 = 1,
+	IRQ_CORE_SOFT_1 = 2,
+	IRQ_EXT_INT_0 = 3,
+	IRQ_TIMER_1 = 4,
+	IRQ_INPUT_CAPTURE_1_ERR = 5,
+	IRQ_INPUT_CAPTURE_1 = 6,
+	IRQ_OUTPUT_COMPARE_1 = 7,
+	IRQ_EXT_INT_1 = 8,
+	IRQ_TIMER_2 = 9,
+	IRQ_TIMER_23 = 0x89,
+	IRQ_INPUT_CAPTURE_2_ERR = 10,
+	IRQ_INPUT_CAPTURE_2 = 11,
+	IRQ_OUTPUT_COMPARE_2 = 12,
+	IRQ_EXT_INT_2 = 13,
+	IRQ_TIMER_3 = 14,
+	IRQ_INPUT_CAPTURE_3_ERR = 15,
+	IRQ_INPUT_CAPTURE_3 = 16,
+	IRQ_OUTPUT_COMPARE_3 = 17,
+	IRQ_EXT_INT_3 = 18,
+	IRQ_TIMER_4 = 19,
+	IRQ_TIMER_45 = 0x93,
+	IRQ_INPUT_CAPTURE_4_ERR = 20,
+	IRQ_INPUT_CAPTURE_4 = 21,
+	IRQ_OUTPUT_COMPARE_4 = 22,
+	IRQ_EXT_INT_4 = 23,
+	IRQ_TIMER_5 = 24,
+	IRQ_INPUT_CAPTURE_5_ERR = 25,
+	IRQ_INPUT_CAPTURE_5 = 26,
+	IRQ_OUTPUT_COMPARE_5 = 27,
+	IRQ_ADC_1 = 28,
+	IRQ_FAIL_SAFE_CLOCK_MON = 29,
+	IRQ_RTCC = 30,
+	IRQ_FLASH_CONTROL_EVENT = 31,
+	IRQ_COMPARATOR_1 = 32,
+	IRQ_COMPARATOR_2 = 33,
+	IRQ_COMPARATOR_3 = 34,
+	IRQ_USB = 35,
+	IRQ_SPI_1_ERR = 36,
+	IRQ_SPI_1_RX = 37,
+	IRQ_SPI_1_TX = 38,
+	IRQ_SPI_1 = 0xA4,
+	IRQ_UART_1_ERR = 39,
+	IRQ_UART_1_RX = 40,
+	IRQ_UART_1_TX = 41,
+	IRQ_UART_1 = 0xA7,
+	IRQ_I2C_1_COL = 42,
+	IRQ_I2C_1_SLAVE = 43,
+	IRQ_I2C_1_MASTER = 44,
+	IRQ_I2C_1 = 0xAA,
+	IRQ_INPUT_CHANGE_PORT_A = 45,
+	IRQ_INPUT_CHANGE_PORT_B = 46,
+	IRQ_INPUT_CHANGE_PORT_C = 47,
+	IRQ_INPUT_CHANGE = 0xAD,
+	IRQ_PMP = 48,
+	IRQ_PMP_ERR = 49,
+	IRQ_SPI_2_ERR = 50,
+	IRQ_SPI_2_RX = 51,
+	IRQ_SPI_2_TX = 52,
+	IRQ_SPI_2 = 0xB2,
+	IRQ_UART_2_ERR = 53,
+	IRQ_UART_2_RX = 54,
+	IRQ_UART_2_TX = 55,
+	IRQ_UART_2 = 0xB5,
+	IRQ_I2C_2_COL = 56,
+	IRQ_I2C_2_SLAVE = 57,
+	IRQ_I2C_2_MASTER = 58,
+	IRQ_I2C_2 = 50xB8,
+	IRQ_CTMU = 59,
+	IRQ_DMA_0 = 60,
+	IRQ_DMA_1 = 61,
+	IRQ_DMA_2 = 62,
+	IRQ_DMA_3 = 63
 }tIntIRQ;
 #elif CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx
 typedef enum
 {
-	INT_IRQ_CORE_TIMER = 0,
-	INT_IRQ_CORE_SOFT_0 = 1,
-	INT_IRQ_CORE_SOFT_1 = 2,
-	INT_IRQ_EXT_INT_0 = 3,
-	INT_IRQ_TIMER_1 = 4,
-	INT_IRQ_INPUT_CAPTURE_1 = 5,
-	INT_IRQ_OUTPUT_COMPARE_1 = 6,
-	INT_IRQ_EXT_INT_1 = 7,
-	INT_IRQ_TIMER_2 = 8,
-	INT_IRQ_INPUT_CAPTURE_2 = 9,
-	INT_IRQ_OUTPUT_COMPARE_2 = 10,
-	INT_IRQ_EXT_INT_2 = 11,
-	INT_IRQ_TIMER_3 = 12,
-	INT_IRQ_INPUT_CAPTURE_3 = 13,
-	INT_IRQ_OUTPUT_COMPARE_3 = 14,
-	INT_IRQ_EXT_INT_3 = 15,
-	INT_IRQ_TIMER_4 = 16,
-	INT_IRQ_INPUT_CAPTURE_4 = 17,
-	INT_IRQ_OUTPUT_COMPARE_4 = 18,
-	INT_IRQ_EXT_INT_4 = 19,
-	INT_IRQ_TIMER_5 = 20,
-	INT_IRQ_INPUT_CAPTURE_5 = 21,
-	INT_IRQ_OUTPUT_COMPARE_5 = 22,
-	INT_IRQ_SPI_1_ERR = 23,
-	INT_IRQ_SPI_1_RX = 24,
-	INT_IRQ_SPI_1_TX = 25,
-	INT_IRQ_UART_1_ERR = 26,
-	INT_IRQ_UART_1_RX = 27,
-	INT_IRQ_UART_1_TX = 28,
-	INT_IRQ_I2C_1_COL = 29,
-	INT_IRQ_I2C_1_SLAVE = 30,
-	INT_IRQ_I2C_1_MASTER = 31,
-	INT_IRQ_INPUT_CHANGE = 32,
-	INT_IRQ_ADC_1 = 33,
-	INT_IRQ_PMP = 34,
-	INT_IRQ_COMPARATOR_1 = 35,
-	INT_IRQ_COMPARATOR_2 = 36,
-	INT_IRQ_SPI_2_ERR = 37,
-	INT_IRQ_SPI_2_RX = 38,
-	INT_IRQ_SPI_2_TX = 39,
-	INT_IRQ_UART_2_ERR = 40,
-	INT_IRQ_UART_2_RX = 41,
-	INT_IRQ_UART_2_TX = 42,
-	INT_IRQ_I2C_2_COL = 43,
-	INT_IRQ_I2C_2_SLAVE = 44,
-	INT_IRQ_I2C_2_MASTER = 45,
-	INT_IRQ_FAIL_SAFE_CLOCK_MON = 46,
-	INT_IRQ_RTCC = 47,
-	INT_IRQ_DMA_0 = 48,
-	INT_IRQ_DMA_1 = 49,
-	INT_IRQ_DMA_2 = 50,
-	INT_IRQ_DMA_3 = 51,
-	INT_IRQ_FLASH_CONTROL_EVENT = 56,
-	INT_IRQ_USB = 57
+	IRQ_CORE_TIMER = 0,
+	IRQ_CORE_SOFT_0 = 1,
+	IRQ_CORE_SOFT_1 = 2,
+	IRQ_EXT_INT_0 = 3,
+	IRQ_TIMER_1 = 4,
+	IRQ_INPUT_CAPTURE_1 = 5,
+	IRQ_OUTPUT_COMPARE_1 = 6,
+	IRQ_EXT_INT_1 = 7,
+	IRQ_TIMER_2 = 8,
+	IRQ_TIMER_23 = 0x88,
+	IRQ_INPUT_CAPTURE_2 = 9,
+	IRQ_OUTPUT_COMPARE_2 = 10,
+	IRQ_EXT_INT_2 = 11,
+	IRQ_TIMER_3 = 12,
+	IRQ_INPUT_CAPTURE_3 = 13,
+	IRQ_OUTPUT_COMPARE_3 = 14,
+	IRQ_EXT_INT_3 = 15,
+	IRQ_TIMER_4 = 16,
+	IRQ_TIMER_45 = 0x90,
+	IRQ_INPUT_CAPTURE_4 = 17,
+	IRQ_OUTPUT_COMPARE_4 = 18,
+	IRQ_EXT_INT_4 = 19,
+	IRQ_TIMER_5 = 20,
+	IRQ_INPUT_CAPTURE_5 = 21,
+	IRQ_OUTPUT_COMPARE_5 = 22,
+	IRQ_SPI_1_ERR = 23,
+	IRQ_SPI_1_RX = 24,
+	IRQ_SPI_1_TX = 25,
+	IRQ_SPI_1 = 0x97,
+	IRQ_UART_1_ERR = 26,
+	IRQ_UART_1_RX = 27,
+	IRQ_UART_1_TX = 28,
+	IRQ_UART_1 = 0x9A,
+	IRQ_I2C_1_COL = 29,
+	IRQ_I2C_1_SLAVE = 30,
+	IRQ_I2C_1_MASTER = 31,
+	IRQ_I2C_1 = 0x9D,
+	IRQ_INPUT_CHANGE = 32,
+	IRQ_ADC_1 = 33,
+	IRQ_PMP = 34,
+	IRQ_COMPARATOR_1 = 35,
+	IRQ_COMPARATOR_2 = 36,
+	IRQ_SPI_2_ERR = 37,
+	IRQ_SPI_2_RX = 38,
+	IRQ_SPI_2_TX = 39,
+	IRQ_SPI_2 = 0xA5,
+	IRQ_UART_2_ERR = 40,
+	IRQ_UART_2_RX = 41,
+	IRQ_UART_2_TX = 42,
+	IRQ_UART_2 = 0xA8,
+	IRQ_I2C_2_COL = 43,
+	IRQ_I2C_2_SLAVE = 44,
+	IRQ_I2C_2_MASTER = 45,
+	IRQ_I2C_2 = 0xAB,
+	IRQ_FAIL_SAFE_CLOCK_MON = 46,
+	IRQ_RTCC = 47,
+	IRQ_DMA_0 = 48,
+	IRQ_DMA_1 = 49,
+	IRQ_DMA_2 = 50,
+	IRQ_DMA_3 = 51,
+	IRQ_FLASH_CONTROL_EVENT = 56,
+	IRQ_USB = 57
 }tIntIRQ;
 #elif CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 typedef enum
 {
-	INT_IRQ_CORE_TIMER = 0,
-	INT_IRQ_CORE_SOFT_0 = 1,
-	INT_IRQ_CORE_SOFT_1 = 2,
-	INT_IRQ_EXT_INT_0 = 3,
-	INT_IRQ_TIMER_1 = 4,
-	INT_IRQ_INPUT_CAPTURE_1 = 5,
-	INT_IRQ_OUTPUT_COMPARE_1 = 6,
-	INT_IRQ_EXT_INT_1 = 7,
-	INT_IRQ_TIMER_2 = 8,
-	INT_IRQ_INPUT_CAPTURE_2 = 9,
-	INT_IRQ_OUTPUT_COMPARE_2 = 10,
-	INT_IRQ_EXT_INT_2 = 11,
-	INT_IRQ_TIMER_3 = 12,
-	INT_IRQ_INPUT_CAPTURE_3 = 13,
-	INT_IRQ_OUTPUT_COMPARE_3 = 14,
-	INT_IRQ_EXT_INT_3 = 15,
-	INT_IRQ_TIMER_4 = 16,
-	INT_IRQ_INPUT_CAPTURE_4 = 17,
-	INT_IRQ_OUTPUT_COMPARE_4 = 18,
-	INT_IRQ_EXT_INT_4 = 19,
-	INT_IRQ_TIMER_5 = 20,
-	INT_IRQ_INPUT_CAPTURE_5 = 21,
-	INT_IRQ_OUTPUT_COMPARE_5 = 22,
-	INT_IRQ_SPI_1_ERR = 23,
-	INT_IRQ_SPI_1_RX = 24,
-	INT_IRQ_SPI_1_TX = 25,
-	INT_IRQ_UART_1_ERR = 26,
-	INT_IRQ_UART_1_RX = 27,
-	INT_IRQ_UART_1_TX = 28,
-	INT_IRQ_SPI_3_ERR = 26,
-	INT_IRQ_SPI_3_RX = 27,
-	INT_IRQ_SPI_3_TX = 28,
-	INT_IRQ_I2C_3_COL = 26,
-	INT_IRQ_I2C_3_SLAVE = 27,
-	INT_IRQ_I2C_3_MASTER = 28,
-	INT_IRQ_I2C_1_COL = 29,
-	INT_IRQ_I2C_1_SLAVE = 30,
-	INT_IRQ_I2C_1_MASTER = 31,
-	INT_IRQ_INPUT_CHANGE = 32,
-	INT_IRQ_ADC_1 = 33,
-	INT_IRQ_PMP = 34,
-	INT_IRQ_COMPARATOR_1 = 35,
-	INT_IRQ_COMPARATOR_2 = 36,
-	INT_IRQ_UART_3_ERR = 37,
-	INT_IRQ_UART_3_RX = 38,
-	INT_IRQ_UART_3_TX = 39,
-	INT_IRQ_SPI_2_ERR = 37,
-	INT_IRQ_SPI_2_RX = 38,
-	INT_IRQ_SPI_2_TX = 39,
-	INT_IRQ_I2C_4_COL = 37,
-	INT_IRQ_I2C_4_SLAVE = 38,
-	INT_IRQ_I2C_4_MASTER = 39,
-	INT_IRQ_UART_2_ERR = 40,
-	INT_IRQ_UART_2_RX = 41,
-	INT_IRQ_UART_2_TX = 42,
-	INT_IRQ_SPI_4_ERR = 40,
-	INT_IRQ_SPI_4_RX = 41,
-	INT_IRQ_SPI_4_TX = 42,
-	INT_IRQ_I2C_5_COL = 40,
-	INT_IRQ_I2C_5_SLAVE = 41,
-	INT_IRQ_I2C_5_MASTER = 42,
-	INT_IRQ_I2C_2_COL = 43,
-	INT_IRQ_I2C_2_SLAVE = 44,
-	INT_IRQ_I2C_2_MASTER = 45,
-	INT_IRQ_FAIL_SAFE_CLOCK_MON = 46,
-	INT_IRQ_RTCC = 47,
-	INT_IRQ_DMA_0 = 48,
-	INT_IRQ_DMA_1 = 49,
-	INT_IRQ_DMA_2 = 50,
-	INT_IRQ_DMA_3 = 51,
-	INT_IRQ_DMA_4 = 52,
-	INT_IRQ_DMA_5 = 53,
-	INT_IRQ_DMA_6 = 54,
-	INT_IRQ_DMA_7 = 55,
-	INT_IRQ_FLASH_CONTROL_EVENT = 56,
-	INT_IRQ_USB = 57,
-	INT_IRQ_CAN_1 = 58,
-	INT_IRQ_CAN_2 = 59,
-	INT_IRQ_ETHERNET = 60,
-	INT_IRQ_INPUT_CAPTURE_1_ERR = 61,
-	INT_IRQ_INPUT_CAPTURE_2_ERR = 62,
-	INT_IRQ_INPUT_CAPTURE_3_ERR = 63,
-	INT_IRQ_INPUT_CAPTURE_4_ERR = 64,
-	INT_IRQ_INPUT_CAPTURE_5_ERR = 65,
-	INT_IRQ_PMP_ERR = 66,
-	INT_IRQ_UART_4_ERR = 67,
-	INT_IRQ_UART_4_RX = 68,
-	INT_IRQ_UART_4_TX = 69,
-	INT_IRQ_UART_6_ERR = 70,
-	INT_IRQ_UART_6_RX = 71,
-	INT_IRQ_UART_6_TX = 72,
-	INT_IRQ_UART_5_ERR = 73,
-	INT_IRQ_UART_5_RX = 74,
-	INT_IRQ_UART_5_TX = 75
+	IRQ_CORE_TIMER = 0,
+	IRQ_CORE_SOFT_0 = 1,
+	IRQ_CORE_SOFT_1 = 2,
+	IRQ_EXT_INT_0 = 3,
+	IRQ_TIMER_1 = 4,
+	IRQ_INPUT_CAPTURE_1 = 5,
+	IRQ_OUTPUT_COMPARE_1 = 6,
+	IRQ_EXT_INT_1 = 7,
+	IRQ_TIMER_2 = 8,
+	IRQ_TIMER_23 = 0x88,
+	IRQ_INPUT_CAPTURE_2 = 9,
+	IRQ_OUTPUT_COMPARE_2 = 10,
+	IRQ_EXT_INT_2 = 11,
+	IRQ_TIMER_3 = 12,
+	IRQ_INPUT_CAPTURE_3 = 13,
+	IRQ_OUTPUT_COMPARE_3 = 14,
+	IRQ_EXT_INT_3 = 15,
+	IRQ_TIMER_4 = 16,
+	IRQ_TIMER_45 = 0x90,
+	IRQ_INPUT_CAPTURE_4 = 17,
+	IRQ_OUTPUT_COMPARE_4 = 18,
+	IRQ_EXT_INT_4 = 19,
+	IRQ_TIMER_5 = 20,
+	IRQ_INPUT_CAPTURE_5 = 21,
+	IRQ_OUTPUT_COMPARE_5 = 22,
+	IRQ_SPI_1_ERR = 23,
+	IRQ_SPI_1_RX = 24,
+	IRQ_SPI_1_TX = 25,
+	IRQ_SPI_1 = 0x97,
+	IRQ_UART_1_ERR = 26,
+	IRQ_UART_1_RX = 27,
+	IRQ_UART_1_TX = 28,
+	IRQ_UART_1 = 0x9A,
+	IRQ_SPI_3_ERR = 26,
+	IRQ_SPI_3_RX = 27,
+	IRQ_SPI_3_TX = 28,
+	IRQ_SPI_3 = 0x9A,
+	IRQ_I2C_3_COL = 26,
+	IRQ_I2C_3_SLAVE = 27,
+	IRQ_I2C_3_MASTER = 28,
+	IRQ_I2C_3 = 0x9A,
+	IRQ_I2C_1_COL = 29,
+	IRQ_I2C_1_SLAVE = 30,
+	IRQ_I2C_1_MASTER = 31,
+	IRQ_I2C_1 = 0x9D,
+	IRQ_INPUT_CHANGE = 32,
+	IRQ_ADC_1 = 33,
+	IRQ_PMP = 34,
+	IRQ_COMPARATOR_1 = 35,
+	IRQ_COMPARATOR_2 = 36,
+	IRQ_UART_3_ERR = 37,
+	IRQ_UART_3_RX = 38,
+	IRQ_UART_3_TX = 39,
+	IRQ_UART_3 = 0xA5,
+	IRQ_SPI_2_ERR = 37,
+	IRQ_SPI_2_RX = 38,
+	IRQ_SPI_2_TX = 39,
+	IRQ_SPI_2 = 0xA5,
+	IRQ_I2C_4_COL = 37,
+	IRQ_I2C_4_SLAVE = 38,
+	IRQ_I2C_4_MASTER = 39,
+	IRQ_I2C_4 = 0xA5,
+	IRQ_UART_2_ERR = 40,
+	IRQ_UART_2_RX = 41,
+	IRQ_UART_2_TX = 42,
+	IRQ_UART_2 = 0xA8,
+	IRQ_SPI_4_ERR = 40,
+	IRQ_SPI_4_RX = 41,
+	IRQ_SPI_4_TX = 42,
+	IRQ_SPI_4 = 0xA8,
+	IRQ_I2C_5_COL = 40,
+	IRQ_I2C_5_SLAVE = 41,
+	IRQ_I2C_5_MASTER = 42,
+	IRQ_I2C_5 = 0xA8,
+	IRQ_I2C_2_COL = 43,
+	IRQ_I2C_2_SLAVE = 44,
+	IRQ_I2C_2_MASTER = 45,
+	IRQ_I2C_2 = 0xAB,
+	IRQ_FAIL_SAFE_CLOCK_MON = 46,
+	IRQ_RTCC = 47,
+	IRQ_DMA_0 = 48,
+	IRQ_DMA_1 = 49,
+	IRQ_DMA_2 = 50,
+	IRQ_DMA_3 = 51,
+	IRQ_DMA_4 = 52,
+	IRQ_DMA_5 = 53,
+	IRQ_DMA_6 = 54,
+	IRQ_DMA_7 = 55,
+	IRQ_FLASH_CONTROL_EVENT = 56,
+	IRQ_USB = 57,
+	IRQ_CAN_1 = 58,
+	IRQ_CAN_2 = 59,
+	IRQ_ETHERNET = 60,
+	IRQ_INPUT_CAPTURE_1_ERR = 61,
+	IRQ_INPUT_CAPTURE_2_ERR = 62,
+	IRQ_INPUT_CAPTURE_3_ERR = 63,
+	IRQ_INPUT_CAPTURE_4_ERR = 64,
+	IRQ_INPUT_CAPTURE_5_ERR = 65,
+	IRQ_PMP_ERR = 66,
+	IRQ_UART_4_ERR = 67,
+	IRQ_UART_4_RX = 68,
+	IRQ_UART_4_TX = 69,
+	IRQ_UART_4 = 0xC3,
+	IRQ_UART_6_ERR = 70,
+	IRQ_UART_6_RX = 71,
+	IRQ_UART_6_TX = 72,
+	IRQ_UART_6 = 0xC6,
+	IRQ_UART_5_ERR = 73,
+	IRQ_UART_5_RX = 74,
+	IRQ_UART_5_TX = 75,
+	IRQ_UART_5 = 0xC9
 }tIntIRQ;
 #endif
 // ---------------- //
@@ -755,7 +780,8 @@ typedef enum
 /**
 * \fn		void intInit(intIRQSource)
 * @brief	Initialize an interrupt
-* @note		Will clear it's flag prior to enabling it
+* @note		Will clear the flag prior to enabling the interrupt
+*		Can accept IRQ group
 * @arg		tIntIRQ intIRQSource		Which interrupt to init
 * @return	nothing
 */
@@ -765,7 +791,8 @@ typedef enum
 * \fn		void intSetState(intIRQSource, state)
 * @brief	Set the state of a specific interrupt
 * @note		Use tIntIRQ to know which interrupt is available
-*		Use ENABLE or DISABLE for $state
+*		Use ENABLE or DISABLE for $state but if you are using
+*		an IRQ group,use the correct number of bit (ex: IRQ_UART_1 , BIT2|BIT1|BIT0)
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @arg		U8 state			State to set the interrupt
 * @return	nothing
@@ -776,7 +803,8 @@ typedef enum
 * \fn		void intGetState(intIRQSource, state)
 * @brief	Get the state of a specific interrupt
 * @note		Use tIntIRQ to know which interrupt is available
-*		The state is return as ENABLE or DISABLE
+*		The state is return as ENABLE or DISABLE but if you are using
+*		an IRQ group, it will return all the bits (ex: IRQ_UART_1 returns 0x7)
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @return	U8 state			State of the interrupt
 */
@@ -786,7 +814,8 @@ typedef enum
 * \fn		void intSetFlag(intIRQSource, state)
 * @brief	Set the state of the flag of a specific interrupt
 * @note		Use tIntIRQ to know which interrupt is available
-*		Use ENABLE or DISABLE for $state
+*		Use ENABLE or DISABLE for $state but if you are using
+*		an IRQ group,use the correct number of bit (ex: IRQ_UART_1 , BIT2|BIT1|BIT0)
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @arg		U8 state			State to set the flag
 * @return	nothing
@@ -797,7 +826,8 @@ typedef enum
 * \fn		void intGetFlag(intIRQSource, state)
 * @brief	Get the state of the flag of a specific interrupt
 * @note		Use tIntIRQ to know which interrupt is available
-*		The state is return as ENABLE or DISABLE
+*		The state is return as ENABLE or DISABLE but if you are using
+*		an IRQ group, it will return all the bits (ex: IRQ_UART_1 returns 0x7)
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @return	U8 state			State of the flag
 */
@@ -806,10 +836,10 @@ typedef enum
 /**
 * \fn		void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl)
 * @brief	Set the priority and the sub-priority of an interrupt
-* @note
+* @note		If you use IRQ Group you will only set the priority for the first IRQ (ex: UART_1 would be UART_1_ERR)
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @arg		U8 priorityLvl			Level of priority for the interrupt
- * @arg		U8 subPriorityLvl		Level of sub-priority for the interrupt
+* @arg		U8 subPriorityLvl		Level of sub-priority for the interrupt
 * @return	nothing
 */
 void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl);
@@ -817,7 +847,7 @@ void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl);
 /**
 * \fn		U8 intGetPriority(tIntIRQ intIRQSource)
 * @brief	Return the priority level of an interrupt
-* @note
+* @note		If you use IRQ Group you will only get the priority of the first IRQ (ex: UART_1 would give UART_1_ERR)
 * @arg		tIntIRQ intIRQSource		Which interrupt to get
 * @return	U8 priorityLvl			Level of priority of the interrupt
 */
@@ -826,7 +856,7 @@ U8 intGetPriority(tIntIRQ intIRQSource);
 /**
 * \fn		U8 intGetSubPriority(tIntIRQ intIRQSource)
 * @brief	Return the sub-priority level of an interrupt
-* @note
+* @note		If you use IRQ Group you will only get the subPriority of the first IRQ (ex: UART_1 would give UART_1_ERR)
 * @arg		tIntIRQ intIRQSource		Which interrupt to get
 * @return	U8 subPriorityLvl		Level of sub-priority of the interrupt
 */
@@ -835,7 +865,7 @@ U8 intGetSubPriority(tIntIRQ intIRQSource);
 /**
 * \fn		void intSetExternalEdge(U8 intSource, U8 edgeDirection)
 * @brief	Set the specified external interrupt source to trigger on a specific edge transition
-* @note		Use the tIntIRQ type to select the correct interrupt source
+* @note		Use the tIntIRQ type to select the correct interrupt source (only IRQ_EXT_INT are valid)
 * @arg		tIntIRQ intIRQSource		The external interrupt to configure
 * @arg		U8 edgeDirection		The edge transition to select
 * @return	nothing

@@ -2,16 +2,14 @@
  @file		pic32_interrupts.c
  @brief		Interrupt lib for pic32
 
- @version	0.2.1
+ @version	0.3.0
  @note		Use the name in the Interrupts Source List to access an interrupt with any macro
-			Use the Vector number in the _ISR Macro wherever you want
-			Use the IRQ only with the run-time functions (not done yet)
- @todo		Run-time functions
-			Init functions
-			Test usefulness and exactness of IRQ number for group selection (only pic32mx1xx and 2xx for now)
+		Use the Vector number in the _ISR Macro wherever you want
+		Use the IRQ only with the run-time functions
+ @todo		Test usefulness and exactness of IRQ number for group selection (only pic32mx1xx and 2xx for now)
 
- @date		March 7th 2012
- @author	Jonathan LL && Laurence DV
+ @date		September 15th 2012
+ @author	Laurence DV
 */
 
 
@@ -42,16 +40,28 @@
 */
 void _intSetReg(U32 * regPtr, tIntIRQ intIRQSource, U8 state)
 {
+	U8 maskTemp = BIT0;				//Default mask for only 1 bit
+	
+	// -- Intercept the Group flag -- //
+	if (intIRQSource & BIT7)
+	{
+		maskTemp = BIT1|BIT0;			//Group at at least 2 bit wide
+		if (intIRQSource > 22)
+			maskTemp |= BIT2;		//Higher group are 3 bit wide
+		intIRQSource &= 0x7F;			//Remove the flag
+	}
+	// ------------------------------ //
+
 	// -- Point the correct IEC Reg -- //
-	while (intIRQSource > 31)
+	while (intIRQSource > (INT_IRQ_PER_IEC_REG-1))
 	{
 		regPtr += REG_OFFSET_NEXT_32;		//Point to the next reg
-		intIRQSource -= 32;			//Substract the bit number skipped
+		intIRQSource -= INT_IRQ_PER_IEC_REG;	//Substract the IRQ skipped
 	}
 	// ------------------------------- //
 
 	// -- Set the state -- //
-	state &= BIT0;					//Leave only the first bit
+	state &= maskTemp;				//Leave only the first bit
 	*regPtr |= state << intIRQSource;
 	// ------------------- //
 }
@@ -66,21 +76,33 @@ void _intSetReg(U32 * regPtr, tIntIRQ intIRQSource, U8 state)
 */
 U8 _intGetReg(U32 * regPtr, tIntIRQ intIRQSource)
 {
+	U8 maskTemp = BIT0;				//Default mask for only 1 bit
+
+	// -- Intercept the Group flag -- //
+	if (intIRQSource & BIT7)
+	{
+		maskTemp = BIT1|BIT0;			//Group at at least 2 bit wide
+		if (intIRQSource > 22)
+			maskTemp |= BIT2;		//Higher group are 3 bit wide
+		intIRQSource &= 0x7F;			//Remove the flag
+	}
+	// ------------------------------ //
+
 	// -- Point the correct IFS Reg -- //
-	while (intIRQSource > 31)
+	while (intIRQSource > (INT_IRQ_PER_IEC_REG-1))
 	{
 		regPtr += REG_OFFSET_NEXT_32;		//Point to the next reg
-		intIRQSource -= 32;			//Substract the bit number skipped
+		intIRQSource -= INT_IRQ_PER_IEC_REG;	//Substract the IRQ skipped
 	}
 	// ------------------------------- //
 
-	return ((*regPtr & (BIT0 << intIRQSource)) >> intIRQSource);
+	return ((*regPtr & (maskTemp << intIRQSource)) >> intIRQSource);
 }
 
 /**
 * \fn		void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl)
 * @brief	Set the priority and the sub-priority of an interrupt
-* @note
+* @note		If you use IRQ Group you will only set the priority for the first IRQ (ex: UART_1 would be UART_1_ERR)
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @arg		U8 priorityLvl			Level of priority for the interrupt
 * @arg		U8 subPriorityLvl		Level of sub-priority for the interrupt
@@ -92,7 +114,7 @@ void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl)
 
 	// -- Point the correct IPC Reg -- //
 	regPtr += REG_OFFSET_NEXT_32 * (((U8)intIRQSource)/INT_IRQ_PER_IPC_REG);
-	intIRQSource %= INT_IRQ_PER_IPC_REG;
+	intIRQSource %= INT_IRQ_PER_IPC_REG;		//Adjust to the current pointer reg
 	// ------------------------------- //
 
 	// -- Set the priority -- //
@@ -107,7 +129,7 @@ void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl)
 /**
 * \fn		U8 intGetPriority(tIntIRQ intIRQSource)
 * @brief	Return the priority level of an interrupt
-* @note
+* @note		If you use IRQ Group you will only get the priority of the first IRQ (ex: UART_1 would give UART_1_ERR)
 * @arg		tIntIRQ intIRQSource		Which interrupt to get
 * @return	U8 priorityLvl			Level of priority of the interrupt
 */
@@ -118,12 +140,12 @@ U8 intGetPriority(tIntIRQ intIRQSource)
 
 	// -- Point the correct IPC Reg -- //
 	regPtr += REG_OFFSET_NEXT_32 * (((U8)intIRQSource)/INT_IRQ_PER_IPC_REG);
-	intIRQSource %= INT_IRQ_PER_IPC_REG;
+	intIRQSource %= INT_IRQ_PER_IPC_REG;		//Adjust to the current pointer reg
 	// ------------------------------- //
 
 	// -- Format the result -- //
 	returnPriority = (*regPtr >> (intIRQSource << 3)) & (BIT4|BIT3|BIT2) ;	//Extract, mask and align the priority
-	returnPriority >>= 2;					//Realign the priority
+	returnPriority >>= 2;				//Realign the priority
 	// ----------------------- //
 
 	return returnPriority;
@@ -132,7 +154,7 @@ U8 intGetPriority(tIntIRQ intIRQSource)
 /**
 * \fn		U8 intGetSubPriority(tIntIRQ intIRQSource)
 * @brief	Return the sub-priority level of an interrupt
-* @note
+* @note		If you use IRQ Group you will only get the subPriority of the first IRQ (ex: UART_1 would give UART_1_ERR)
 * @arg		tIntIRQ intIRQSource		Which interrupt to get
 * @return	U8 subPriorityLvl		Level of sub-priority of the interrupt
 */
@@ -142,17 +164,16 @@ U8 intGetSubPriority(tIntIRQ intIRQSource)
 
 	// -- Point the correct IPC Reg -- //
 	regPtr += REG_OFFSET_NEXT_32 * (((U8)intIRQSource)/INT_IRQ_PER_IPC_REG);
-	intIRQSource %= INT_IRQ_PER_IPC_REG;
+	intIRQSource %= INT_IRQ_PER_IPC_REG;		//Adjust to the current pointer reg
 	// ------------------------------- //
 
 	return (*regPtr >> (intIRQSource << 3)) & (BIT1|BIT0);	//Extract, mask and align the subPriority
 }
 
-
 /**
 * \fn		void intSetExternalEdge(U8 intSource, U8 edgeDirection)
 * @brief	Set the specified external interrupt source to trigger on a specific edge transition
-* @note		Use the tIntIRQ type to select the correct interrupt source
+* @note		Use the tIntIRQ type to select the correct interrupt source (only IRQ_EXT_INT are valid)
 * @arg		tIntIRQ intIRQSource		The external interrupt to configure
 * @arg		U8 edgeDirection		The edge transition to select
 * @return	nothing
@@ -161,11 +182,11 @@ void intSetExternalEdge(tIntIRQ intIRQSource, U8 edgeDirection)
 {
 	switch (intIRQSource)
 	{
-		case INT_IRQ_EXT_INT_0:	INTCONbits.INT0EP = edgeDirection;	break;
-		case INT_IRQ_EXT_INT_1:	INTCONbits.INT1EP = edgeDirection;	break;
-		case INT_IRQ_EXT_INT_2:	INTCONbits.INT2EP = edgeDirection;	break;
-		case INT_IRQ_EXT_INT_3:	INTCONbits.INT3EP = edgeDirection;	break;
-		case INT_IRQ_EXT_INT_4:	INTCONbits.INT4EP = edgeDirection;	break;
+		case IRQ_EXT_INT_0:	INTCONbits.INT0EP = edgeDirection;	break;
+		case IRQ_EXT_INT_1:	INTCONbits.INT1EP = edgeDirection;	break;
+		case IRQ_EXT_INT_2:	INTCONbits.INT2EP = edgeDirection;	break;
+		case IRQ_EXT_INT_3:	INTCONbits.INT3EP = edgeDirection;	break;
+		case IRQ_EXT_INT_4:	INTCONbits.INT4EP = edgeDirection;	break;
 		default: break;
 	}
 }
