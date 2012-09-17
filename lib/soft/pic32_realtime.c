@@ -54,7 +54,7 @@ U16 rtccRemaininguS = 0;						//Remaining µS after an update (to be added at the
 #if USE_RT_SOFT_COUNTER == ENABLE
 U32 softCnt[RT_SOFT_COUNTER_NB];					//Actual value of the software counter
 U32 softCntReloadVal[RT_SOFT_COUNTER_NB];				//Value to reload after the underrun of the counter
-U8 * softCntTargetPtr[RT_SOFT_COUNTER_NB];				//Target to modify at the underrun
+U32 * softCntTargetPtr[RT_SOFT_COUNTER_NB];				//Target to modify at the underrun
 U32 softCntTargetVal[RT_SOFT_COUNTER_NB];				//Value to input in the target
 tSoftCounterControl softCntControl[RT_SOFT_COUNTER_NB];			//Control register of the software counter
 U8 softCntEnabled = 0;							//Number of counter enabled
@@ -233,7 +233,7 @@ void rtTimeEngine(void)
 * @arg		U8 option			Options of the counter (Use the "Init Option" defines)
 * @return	U8 softCntID		ID of the initialised counter
 */
-U8 softCntInit(U32 cntPeriod, U8 * targetPtr, U32 targetValue, U8 option)
+U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 {
 	U8 softCntID;
 
@@ -318,7 +318,12 @@ void softCntEngine(void)
 
 			// -- Target Action -- //
 			if (softCntControl[softCntIDtemp].targetEn)
-				*softCntTargetPtr[softCntIDtemp] |= (softCntTargetVal[softCntIDtemp]);
+			{
+				U32 targetTemp = (U32*)*softCntTargetPtr[softCntIDtemp];//Load the previous data in the target
+				targetTemp &= ~(softCntTargetVal[softCntIDtemp]);	//Clear the overlapping bit
+				targetTemp |= softCntTargetVal[softCntIDtemp];		//OR with the value
+				*softCntTargetPtr[softCntIDtemp] = targetTemp;		//Save the new value
+			}
 			// ------------------- //
 
 			softCntControl[softCntIDtemp].underRun = 0;			//Clear the underRun flag

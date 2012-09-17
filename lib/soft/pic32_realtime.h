@@ -158,7 +158,7 @@ void rtTimeEngine(void);
 * @arg		U8 option			Options of the counter (Use the "Init Option" defines)
 * @return	U8 softCntID		ID of the initialised counter
 */
-U8 softCntInit(U32 cntPeriod, U8 * targetPtr, U32 targetValue, U8 option);
+U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option);
 
 /**
 * \fn		void softCntRelease(U8 softCntID)
