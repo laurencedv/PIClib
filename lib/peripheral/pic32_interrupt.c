@@ -110,7 +110,7 @@ U8 _intGetReg(U32 * regPtr, tIntIRQ intIRQSource)
 */
 void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl)
 {
-	U32 * regPtr = &IPC0;
+	U32 * regPtr = (U32*)&IPC0;
 
 	// -- Point the correct IPC Reg -- //
 	regPtr += REG_OFFSET_NEXT_32 * (((U8)intIRQSource)/INT_IRQ_PER_IPC_REG);
@@ -135,7 +135,7 @@ void intSetPriority(tIntIRQ intIRQSource, U8 priorityLvl, U8 subPriorityLvl)
 */
 U8 intGetPriority(tIntIRQ intIRQSource)
 {
-	U32 * regPtr = &IPC0;
+	U32 * regPtr = (U32*)&IPC0;
 	U8 returnPriority;
 
 	// -- Point the correct IPC Reg -- //
@@ -160,7 +160,7 @@ U8 intGetPriority(tIntIRQ intIRQSource)
 */
 U8 intGetSubPriority(tIntIRQ intIRQSource)
 {
-	U32 * regPtr = &IPC0;
+	U32 * regPtr = (U32*)&IPC0;
 
 	// -- Point the correct IPC Reg -- //
 	regPtr += REG_OFFSET_NEXT_32 * (((U8)intIRQSource)/INT_IRQ_PER_IPC_REG);

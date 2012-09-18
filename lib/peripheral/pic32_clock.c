@@ -66,7 +66,7 @@ void clockSetFRC(U32 desiredFreq)
 */
 U32 clockGetFRC(void)
 {
-
+	return 0;
 }
 
 // Clock Source Selector
@@ -91,7 +91,7 @@ void clockSetSource(tClockSource desiredClkSource)
 */
 tClockSource clockGetSource(void)
 {
-
+	return temporarynameforcompile;
 }
 
 // Peripheral Bus Clock divider
@@ -128,7 +128,7 @@ void clockSetPLL(U8 ratio)
 
 U8 clockGetPLL(void)
 {
-
+	return 0;
 }
 
 // USB PLL control
@@ -139,7 +139,7 @@ void clockSetUSBPLL(U8 option)
 
 U8 clockGetUSBPLL(void)
 {
-	
+	return 0;
 }
 
 // Reference Clock output control
@@ -150,7 +150,7 @@ void clockSetREFCLKO(U32 desiredCLK)
 
 U32 clockGetREFCLKO(void)
 {
-	
+	return 0;
 }
 // =========================== //
 

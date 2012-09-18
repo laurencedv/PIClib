@@ -67,7 +67,7 @@ void adcISR(U8 adcPort)
 		}
 		case ADCbusy:
 		{
-			if (adcResultPtr[adcPort] != &globalDump)
+			if (adcResultPtr[adcPort] != (U16*)&globalDump)
 			{
 				// -- Save the result in the destination -- //
 				for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
@@ -109,7 +109,7 @@ U8 adcSelectPort(U8 adcPort)
 {
 	switch (adcPort)
 	{
-		case ADC_1:	pADxCON1 = (tADxCON1*)&AD1CON1; pADxCON2 = (tADxCON2*)&AD1CON2; pADxCON3 = (tADxCON3*)&AD1CON3; pADxCHS = (tADxCHS*)&AD1CHS; pADxCSSL = (tADxCSSL*)&AD1CSSL; pADxBUF = &ADC1BUF0;	break;
+		case ADC_1:	pADxCON1 = (tADxCON1*)&AD1CON1; pADxCON2 = (tADxCON2*)&AD1CON2; pADxCON3 = (tADxCON3*)&AD1CON3; pADxCHS = (tADxCHS*)&AD1CHS; pADxCSSL = (tADxCSSL*)&AD1CSSL; pADxBUF = (U32*)&ADC1BUF0;	break;
 		default :	return STD_EC_NOTFOUND;
 	}
 	return STD_EC_SUCCESS;
@@ -386,7 +386,7 @@ U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr,
 			adcDonePtr[adcPort] = donePtr;		//Save the done pointer
 
 		if (resultPtr == NULL)
-			adcResultPtr[adcPort] = &globalDump;	//Point to a safe place
+			adcResultPtr[adcPort] = (U16*)&globalDump;	//Point to a safe place
 		else
 			adcResultPtr[adcPort] = resultPtr;	//Save the result pointer
 

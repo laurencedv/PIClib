@@ -228,16 +228,14 @@ U32 timerGetClock(U8 timerPort)
 
 		// -- Compute if Clock source is the PBCLK -- //
 		if (pTxCON->TCS == TMR_CS_PBCLK)
-		{
 			tempDivID = pTxCON->TCKPS;			//check the actual prescaler setting
-
-			//Return the actual Timer clock source freq
-			return (clockGetPBCLK()/(pDivTable[tempDivID]));
-		}
 		else
 			return 0;					//Return 0 if the clock is external (0 Hz)
 		// ------------------------------------------ //
 	}
+
+	//Return the actual Timer clock source freq
+	return (clockGetPBCLK()/(pDivTable[tempDivID]));
 }
 
 /**

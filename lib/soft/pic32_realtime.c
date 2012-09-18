@@ -30,7 +30,7 @@ U32 sysTickValue = 0;							//Value of a sysTick (in us)
 const U8 dayPerMonth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};	//Number of day per month
 tFSMState rtccEngineState = unknown;
 U8 rtccEngineSoftCntID = SOFT_CNT_MAX;					//ID of the Soft Counter for the rtcc Engine
-U8 rtccEngineFlag = 0;							//Rtcc Engine Flag
+U32 rtccEngineFlag = 0;							//Rtcc Engine Flag
 U8 rtccEngineUpdatePtr = RT_ENGINE_UPDATE_RTCC;				//Tell the engine which time to update
 extern U32 globalDump;
 // ====================== //
@@ -319,7 +319,7 @@ void softCntEngine(void)
 			// -- Target Action -- //
 			if (softCntControl[softCntIDtemp].targetEn)
 			{
-				U32 targetTemp = (U32*)*softCntTargetPtr[softCntIDtemp];//Load the previous data in the target
+				U32 targetTemp = *softCntTargetPtr[softCntIDtemp];	//Load the previous data in the target
 				targetTemp &= ~(softCntTargetVal[softCntIDtemp]);	//Clear the overlapping bit
 				targetTemp |= softCntTargetVal[softCntIDtemp];		//OR with the value
 				*softCntTargetPtr[softCntIDtemp] = targetTemp;		//Save the new value

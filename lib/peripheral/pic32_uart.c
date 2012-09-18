@@ -458,6 +458,7 @@ U16 uartSendArray(U8 uartPort, void * arrayPtr, U16 byteNb)
 {
 	// -- Push the array in the correct buffer -- //
 	// ------------------------------------------ //
+	return 0;
 }
 
 
@@ -465,6 +466,7 @@ U16 uartRcvArray(U8 uartPort, void * destinationPtr, U16 byteNb)
 {
 	// -- Pull the array from the correct buffer -- //
 	// -------------------------------------------- //
+	return 0;
 }
 
 
@@ -472,6 +474,7 @@ U16 uartSendFrame(U8 uartPort, void * framePtr, U8 delimiter)
 {
 	// -- Push the frame in the correct buffer -- //
 	// ------------------------------------------ //
+	return 0;
 }
 
 
@@ -479,6 +482,7 @@ U16 uartRcvFrame(U8 uartPort, void * framePtr, U8 delimiter)
 {
 	// -- Pull the frame from the correct buffer -- //
 	// -------------------------------------------- //
+	return 0;
 }
 // =========================== //
 // ############################################## //
