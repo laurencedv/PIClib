@@ -596,11 +596,6 @@ typedef enum
 // ############################################## //
 
 
-// ################# Prototypes ################# //
-
-// ############################################## //
-
-
 // ################# Fast Macro ################# //
 /**
 * \fn		intFastEnableGlobal()
@@ -785,7 +780,7 @@ typedef enum
 * @arg		tIntIRQ intIRQSource		Which interrupt to init
 * @return	nothing
 */
-#define intInit(intIRQSource)				_intSetReg(&IFS0,intIRQSource,DISABLE); _intSetReg(&IEC0,intIRQSource,ENABLE)
+#define intInit(intIRQSource)				_intSetReg((U32*)&IFS0,intIRQSource,DISABLE); _intSetReg((U32*)&IEC0,intIRQSource,ENABLE)
 
 /**
 * \fn		void intSetState(intIRQSource, state)
@@ -797,7 +792,7 @@ typedef enum
 * @arg		U8 state			State to set the interrupt
 * @return	nothing
 */
-#define intSetState(intIRQSource, state)		_intSetReg(&IEC0,intIRQSource,state)
+#define intSetState(intIRQSource, state)		_intSetReg((U32*)&IEC0,intIRQSource,state)
 
 /**
 * \fn		void intGetState(intIRQSource, state)
@@ -808,7 +803,7 @@ typedef enum
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @return	U8 state			State of the interrupt
 */
-#define intGetState(intIRQSource)			_intGetReg(&IEC0,intIRQSource)
+#define intGetState(intIRQSource)			_intGetReg((U32*)&IEC0,intIRQSource)
 
 /**
 * \fn		void intSetFlag(intIRQSource, state)
@@ -2203,6 +2198,30 @@ void _general_exception_handler(void);
 	#define _REG_INT_I2C_5					_REG_INT_I2C_5_COL
 #endif
 // -------------------------- //
+// ############################################## //
+
+
+// ############# Internal Functions ############# //
+/**
+* \fn		void _intSetReg(U32 * regPtr, tIntIRQ intIRQSource, U8 state)
+* @brief	Write access to a interrupt register
+* @note		INTERNAL FUNCTION Do not use directly!!!
+* @arg		U32 * regPtr			Pointer to the register being written
+* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @arg		U8 state			State to set the bit
+* @return	nothing
+*/
+void _intSetReg(U32 * regPtr, tIntIRQ intIRQSource, U8 state);
+
+/**
+* \fn		U8 _intGetReg(U32 * regPtr, tIntIRQ intIRQSource)
+* @brief	Read access to a interrupt register
+* @note		INTERNAL FUNCTION Do not use directly!!!
+* @arg		U32 * regPtr			Pointer to the register being written
+* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @return	U8 state			State to set the bit
+*/
+U8 _intGetReg(U32 * regPtr, tIntIRQ intIRQSource);
 // ############################################## //
 
 #endif

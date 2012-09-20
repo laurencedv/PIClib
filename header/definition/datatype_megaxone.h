@@ -19,15 +19,15 @@
 #if defined (__18CXX)
 // Signed Integer
 typedef char				S8;
-typedef int					S16;
+typedef int				S16;
 typedef short long			S24;
 typedef long				S32;
 
 // Unsigned Integer
-typedef unsigned char		U8;
-typedef unsigned int		U16;
-typedef unsigned short long	U24;
-typedef unsigned long		U32;
+typedef unsigned char			U8;
+typedef unsigned int			U16;
+typedef unsigned short long		U24;
+typedef unsigned long			U32;
 
 // Float
 typedef float				F32;
@@ -40,14 +40,14 @@ typedef float				F32;
 // Signed Integer
 typedef char				S8;
 typedef short				S16;
-typedef int					S32;
+typedef int				S32;
 typedef long long			S64;
 
 // Unsigned Integer
-typedef unsigned char		U8;
-typedef unsigned short		U16;
-typedef unsigned int		U32;
-typedef unsigned long long	U64;
+typedef unsigned char			U8;
+typedef unsigned short			U16;
+typedef unsigned int			U32;
+typedef unsigned long long		U64;
 
 // Float
 typedef double				F32;

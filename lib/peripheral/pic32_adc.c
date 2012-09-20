@@ -343,6 +343,7 @@ tADCMuxInput adcGetScan(U8 adcPort)
 {
 	if (adcSelectPort(adcPort) == STD_EC_SUCCESS)
 		return pADxCSSL->CSSL;
+	return 0;
 }
 // ========================== //
 

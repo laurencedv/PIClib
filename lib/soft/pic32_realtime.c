@@ -343,7 +343,7 @@ void softCntEngine(void)
 */
 void softCntStart(U8 softCntID)
 {
-	softCnt[softCntID] = softCntReloadVal[softCntID];	//Reload the counter
+	softCnt[softCntID] = softCntReloadVal[softCntID];			//Reload the counter
 	softCntRun |= (BIT0 << softCntID);					//Start the counter
 }
 

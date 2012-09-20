@@ -38,7 +38,6 @@
 #define UART_BUF_SIZE				100
 // --------------------- //
 
-
 // ---- Init Option ---- //
 // Activity state in Idle mode
 #define UART_IDLE_RUN				0
@@ -121,7 +120,7 @@ typedef union
 	U32 all;
 	struct
 	{
-		U32	STSEL:1;		//Stop bit selection
+		U32 STSEL:1;		//Stop bit selection
 		U32 PDSEL:2;			//Data format control
 		U32 BRGH:1;			//Baudrate formula control
 		U32 RXINV:1;			//Rx polarity inversion

@@ -19,8 +19,8 @@
 
 
 // ################## Variables ################# //
+extern U32 globalDump;
 tUARTConfig uartConfig[UART_MAX_PORT];
-
 
 //Data Buffers
 tRBufCtl * uartRxBuf[UART_MAX_PORT];
@@ -29,7 +29,16 @@ tRBufCtl * uartTxBuf[UART_MAX_PORT];
 //Reg pointers
 tUxMODE * pUxMODE = NULL;
 tUxSTA * pUxSTA = NULL;
+U32 * pUxRXREG = NULL;
+U32 * pUxTXREG = NULL;
 U32 * pUxBRG = NULL;
+
+// Interrupt Mapping
+#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
+const tIntIRQ UART_INT[6] = {IRQ_UART_1,IRQ_UART_2,IRQ_UART_3,IRQ_UART_4,IRQ_UART_5,IRQ_UART_6};
+#else
+const tIntIRQ UART_INT[2] = {IRQ_UART_1,IRQ_UART_2};
+#endif
 // ############################################## //
 
 
@@ -46,13 +55,13 @@ U8 uartSelectPort(U8 uartPort)
 	// -- Select the correct UART -- //
 	switch (uartPort)
 	{
-		case UART_1: pUxMODE = (tUxMODE*)&U1MODE;	pUxSTA = (tUxSTA*)&U1STA;	pUxBRG = (U32*)&U1BRG;	break;
-		case UART_2: pUxMODE = (tUxMODE*)&U2MODE;	pUxSTA = (tUxSTA*)&U2STA;	pUxBRG = (U32*)&U2BRG;	break;
+		case UART_1: pUxMODE = (tUxMODE*)&U1MODE; pUxSTA = (tUxSTA*)&U1STA; pUxBRG = (U32*)&U1BRG; pUxRXREG = (U32*)&U1RXREG; pUxTXREG = &U1TXREG; break;
+		case UART_2: pUxMODE = (tUxMODE*)&U2MODE; pUxSTA = (tUxSTA*)&U2STA; pUxBRG = (U32*)&U2BRG; pUxRXREG = (U32*)&U2RXREG; pUxTXREG = &U2TXREG; break;
 	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
-		case UART_3: pUxMODE = (tUxMODE*)&U3MODE;	pUxSTA = (tUxSTA*)&U3STA;	pUxBRG = (U32*)&U3BRG;	break;
-		case UART_4: pUxMODE = (tUxMODE*)&U4MODE;	pUxSTA = (tUxSTA*)&U4STA;	pUxBRG = (U32*)&U4BRG;	break;
-		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxSTA = (tUxSTA*)&U5STA;	pUxBRG = (U32*)&U5BRG;	break;
-		case UART_6: pUxMODE = (tUxMODE*)&U6MODE;	pUxSTA = (tUxSTA*)&U6STA;	pUxBRG = (U32*)&U6BRG;	break;
+		case UART_3: pUxMODE = (tUxMODE*)&U3MODE; pUxSTA = (tUxSTA*)&U3STA; pUxBRG = (U32*)&U3BRG; pUxRXREG = (U32*)&U3RXREG; pUxTXREG = &U3TXREG; break;
+		case UART_4: pUxMODE = (tUxMODE*)&U4MODE; pUxSTA = (tUxSTA*)&U4STA; pUxBRG = (U32*)&U4BRG; pUxRXREG = (U32*)&U4RXREG; pUxTXREG = &U4TXREG; break;
+		case UART_5: pUxMODE = (tUxMODE*)&U5MODE; pUxSTA = (tUxSTA*)&U5STA; pUxBRG = (U32*)&U5BRG; pUxRXREG = (U32*)&U5RXREG; pUxTXREG = &U5TXREG; break;
+		case UART_6: pUxMODE = (tUxMODE*)&U6MODE; pUxSTA = (tUxSTA*)&U6STA; pUxBRG = (U32*)&U6BRG; pUxRXREG = (U32*)&U6RXREG; pUxTXREG = &U6TXREG; break;
 	#endif
 		default : return STD_EC_NOTFOUND;		//Invalid Uart port ID
 	}
@@ -75,92 +84,85 @@ U8 uartSelectPort(U8 uartPort)
 * @arg		nothing
 * @return	nothing
 */
-/*
-void __ISR(INT_VEC_UART_1, IPL5SOFT) uart1ISR(void)
+void uartISR(U8 uartID)
 {
-	extern tRBufCtl * uartRxBuf[];
-	extern tRBufCtl * uartTxBuf[];
-
-	U32 interruptCheck = intFastCheckFlag(INT_UART_1);			//Fetch the all the flags for UART_1
+	U32 interruptCheck = intGetFlag(UART_INT[uartID]);	//Fetch all the flags for UART_1
 	U16 byteNb;
 	U8 tempBuf[8];
 
-	// === RX Interrupt ==== //
-	if (interruptCheck & INT_MASK_UART_RX)
+	if (uartSelectPort(uartID) == STD_EC_SUCCESS)
 	{
-		// -- Empty the buffer -- //
-		while (U1STAbits.URXDA)
+		// === RX Interrupt ==== //
+		if (interruptCheck & INT_MASK_UART_RX)
 		{
-			// Discard if error detected
-			if (U1STA & UART_MASK_PERR|UART_MASK_FERR)
-				U1RXREG;
-			//Save if the data is valid
+			// -- Empty the buffer -- //
+			while (pUxSTA->URXDA)
+			{
+				// Discard if error detected
+				if (pUxSTA->all & (UART_MASK_PERR|UART_MASK_FERR))
+					globalDump = *pUxRXREG;
+
+				//Save if the data is valid
+				else
+					tempBuf[byteNb] = *pUxRXREG;
+
+				byteNb++;
+			}
+			// ---------------------- //
+
+			// -- Save to the buffer -- //
+			rBufPushU8(uartRxBuf[uartID], tempBuf, byteNb, RBUF_FREERUN_PTR);	//Can loose data if the buffer is full
+			// ------------------------ //
+		}
+		// ===================== //
+
+		// === TX Interrupt ==== //
+		if (interruptCheck & INT_MASK_UART_TX)
+		{
+			//Check for pending data
+			byteNb = rBufGetUsedSpace(uartTxBuf[uartID]);
+
+			// -- No more byte to send --- //
+			if (!byteNb)
+				(pUxSTA + REG_OFFSET_CLR_32)->all = UTXEN_MASK;		//Stop the transmitter
+			// -- Send the pending data -- //
 			else
-				tempBuf[byteNb] = U1RXREG;
+			{
+				if (byteNb > UART_FIFO_LVL)			//If there is more byte that the HW buffer can
+					byteNb = UART_FIFO_LVL;			//contain, load the maximum
 
-			byteNb++;
+				//Pull the correct number of byte from the soft buffer into the HW buffer
+				rBufPullU8(uartTxBuf[uartID], pUxTXREG, byteNb, RBUF_FIXED_PTR);
+			}
+			// --------------------------- //
 		}
-		// ---------------------- //
+		// ===================== //
 
-		// -- Save to the buffer -- //
-		rBufPushU8(uartRxBuf[UART_1], tempBuf, byteNb, RBUF_FREERUN_PTR);	//Can loose data if the buffer is full
-		// ------------------------ //
+		// === ERR Interrupt === //
+		if (interruptCheck & INT_MASK_UART_ERR)
+		{
+			// -- Overrun Error -- //
+			if (pUxSTA->OERR)
+			{
+				//Read all the HW buffer
 
-		intFastClearFlag(INT_UART_1_RX);
+				//Clear the error flag
+			}
+			// -- Framing Error -- //
+			else if (pUxSTA->FERR)
+			{
+				//Clear the error flag
+			}
+			else
+			// -- Parity Error --- //
+			{
+				//Clear the error flag
+			}
+			// ------------------- //
+		}
+		// ===================== //
 	}
-	// ===================== //
-
-	// === TX Interrupt ==== //
-	if (interruptCheck & INT_MASK_UART_TX)
-	{
-		//Check for pending data
-		byteNb = rBufGetUsedSpace(uartTxBuf[UART_1]);
-
-		// -- No more byte to send --- //
-		if (!byteNb)
-			clearBIT(U1STA,UTXEN_MASK);		//Stop the transmitter
-		// -- Send the pending data -- //
-		else
-		{
-			if (byteNb > UART_FIFO_LVL)			//If there is more byte that the HW buffer can
-				byteNb = UART_FIFO_LVL;			//contain, load the maximum
-
-			//Pull the correct number of byte from the soft buffer into the HW buffer
-			rBufPullU8(uartTxBuf[UART_1], &U1TXREG, byteNb, RBUF_FIXED_PTR);
-		}
-		// --------------------------- //
-
-		intFastClearFlag(INT_UART_1_TX);
-	}
-	// ===================== //
-
-	// === ERR Interrupt === //
-	if (interruptCheck & INT_MASK_UART_ERR)
-	{
-		// -- Overrun Error -- //
-		if (U1STAbits.OERR)
-		{
-			//Read all the HW buffer
-
-			//Clear the error flag
-		}
-		// -- Framing Error -- //
-		else if (U1STAbits.FERR)
-		{
-			//Clear the error flag
-		}
-		else
-		// -- Parity Error --- //
-		{
-			//Clear the error flag
-		}
-		// ------------------- //
-
-		intFastClearFlag(INT_UART_1_ERR);
-	}
-	// ===================== //
 }
-*/
 // =========================== //
 
 
