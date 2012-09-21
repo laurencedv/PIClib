@@ -396,6 +396,30 @@ U8 uartGetAddressMask(U8 uartPort)
 	}
 	// ----------------------------- //
 }
+
+/**
+* \fn		U16 uartGetRxSize(U8 uartPort)
+* @brief	Return the number of byte waiting in the RX buffer
+* @note
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U16 rxBufSize			Number fo byte in the RX buffer
+*/
+U16 uartGetRxSize(U8 uartPort)
+{
+	return rBufGetUsedSpace(uartRxBuf[uartPort]);
+}
+
+/**
+* \fn		U16 uartGetTxSize(U8 uartPort)
+* @brief	Return the number of byte waiting in the TX buffer
+* @note
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U16 txBufSize			Number fo byte in the TX buffer
+*/
+U16 uartGetTxSize(U8 uartPort)
+{
+	return rBufGetUsedSpace(uartTxBuf[uartPort]);
+}
 // =========================== //
 
 
