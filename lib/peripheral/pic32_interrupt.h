@@ -55,6 +55,9 @@
 // ################## Includes ################## //
 #include <hardware.h>
 
+// Lib
+#include <peripheral/pic32_cpu.h>
+
 // Definition
 #include <definition/stddef_megaxone.h>
 #include <definition/datatype_megaxone.h>

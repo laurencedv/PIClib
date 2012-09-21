@@ -209,6 +209,6 @@ void _general_exception_handler (void)
 	exceptionCause = (_CP0_GET_CAUSE() & 0x7C) >> 2;
 	exceptionAddress = _CP0_GET_EPC();
 
-	for (;;);
+	cpuSoftReset();					//Reset!
 }
 // ############################################## //
