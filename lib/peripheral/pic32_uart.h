@@ -236,7 +236,6 @@ typedef union
 		U32 UxSTA;
 	}registers;
 }tUARTConfig;
-
 // ############################################## //
 
 
@@ -337,6 +336,15 @@ U8 uartGetAddressMask(U8 uartPort);
 U16 uartGetRxSize(U8 uartPort);
 
 /**
+* \fn		U16 uartGetRxSpace(U8 uartPort)
+* @brief	Return the number of available space is in the RX buffer
+* @note
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U16 rxBufSpace			Space available (in byte)
+*/
+U16 uartGetRxSpace(U8 uartPort);
+
+/**
 * \fn		U16 uartGetTxSize(U8 uartPort)
 * @brief	Return the number of byte waiting in the TX buffer
 * @note
@@ -344,6 +352,15 @@ U16 uartGetRxSize(U8 uartPort);
 * @return	U16 txBufSize			Number fo byte in the TX buffer
 */
 U16 uartGetTxSize(U8 uartPort);
+
+/**
+* \fn		U16 uartGetTxSpace(U8 uartPort)
+* @brief	Return the number of available space is in the TX buffer
+* @note
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U16 txBufSpace			Space available (in byte)
+*/
+U16 uartGetTxSpace(U8 uartPort);
 // ========================== //
 
 
@@ -366,6 +383,32 @@ U8 uartSendByte(U8 uartPort, U8 byteToSend);
 * @return	U8 receivedByte			Byte received
 */
 U8 uartRcvByte(U8 uartPort);
+
+/**
+* \fn		U16 uartSendArray(U8 uartPort, void * sourcePtr, U16 byteNb)
+* @brief	Append $byteNb number of byte from the $sourcePtr to the transmit buffer
+* @note		Return the actual number of byte placed in the buffer
+*		If the passed $byteNb is greater than the number of available byte in the buffer,
+*		will return 0 and transfer nothing
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		void * sourcePtr		Pointer to load the byte from
+* @arg		U16 byteNb			Number of byte to load
+* @return	U16 receivedByte		Number of byte really loaded
+*/
+U16 uartSendArray(U8 uartPort, U8 * sourcePtr, U16 byteNb);
+
+/**
+* \fn		U16 uartRcvArray(U8 uartPort, void * destinationPtr, U16 byteNb)
+* @brief	Extract $byteNb number of byte from the receive buffer and place it in $destinationPtr
+* @note		Return the actual number of byte placed in the destination
+*		If the passed $byteNb is greater than the number of valid byte in the buffer, will only
+*		extract the number of byte present in the buffer
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		void * destinationPtr		Pointer to save the byte to
+* @arg		U16 byteNb			Number of byte to extract
+* @return	U16 receivedByte		Number of byte really extracted
+*/
+U16 uartRcvArray(U8 uartPort, U8 * destinationPtr, U16 byteNb);
 // ========================== //
 // ############################################## //
 

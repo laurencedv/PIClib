@@ -31,7 +31,7 @@ extern U32 globalDump;
 void cpuSoftReset(void)
 {
 	sysUnlock();			//Unlock the register
-	RSWRSTSET = SWRST_BIT;		//Enable the Soft Reset Event
+	RSWRSTSET = SWRST_MASK;		//Enable the Soft Reset Event
 	globalDump = RSWRST;		//Read the Register
 	for(;;);			//Wait for the reset
 }

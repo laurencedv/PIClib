@@ -410,6 +410,18 @@ U16 uartGetRxSize(U8 uartPort)
 }
 
 /**
+* \fn		U16 uartGetRxSpace(U8 uartPort)
+* @brief	Return the number of available space is in the RX buffer
+* @note
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U16 rxBufSpace			Space available (in byte)
+*/
+U16 uartGetRxSpace(U8 uartPort)
+{
+	return rBufGetFreeSpace(uartRxBuf[uartPort]);
+}
+
+/**
 * \fn		U16 uartGetTxSize(U8 uartPort)
 * @brief	Return the number of byte waiting in the TX buffer
 * @note
@@ -419,6 +431,18 @@ U16 uartGetRxSize(U8 uartPort)
 U16 uartGetTxSize(U8 uartPort)
 {
 	return rBufGetUsedSpace(uartTxBuf[uartPort]);
+}
+
+/**
+* \fn		U16 uartGetTxSpace(U8 uartPort)
+* @brief	Return the number of available space is in the TX buffer
+* @note
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U16 txBufSpace			Space available (in byte)
+*/
+U16 uartGetTxSpace(U8 uartPort)
+{
+	return rBufGetFreeSpace(uartTxBuf[uartPort]);
 }
 // =========================== //
 
@@ -443,17 +467,10 @@ U8 uartSendByte(U8 uartPort,U8 byteToSend)
 	// -- Enable Transmission -- //
 	if (errorCode == STD_EC_SUCCESS)
 	{
-		switch (uartPort)
-		{
-			case UART_1:	setBIT(U1STA,UTXEN_MASK);	break;
-			case UART_2:	setBIT(U2STA,UTXEN_MASK);	break;
-		#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
-			case UART_3:	setBIT(U3STA,UTXEN_MASK);	break;
-			case UART_4:	setBIT(U4STA,UTXEN_MASK);	break;
-			case UART_5:	setBIT(U5STA,UTXEN_MASK);	break;
-			case UART_6:	setBIT(U6STA,UTXEN_MASK);	break;
-		#endif
-		}
+		errorCode = uartSelectPort(uartPort);
+
+		if (errorCode == STD_EC_SUCCESS)
+			pUxSTA->UTXEN = 1;
 	}
 	// ------------------------- //
 
@@ -476,24 +493,69 @@ U8 uartRcvByte(U8 uartPort)
 	return receivedByte;
 }
 
-
-U16 uartSendArray(U8 uartPort, void * arrayPtr, U16 byteNb)
+/**
+* \fn		U16 uartSendArray(U8 uartPort, void * sourcePtr, U16 byteNb)
+* @brief	Append $byteNb number of byte from the $sourcePtr to the transmit buffer
+* @note		Return the actual number of byte placed in the buffer
+*		If the passed $byteNb is greater than the number of available byte in the buffer,
+*		will return 0 and transfer nothing
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		void * sourcePtr		Pointer to load the byte from
+* @arg		U16 byteNb			Number of byte to load
+* @return	U16 receivedByte		Number of byte really loaded
+*/
+U16 uartSendArray(U8 uartPort, U8 * sourcePtr, U16 byteNb)
 {
+	U8 errorCode;
+
 	// -- Push the array in the correct buffer -- //
+	errorCode = rBufPushU8(uartTxBuf[uartPort], sourcePtr, byteNb, RBUF_FREERUN_PTR);
 	// ------------------------------------------ //
-	return 0;
+
+	// -- Enable Transmission -- //
+	if (errorCode == STD_EC_SUCCESS)
+	{
+		errorCode = uartSelectPort(uartPort);
+
+		if (errorCode == STD_EC_SUCCESS)
+			pUxSTA->UTXEN = 1;
+	}
+	else
+		return 0;
+	// ------------------------- //
+	
+	return byteNb;
 }
 
-
-U16 uartRcvArray(U8 uartPort, void * destinationPtr, U16 byteNb)
+/**
+* \fn		U16 uartRcvArray(U8 uartPort, void * destinationPtr, U16 byteNb)
+* @brief	Extract $byteNb number of byte from the receive buffer and place it in $destinationPtr
+* @note		Return the actual number of byte placed in the destination
+*		If the passed $byteNb is greater than the number of valid byte in the buffer, will only
+*		extract the number of byte present in the buffer
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		void * destinationPtr		Pointer to save the byte to
+* @arg		U16 byteNb			Number of byte to extract
+* @return	U16 receivedByte		Number of byte really extracted
+*/
+U16 uartRcvArray(U8 uartPort, U8 * destinationPtr, U16 byteNb)
 {
+	U16 actualByteInBuffer = rBufGetUsedSpace(uartRxBuf[uartPort]);
+
+	// -- Handle boundary -- //
+	if (byteNb > actualByteInBuffer)
+		byteNb = actualByteInBuffer;
+	// --------------------- //
+
 	// -- Pull the array from the correct buffer -- //
+	rBufPullU8(uartRxBuf[uartPort], destinationPtr, byteNb, RBUF_FREERUN_PTR);
 	// -------------------------------------------- //
-	return 0;
+
+	return byteNb;
 }
 
 
-U16 uartSendFrame(U8 uartPort, void * framePtr, U8 delimiter)
+U16 uartSendFrame(U8 uartPort, U8 * framePtr, U8 delimiter)
 {
 	// -- Push the frame in the correct buffer -- //
 	// ------------------------------------------ //
@@ -501,7 +563,7 @@ U16 uartSendFrame(U8 uartPort, void * framePtr, U8 delimiter)
 }
 
 
-U16 uartRcvFrame(U8 uartPort, void * framePtr, U8 delimiter)
+U16 uartRcvFrame(U8 uartPort, U8 * framePtr, U8 delimiter)
 {
 	// -- Pull the frame from the correct buffer -- //
 	// -------------------------------------------- //

@@ -2214,7 +2214,7 @@ void _general_exception_handler(void);
 * @arg		U8 state			State to set the bit
 * @return	nothing
 */
-void _intSetReg(U32 * regPtr, tIntIRQ intIRQSource, U8 state);
+void _intSetReg(volatile U32 * regPtr, tIntIRQ intIRQSource, U8 state);
 
 /**
 * \fn		U8 _intGetReg(U32 * regPtr, tIntIRQ intIRQSource)
@@ -2224,7 +2224,7 @@ void _intSetReg(U32 * regPtr, tIntIRQ intIRQSource, U8 state);
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @return	U8 state			State to set the bit
 */
-U8 _intGetReg(U32 * regPtr, tIntIRQ intIRQSource);
+U8 _intGetReg(volatile U32 * regPtr, tIntIRQ intIRQSource);
 // ############################################## //
 
 #endif
