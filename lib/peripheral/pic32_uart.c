@@ -75,13 +75,10 @@ U8 uartSelectPort(U8 uartPort)
 // ############### UART Functions ############## //
 // === Interrupt Handler ===== //
 /**
-* \fn		void timer1ISR(void)
-* @brief	Example of an Interrupt Service Routine for the uart 1
-* @note		Place it at the UART 1 vector in the main
-*		One vector for all interrupt source
-*		Must used UART_TX_INT_BUF_EMPTY and UART_RX_INT_DATA_READY init option
-*		for this ISR to behave correctly.
-* @arg		nothing
+* \fn		void uartISR(U8 uartID)
+* @brief	Interrupt handler for any uart
+* @note		
+* @arg		U8 uartID			Hardware UART ID
 * @return	nothing
 */
 void uartISR(U8 uartID)

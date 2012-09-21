@@ -343,7 +343,7 @@ void softCntEngine(void)
 */
 void softCntStart(U8 softCntID)
 {
-	softCnt[softCntID] = softCntReloadVal[softCntID];			//Reload the counter
+	//softCnt[softCntID] = softCntReloadVal[softCntID];			//Reload the counter
 	softCntRun |= (BIT0 << softCntID);					//Start the counter
 }
 
@@ -370,6 +370,18 @@ void softCntStop(U8 softCntID)
 void softCntUpdatePeriod(U8 softCntID, U32 newPeriod)
 {
 	softCntReloadVal[softCntID] = newPeriod;
+}
+
+/**
+* \fn		void softCntReload(U8 softCntID)
+* @brief	Manual reload a soft counter
+* @note		Do the reload at the call time
+* @arg		U8 softCntID		ID of the Software Counter
+* @return	nothing
+*/
+void softCntReload(U8 softCntID)
+{
+	softCnt[softCntID] = softCntReloadVal[softCntID];
 }
 // ============================== //
 

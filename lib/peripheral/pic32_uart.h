@@ -242,7 +242,14 @@ typedef union
 
 // ################# Prototypes ################# //
 // === Interrupt Handler ===== //
-
+/**
+* \fn		void uartISR(U8 uartID)
+* @brief	Interrupt handler for any uart
+* @note
+* @arg		U8 uartID			Hardware UART ID
+* @return	nothing
+*/
+void uartISR(U8 uartID);
 // =========================== //
 
 

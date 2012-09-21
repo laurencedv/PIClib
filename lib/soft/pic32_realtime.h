@@ -206,6 +206,15 @@ void softCntStop(U8 softCntID);
 * @return	nothing
 */
 void softCntUpdatePeriod(U8 softCntID, U32 newPeriod);
+
+/**
+* \fn		void softCntReload(U8 softCntID)
+* @brief	Manual reload a soft counter
+* @note		Do the reload at the call time
+* @arg		U8 softCntID		ID of the Software Counter
+* @return	nothing
+*/
+void softCntReload(U8 softCntID);
 // =========================== //
 
 
