@@ -90,12 +90,15 @@ void rtISR(void)
 	#if USE_RT_SOFT_COUNTER == ENABLE
 	U8 wu0 = 0;
 
-	while ((softCntRun) & (U16_MAX << wu0))
+	while (softCntRun >> wu0)					//While there is still some enabled counter
 	{
-		if (softCnt[wu0])
-			softCnt[wu0]--;					//Counter is still decrementing
-		else
-			softCntControl[wu0].underRun = 1;		//Counter as reach bottom, flag it
+		if (softCntRun & (BIT0 << wu0))				//Check fot this specific counter
+		{
+			if (softCnt[wu0])
+				softCnt[wu0]--;				//Counter is still decrementing
+			else
+				softCntControl[wu0].underRun = 1;	//Counter as reach bottom, flag it
+		}
 		wu0++;
 	}
 	#endif
@@ -258,6 +261,7 @@ U8 softCntInit(U32 cntPeriod, U32 * targetPtr, U32 targetValue, U8 option)
 		softCntStop(softCntID);							//Ensure that the counter is stopped
 		softCntEnable |= (BIT0 << softCntID);					//Enable the counter
 		softCntControl[softCntID].reload = option & SOFT_CNT_RELOAD_EN;		//Set the auto reload option
+		softCnt[softCntID] = cntPeriod;						//Initial Loading
 		softCntReloadVal[softCntID] = cntPeriod;				//Save the period
 		softCntControl[softCntID].underRun = 0;					//Ensure the underRun flag is cleared
 		// ---------------------- //

@@ -121,7 +121,6 @@ U8 rBufResize(tRBufCtl * bufCtlPtr, U16 newElementNb)
 	return STD_EC_SUCCESS;
 }
 
-
 /**
 * \fn		U8 rBufDelete(tRBufCtl * bufCtlPtr)
 * @brief	Delete the specified Ring buffer

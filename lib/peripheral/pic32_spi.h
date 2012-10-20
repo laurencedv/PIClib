@@ -479,8 +479,8 @@ U8 spiStart(U8 spiPort);
 * \fn		U8 spiSetBaudRate(U8 spiPort, U32 baudRate)
 * @brief	Compute the correct BRG value for the desired baudrate
 * @note		Will round up to the nearest possible, use spiGetBaudRate() to have the exact one.
-*			Will return STD_EC_NOTFOUND if invalid timer ID is inputed.
- *			Use the actual PBCLK freq for it's computation
+*			Will return STD_EC_NOTFOUND if invalid spi ID is inputed.
+ *			It use the actual PBCLK freq for it's computation
 * @arg		U8 spiPort			Hardware SPI ID
 * @arg		U32 baudRate		Desired baudrate (in bps)
 * @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)

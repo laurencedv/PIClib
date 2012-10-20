@@ -58,6 +58,12 @@ void adcISR(U8 adcPort)
 		case ADCidle:
 		{
 			//Not really supposed to be here...
+
+			// -- Discard the result -- //
+			for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
+				globalDump = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
+			// ------------------------ //
+
 			break;
 		}
 		case ADCconfig:
@@ -67,14 +73,21 @@ void adcISR(U8 adcPort)
 		}
 		case ADCbusy:
 		{
-			if (adcResultPtr[adcPort] != (U16*)&globalDump)
+			if (adcResultPtr[adcPort] != &globalDump)
 			{
 				// -- Save the result in the destination -- //
 				for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
 					adcResultPtr[adcPort][wu0] = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
 				// ---------------------------------------- //
 			}
-
+			else
+			{
+				// -- Discard the result -- //
+				for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
+					globalDump = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
+				// ------------------------ //
+			}
+			
 			*adcDonePtr[adcPort] = ADC_CONV_DONE;		//Flag the completion
 
 			adcState[adcPort] = ADCidle;
@@ -157,7 +170,7 @@ U8 adcInit(U8 adcPort)
 /**
 * \fn		void adcSetInput(tADCScanInput inputMatrix)
 * @brief	Enable Analog Input as such
-* @note		Will configure in the correct register depending of the CPU_FAMILY
+* @note		Will configure in the correct register depending on the CPU_FAMILY
 *		Don't forget to set the TRIS register as input also!
 * @arg		tADCScanInput inputMatrix		Bitwise selection of input enabled
 * @return	nothing
@@ -165,7 +178,25 @@ U8 adcInit(U8 adcPort)
 void adcSetInput(tADCMuxInput inputMatrix)
 {
 #if CPU_FAMILY == PIC32MX1xx || CPU_FAMILY == PIC32MX2xx
-	// TO DO
+#if defined (__32MX110F016B__) || (__32MX120F032B__) || (__32MX130F064B__) || (__32MX150F128B__) || (__32MX210F016B__) || (__32MX220F032B__) || (__32MX230F064B__) || (__32MX250F128B__)
+	
+	split32 splittedMatrix;
+
+	splittedMatrix.all = inputMatrix;
+
+	ANSELA = inputMatrix & (BIT1|BIT0);				//AN0,AN1
+	ANSELBCLR = 0xFFFF;						//Clear all input on Port B
+	ANSELBSET = ((inputMatrix >> 2) & (BIT3|BIT2|BIT1|BIT0));	//AN2, AN3, AN4, AN5
+	ANSELBbits.ANSB12 = splittedMatrix.b12;				//AN12
+	ANSELBbits.ANSB13 = splittedMatrix.b11;				//AN11
+	ANSELBbits.ANSB14 = splittedMatrix.b10;				//AN10
+	ANSELBbits.ANSB15 = splittedMatrix.b9;				//AN9
+
+#elif defined (__32MX110F016C__) || (__32MX120F032C__) || (__32MX130F064C__) || (__32MX150F128C__) || (__32MX210F016C__) || (__32MX220F032C__) || (__32MX230F064C__) || (__32MX250F128C__)
+
+#elif defined (__32MX110F016D__) || (__32MX120F032D__) || (__32MX130F064D__) || (__32MX150F128D__) || (__32MX210F016D__) || (__32MX220F032D__) || (__32MX230F064D__) || (__32MX250F128D__)
+
+#endif	
 #elif CPU_FAMILY == PIC32MX3xx || CPU_FAMILY == PIC32MX4xx || CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
 	AD1PCFG = inputMatrix;
 #endif
@@ -309,7 +340,7 @@ U8 adcCalibrate(U8 adcPort)
 * @arg		tADCScanInput scanInput			Input Matrix to enable
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 adcSetScan(U8 adcPort, tADCMuxInput scanInput)
+U8 adcSetScanInput(U8 adcPort, tADCMuxInput scanInput)
 {
 	U8 inputNb = 0;
 
@@ -339,7 +370,7 @@ U8 adcSetScan(U8 adcPort, tADCMuxInput scanInput)
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	tADCScanInput inputMatrix		Input Matrix enabled
 */
-tADCMuxInput adcGetScan(U8 adcPort)
+tADCMuxInput adcGetScanInput(U8 adcPort)
 {
 	if (adcSelectPort(adcPort) == STD_EC_SUCCESS)
 		return pADxCSSL->CSSL;

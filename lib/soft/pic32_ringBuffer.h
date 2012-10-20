@@ -36,7 +36,7 @@
 // --------------- //
 
 // Buffer Status //
-#define RBUF_LOCKED				1
+#define RBUF_LOCKED			1
 #define RBUF_UNLOCKED			0
 // ------------- //
 // ############################################## //

@@ -35,7 +35,7 @@
 
 // ################## Defines ################### //
 // Application dependant //
-#define UART_BUF_SIZE				100
+#define UART_BUF_SIZE				256
 // --------------------- //
 
 // ---- Init Option ---- //
@@ -279,7 +279,7 @@ tUARTConfig uartGetConfig(U8 uartPort);
 * @brief	Initialise and start the selected UART with the specified options.
 * @note		No sanity check of the settings
 *		Return STD_EC_NOTFOUND if invalid UART HW ID is given.
-*		Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL, 9600))
+*		Option must be | or + (ex: uartInit(0, UART_IDLE_RUN|UART_MODE_8N1|UART_RX_INT_BUF_ALMOST_FULL))
 * @arg		U8 uartPort			Hardware UART ID
 * @arg		U32 option			Setting to configure for the UART
 * @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
@@ -361,6 +361,47 @@ U16 uartGetTxSize(U8 uartPort);
 * @return	U16 txBufSpace			Space available (in byte)
 */
 U16 uartGetTxSpace(U8 uartPort);
+// ========================== //
+
+
+// === Status Function ====== //
+/**
+* \fn		U8 uartSetTxStatus(U8 uartPort, U8 state)
+* @brief	Set the state of the Transmitter of the selected UART
+* @note		The state should be passed as ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		U8 state			New state for the transmitter
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
+*/
+U8 uartSetTxStatus(U8 uartPort, U8 state);
+
+/**
+* \fn		U8 uartGetTxStatus(U8 uartPort)
+* @brief	Return the status of the Transmitter of the selected UART
+* @note		The returned value is ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U8 UTXENState			State of the Transmitter
+*/
+U8 uartGetTxStatus(U8 uartPort);
+
+/**
+* \fn		U8 uartSetRxStatus(U8 uartPort, U8 state)
+* @brief	Set the state of the Receiver of the selected UART
+* @note		The state should be passed as ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		U8 state			New state for the receiver
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
+*/
+U8 uartSetRxStatus(U8 uartPort, U8 state);
+
+/**
+* \fn		U8 uartGetRxStatus(U8 uartPort)
+* @brief	Return the status of the Receiver of the selected UART
+* @note		The returned value is ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U8 URXENState			State of the Receiver
+*/
+U8 uartGetRxStatus(U8 uartPort);
 // ========================== //
 
 

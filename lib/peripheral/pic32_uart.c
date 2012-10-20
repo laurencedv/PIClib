@@ -29,9 +29,9 @@ tRBufCtl * uartTxBuf[UART_MAX_PORT];
 //Reg pointers
 tUxMODE * pUxMODE = NULL;
 tUxSTA * pUxSTA = NULL;
-U32 * pUxRXREG = NULL;
-U32 * pUxTXREG = NULL;
-U32 * pUxBRG = NULL;
+volatile U32 * pUxRXREG = NULL;
+volatile U32 * pUxTXREG = NULL;
+volatile U32 * pUxBRG = NULL;
 
 // Interrupt Mapping
 #if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
@@ -55,13 +55,13 @@ U8 uartSelectPort(U8 uartPort)
 	// -- Select the correct UART -- //
 	switch (uartPort)
 	{
-		case UART_1: pUxMODE = (tUxMODE*)&U1MODE; pUxSTA = (tUxSTA*)&U1STA; pUxBRG = (U32*)&U1BRG; pUxRXREG = (U32*)&U1RXREG; pUxTXREG = &U1TXREG; break;
-		case UART_2: pUxMODE = (tUxMODE*)&U2MODE; pUxSTA = (tUxSTA*)&U2STA; pUxBRG = (U32*)&U2BRG; pUxRXREG = (U32*)&U2RXREG; pUxTXREG = &U2TXREG; break;
+		case UART_1: pUxMODE = (tUxMODE*)&U1MODE; pUxSTA = (tUxSTA*)&U1STA; pUxBRG = &U1BRG; pUxRXREG = &U1RXREG; pUxTXREG = &U1TXREG; break;
+		case UART_2: pUxMODE = (tUxMODE*)&U2MODE; pUxSTA = (tUxSTA*)&U2STA; pUxBRG = &U2BRG; pUxRXREG = &U2RXREG; pUxTXREG = &U2TXREG; break;
 	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
-		case UART_3: pUxMODE = (tUxMODE*)&U3MODE; pUxSTA = (tUxSTA*)&U3STA; pUxBRG = (U32*)&U3BRG; pUxRXREG = (U32*)&U3RXREG; pUxTXREG = &U3TXREG; break;
-		case UART_4: pUxMODE = (tUxMODE*)&U4MODE; pUxSTA = (tUxSTA*)&U4STA; pUxBRG = (U32*)&U4BRG; pUxRXREG = (U32*)&U4RXREG; pUxTXREG = &U4TXREG; break;
-		case UART_5: pUxMODE = (tUxMODE*)&U5MODE; pUxSTA = (tUxSTA*)&U5STA; pUxBRG = (U32*)&U5BRG; pUxRXREG = (U32*)&U5RXREG; pUxTXREG = &U5TXREG; break;
-		case UART_6: pUxMODE = (tUxMODE*)&U6MODE; pUxSTA = (tUxSTA*)&U6STA; pUxBRG = (U32*)&U6BRG; pUxRXREG = (U32*)&U6RXREG; pUxTXREG = &U6TXREG; break;
+		case UART_3: pUxMODE = (tUxMODE*)&U3MODE; pUxSTA = (tUxSTA*)&U3STA; pUxBRG = &U3BRG; pUxRXREG = &U3RXREG; pUxTXREG = &U3TXREG; break;
+		case UART_4: pUxMODE = (tUxMODE*)&U4MODE; pUxSTA = (tUxSTA*)&U4STA; pUxBRG = &U4BRG; pUxRXREG = &U4RXREG; pUxTXREG = &U4TXREG; break;
+		case UART_5: pUxMODE = (tUxMODE*)&U5MODE; pUxSTA = (tUxSTA*)&U5STA; pUxBRG = &U5BRG; pUxRXREG = &U5RXREG; pUxTXREG = &U5TXREG; break;
+		case UART_6: pUxMODE = (tUxMODE*)&U6MODE; pUxSTA = (tUxSTA*)&U6STA; pUxBRG = &U6BRG; pUxRXREG = &U6RXREG; pUxTXREG = &U6TXREG; break;
 	#endif
 		default : return STD_EC_NOTFOUND;		//Invalid Uart port ID
 	}
@@ -84,8 +84,8 @@ U8 uartSelectPort(U8 uartPort)
 void uartISR(U8 uartID)
 {
 	U32 interruptCheck = intGetFlag(UART_INT[uartID]);	//Fetch all the flags for UART_1
-	U16 byteNb;
-	U8 tempBuf[8];
+	U16 byteNb = 0;
+	static U8 tempBuf[8];
 
 	if (uartSelectPort(uartID) == STD_EC_SUCCESS)
 	{
@@ -120,7 +120,7 @@ void uartISR(U8 uartID)
 			byteNb = rBufGetUsedSpace(uartTxBuf[uartID]);
 
 			// -- No more byte to send --- //
-			if (!byteNb)
+			if (byteNb == 0)
 				(pUxSTA + REG_OFFSET_CLR_32)->all = UTXEN_MASK;		//Stop the transmitter
 			// -- Send the pending data -- //
 			else
@@ -142,13 +142,18 @@ void uartISR(U8 uartID)
 			if (pUxSTA->OERR)
 			{
 				//Read all the HW buffer
-
+				while (pUxSTA->URXDA)
+				{
+					globalDump = *pUxRXREG;
+				}
 				//Clear the error flag
+				pUxSTA->OERR = 0;
 			}
 			// -- Framing Error -- //
 			else if (pUxSTA->FERR)
 			{
 				//Clear the error flag
+				pUxSTA->FERR = 0;
 			}
 			else
 			// -- Parity Error --- //
@@ -264,47 +269,40 @@ U8 uartSetBaudRate(U8 uartPort, U32 baudRate)
 {
 	U8 divider = 4;							//Default: BRGH=0 div by 16
 	U8 uartSaveState;
+	U8 errorCode;
 
 	// -- Select the correct UART -- //
-	switch (uartPort)
-	{
-		case UART_1: pUxMODE = (tUxMODE*)&U1MODE;	pUxBRG = (U32*)&U1BRG; break;
-		case UART_2: pUxMODE = (tUxMODE*)&U2MODE;	pUxBRG = (U32*)&U2BRG; break;
-	#if CPU_FAMILY == PIC32MX5xxH || CPU_FAMILY == PIC32MX5xxL || CPU_FAMILY == PIC32MX6xx || CPU_FAMILY == PIC32MX7xx
-		case UART_3: pUxMODE = (tUxMODE*)&U3MODE;	pUxBRG = (U32*)&U3BRG; break;
-		case UART_4: pUxMODE = (tUxMODE*)&U4MODE;	pUxBRG = (U32*)&U4BRG; break;
-		case UART_5: pUxMODE = (tUxMODE*)&U5MODE;	pUxBRG = (U32*)&U5BRG; break;
-		case UART_6: pUxMODE = (tUxMODE*)&U6MODE;	pUxBRG = (U32*)&U6BRG; break;
-	#endif
-		default : return STD_EC_NOTFOUND;			//Invalid Uart port ID
-	}
+	errorCode = uartSelectPort(uartPort);
 	// ----------------------------- //
-
-	// -- Handle exception -- //
-	if (baudRate == 0)
-		return STD_EC_INVALID;
-	// ---------------------- //
-
-	// Stop the UART
-	uartSaveState = pUxMODE->ON;
-	pUxMODE->ON = 0;
-
-	// -- Set the divider -- //
-	if (baudRate > 38400)
+	if (errorCode == STD_EC_SUCCESS)
 	{
-		divider = 2;						//Div by 4
-		pUxMODE->BRGH = 1;					//Set the formula for High speed
+		// -- Handle exception -- //
+		if (baudRate == 0)
+			return STD_EC_INVALID;
+		// ---------------------- //
+
+		// Stop the UART
+		uartSaveState = pUxMODE->ON;
+		pUxMODE->ON = 0;
+
+		// -- Set the divider -- //
+		if (baudRate > 38400)
+		{
+			divider = 2;						//Div by 4
+			pUxMODE->BRGH = 1;					//Set the formula for High speed
+		}
+		// --------------------- //
+
+		// -- Compute the BDGEN value -- //
+		*pUxBRG = ((U32)( ((F32)clockGetPBCLK())/(F32)baudRate ) >> divider )-1 ;
+		// ----------------------------- //
+
+		//Restore the UART State
+		pUxSTA->URXEN = uartSaveState;
+		pUxMODE->ON = uartSaveState;
 	}
-	// --------------------- //
 
-	// -- Compute the BDGEN value -- //
-	*pUxBRG = ((U32)( ((F32)clockGetPBCLK())/(F32)baudRate ) >> divider )-1 ;
-	// ----------------------------- //
-
-	//Restore the UART State
-	pUxMODE->ON = uartSaveState;
-
-	return STD_EC_SUCCESS;
+	return errorCode;
 }
 
 /**
@@ -447,6 +445,71 @@ U16 uartGetTxSpace(U8 uartPort)
 // =========================== //
 
 
+// === Status Function ====== //
+/**
+* \fn		U8 uartSetTxStatus(U8 uartPort, U8 state)
+* @brief	Set the state of the Transmitter of the selected UART
+* @note		The state should be passed as ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		U8 state			New state for the transmitter
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
+*/
+U8 uartSetTxStatus(U8 uartPort, U8 state)
+{
+	U8 errorCode = uartSelectPort(uartPort);
+
+	if (errorCode == STD_EC_SUCCESS)
+		pUxSTA->UTXEN = state;
+
+	return errorCode;
+}
+
+/**
+* \fn		U8 uartGetTxStatus(U8 uartPort)
+* @brief	Return the status of the Transmitter of the selected UART
+* @note		The returned value is ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U8 UTXENState			State of the Transmitter
+*/
+U8 uartGetTxStatus(U8 uartPort)
+{
+	if (uartSelectPort(uartPort) == STD_EC_SUCCESS)
+		return pUxSTA->UTXEN;
+}
+
+/**
+* \fn		U8 uartSetRxStatus(U8 uartPort, U8 state)
+* @brief	Set the state of the Receiver of the selected UART
+* @note		The state should be passed as ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @arg		U8 state			New state for the receiver
+* @return	U8 errorCode			STD Error Code (return STD_EC_SUCCESS if successful)
+*/
+U8 uartSetRxStatus(U8 uartPort, U8 state)
+{
+	U8 errorCode = uartSelectPort(uartPort);
+
+	if (errorCode == STD_EC_SUCCESS)
+		pUxSTA->URXEN = state;
+
+	return errorCode;
+}
+
+/**
+* \fn		U8 uartGetRxStatus(U8 uartPort)
+* @brief	Return the status of the Receiver of the selected UART
+* @note		The returned value is ENABLE or DISABLE
+* @arg		U8 uartPort			Hardware UART ID
+* @return	U8 URXENState			State of the Receiver
+*/
+U8 uartGetRxStatus(U8 uartPort)
+{
+	if (uartSelectPort(uartPort) == STD_EC_SUCCESS)
+		return pUxSTA->URXEN;
+}
+// ========================== //
+
+
 // === Transfer Functions ==== //
 /**
 * \fn		U8 uartSendByte(U8 uartPort, U8 byteToSend)
@@ -561,7 +624,6 @@ U16 uartSendFrame(U8 uartPort, U8 * framePtr, U8 delimiter)
 	// ------------------------------------------ //
 	return 0;
 }
-
 
 U16 uartRcvFrame(U8 uartPort, U8 * framePtr, U8 delimiter)
 {

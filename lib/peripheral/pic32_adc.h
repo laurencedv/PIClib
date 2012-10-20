@@ -272,8 +272,7 @@ U8 adcSelectPort(U8 adcPort);
 /**
 * \fn		U8 adcInit(U8 adcPort)
 * @brief	Initialize the ADC module for single mode
-* @note		Will initialise the interrupt, but the priorities must be set in the main
-*		and Multi-Vector Interrupt mode must be enabled
+* @note		
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
@@ -328,7 +327,7 @@ U8 adcCalibrate(U8 adcPort);
 * @arg		tADCScanInput scanInput			Input Matrix to enable
 * @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 adcSetScan(U8 adcPort, tADCMuxInput scanInput);
+U8 adcSetScanInput(U8 adcPort, tADCMuxInput scanInput);
 
 /**
 * \fn		U32 adcGetScan(U8 adcPort)
@@ -337,7 +336,7 @@ U8 adcSetScan(U8 adcPort, tADCMuxInput scanInput);
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	tADCScanInput inputMatrix		Input Matrix enabled
 */
-tADCMuxInput adcGetScan(U8 adcPort);
+tADCMuxInput adcGetScanInput(U8 adcPort);
 // ========================== //
 
 // == Conversion Functions == //

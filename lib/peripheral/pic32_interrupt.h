@@ -6,7 +6,7 @@
  @note		Use the name in the Interrupts Source List to access an interrupt with any macro
 		Use the Vector number in the _ISR Macro wherever you want
 		Use the IRQ only with the run-time functions
- @todo		Test usefulness and exactness of IRQ number for group selection (only pic32mx1xx and 2xx for now)
+ @todo		Test usefulness and exactness of IRQ number for group selection (only pic32mx1xx,2xx and 5xx)
 
  @date		September 15th 2012
  @author	Laurence DV
@@ -406,7 +406,7 @@ typedef enum
 	IRQ_I2C_2_COL = 56,
 	IRQ_I2C_2_SLAVE = 57,
 	IRQ_I2C_2_MASTER = 58,
-	IRQ_I2C_2 = 50xB8,
+	IRQ_I2C_2 = 0xB8,
 	IRQ_CTMU = 59,
 	IRQ_DMA_0 = 60,
 	IRQ_DMA_1 = 61,
@@ -783,7 +783,7 @@ typedef enum
 * @arg		tIntIRQ intIRQSource		Which interrupt to init
 * @return	nothing
 */
-#define intInit(intIRQSource)				_intSetReg((U32*)&IFS0,intIRQSource,DISABLE); _intSetReg((U32*)&IEC0,intIRQSource,ENABLE)
+#define intInit(intIRQSource)				_intSetReg((U32*)&IFS0,intIRQSource,DISABLE); _intSetReg((U32*)&IEC0,intIRQSource,0x7)
 
 /**
 * \fn		void intSetState(intIRQSource, state)
@@ -803,7 +803,7 @@ typedef enum
 * @note		Use tIntIRQ to know which interrupt is available
 *		The state is return as ENABLE or DISABLE but if you are using
 *		an IRQ group, it will return all the bits (ex: IRQ_UART_1 returns 0x7)
-* @arg		tIntIRQ intIRQSource		Which interrupt to set
+* @arg		tIntIRQ intIRQSource		Which interrupt to get
 * @return	U8 state			State of the interrupt
 */
 #define intGetState(intIRQSource)			_intGetReg((U32*)&IEC0,intIRQSource)
@@ -825,7 +825,7 @@ typedef enum
 * @brief	Get the state of the flag of a specific interrupt
 * @note		Use tIntIRQ to know which interrupt is available
 *		The state is return as ENABLE or DISABLE but if you are using
-*		an IRQ group, it will return all the bits (ex: IRQ_UART_1 returns 0x7)
+*		an IRQ group, it will return all the bits align to 0 (ex: IRQ_UART_1 returns 0x7)
 * @arg		tIntIRQ intIRQSource		Which interrupt to set
 * @return	U8 state			State of the flag
 */
@@ -865,7 +865,7 @@ U8 intGetSubPriority(tIntIRQ intIRQSource);
 * @brief	Set the specified external interrupt source to trigger on a specific edge transition
 * @note		Use the tIntIRQ type to select the correct interrupt source (only IRQ_EXT_INT are valid)
 * @arg		tIntIRQ intIRQSource		The external interrupt to configure
-* @arg		U8 edgeDirection		The edge transition to select
+* @arg		U8 edgeDirection			The edge transition to select (use FALLING or RISING)
 * @return	nothing
 */
 void intSetExternalEdge(tIntIRQ intIRQSource, U8 edgeDirection);
