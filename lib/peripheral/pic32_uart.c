@@ -121,7 +121,10 @@ void uartISR(U8 uartID)
 
 			// -- No more byte to send --- //
 			if (byteNb == 0)
-				(pUxSTA + REG_OFFSET_CLR_32)->all = UTXEN_MASK;		//Stop the transmitter
+			{
+				if (pUxSTA->TRMT)					//Wait for the byte is sent
+					(pUxSTA + REG_OFFSET_CLR_32)->all = UTXEN_MASK;	//Stop the transmitter
+			}
 			// -- Send the pending data -- //
 			else
 			{

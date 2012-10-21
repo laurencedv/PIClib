@@ -4,8 +4,8 @@
 
  @version	0.1
  @note		Always respect the group or you could attach an unknow peripheral to a pins.
- 			Ex: Peripherals in "PPS in Group 1" can only be attached to the pins in "PPS in Group 1"
- 			Use only the significant part of the names (ex: PPS_IN_INT4 would be INT4)
+ 		Ex: Peripherals in "PPS in Group 1" can only be attached to the pins in "PPS in Group 1"
+ 		Use only the significant part of the names (ex: PPS_IN_INT4 would be INT4)
  @todo		
 
  @date		February 13th 2011
@@ -35,10 +35,10 @@
 // ------ Input PPS ------ //
 // -- PPS In Group 1 -- //
 //Peripherals
-#define PPS_IN_INT4			INT4R
-#define PPS_IN_T2CK			T2CKR
-#define PPS_IN_IC4			IC4R
-#define PPS_IN_SS1			SS1R
+#define PPS_IN_INT4		INT4R
+#define PPS_IN_T2CK		T2CKR
+#define PPS_IN_IC4		IC4R
+#define PPS_IN_SS1		SS1R
 #define PPS_IN_REFCLKI		REFCLKIR
 
 //Pins
@@ -53,12 +53,12 @@
 
 // -- PPS In Group 2 -- //
 //Peripherals
-#define PPS_IN_INT3			INT3R
-#define PPS_IN_T3CK			T3CKR
-#define PPS_IN_IC3			IC3R
+#define PPS_IN_INT3		INT3R
+#define PPS_IN_T3CK		T3CKR
+#define PPS_IN_IC3		IC3R
 #define PPS_IN_U1CTS		U1CTSR
-#define PPS_IN_U2RX			U2RXR
-#define PPS_IN_SDI1			SDI1R
+#define PPS_IN_U2RX		U2RXR
+#define PPS_IN_SDI1		SDI1R
 
 //Pins
 #define PPS_PIN_RPA1		0
@@ -72,14 +72,14 @@
 
 // -- PPS In Group 3 -- //
 //Peripherals
-#define PPS_IN_INT2			INT2R
-#define PPS_IN_T4CK			T4CKR
-#define PPS_IN_IC1			IC1R
-#define PPS_IN_IC5			IC5R
-#define PPS_IN_U1RX			U1RXR
+#define PPS_IN_INT2		INT2R
+#define PPS_IN_T4CK		T4CKR
+#define PPS_IN_IC1		IC1R
+#define PPS_IN_IC5		IC5R
+#define PPS_IN_U1RX		U1RXR
 #define PPS_IN_U2CTS		U2CTSR
-#define PPS_IN_SDI2			SDI2R
-#define PPS_IN_OCFB			OCFBR
+#define PPS_IN_SDI2		SDI2R
+#define PPS_IN_OCFB		OCFBR
 
 //Pins
 #define PPS_PIN_RPA2		0
@@ -93,11 +93,11 @@
 
 // -- PPS In Group 4 -- //
 //Peripherals
-#define PPS_IN_INT1			INT1R
-#define PPS_IN_T5CK			T5CKR
-#define PPS_IN_IC2			IC2R
-#define PPS_IN_SS2			SS2R
-#define PPS_IN_OCFA			OCFAR
+#define PPS_IN_INT1		INT1R
+#define PPS_IN_T5CK		T5CKR
+#define PPS_IN_IC2		IC2R
+#define PPS_IN_SS2		SS2R
+#define PPS_IN_OCFA		OCFAR
 
 //Pins
 #define PPS_PIN_RPA3		0
@@ -127,8 +127,8 @@
 #define PPS_OUT_NULL		0
 #define PPS_OUT_U1TX		1
 #define PPS_OUT_U2RTS		2
-#define PPS_OUT_SS1			3
-#define PPS_OUT_OC1			5
+#define PPS_OUT_SS1		3
+#define PPS_OUT_OC1		5
 #define PPS_OUT_C2OUT		7
 
 // -- PPS Out Group 2 -- //
@@ -146,7 +146,7 @@
 #define PPS_OUT_NULL		0
 #define PPS_OUT_SDO1		3
 #define PPS_OUT_SDO2		4
-#define PPS_OUT_OC2			5
+#define PPS_OUT_OC2		5
 
 // -- PPS Out Group 3 -- //
 //Pins
@@ -163,8 +163,8 @@
 #define PPS_OUT_NULL		0
 #define PPS_OUT_SDO1		3
 #define PPS_OUT_SDO2		4
-#define PPS_OUT_OC4			5
-#define PPS_OUT_OC5			6
+#define PPS_OUT_OC4		5
+#define PPS_OUT_OC5		6
 #define PPS_OUT_REFCLKO		7
 
 // -- PPS Out Group 4 -- //
@@ -182,8 +182,8 @@
 #define PPS_OUT_NULL		0
 #define PPS_OUT_U1RTS		1
 #define PPS_OUT_U2TX		2
-#define PPS_OUT_SS2			4
-#define PPS_OUT_OC3			5
+#define PPS_OUT_SS2		4
+#define PPS_OUT_OC3		5
 #define PPS_OUT_C1OUT		7
 // --------------------- //
 // ------------------------ //
@@ -200,7 +200,7 @@
 * @arg		nothing
 * @return	nothing
 */
-#define ppsUnlock()						(SYSKEY = 0); (SYSKEY = 0xAA996655); (SYSKEY = 0x556699AA)
+#define ppsUnlock()		(SYSKEY = 0); (SYSKEY = 0xAA996655); (SYSKEY = 0x556699AA)
 
 /**
 * \fn		void ppsLock(void)
@@ -209,7 +209,7 @@
 * @arg		nothing
 * @return	nothing
 */
-#define ppsLock()						(SYSKEY = 0)
+#define ppsLock()		(SYSKEY = 0)
 
 /**
 * \fn		void ppsAttachIn(peripheral,pin)
@@ -222,7 +222,7 @@
 * @arg		pin					Pin to be attached to the Peripheral
 * @return	nothing
 */
-#define ppsAttachIn(peripheral,pin)		((PPS_IN_##peripheral) = (PPS_PIN_##pin))
+#define ppsAttachIn(peripheral,pin)	((PPS_IN_##peripheral) = (PPS_PIN_##pin))
 
 /**
 * \fn		void ppsAttachOut(peripheral,pin)

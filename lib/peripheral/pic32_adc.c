@@ -69,6 +69,11 @@ void adcISR(U8 adcPort)
 		case ADCconfig:
 		{
 			//Not really supposed to be here...
+
+			// -- Discard the result -- //
+			for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
+				globalDump = (pADxBUF[wu0 << 2]) + adcOffsetValue[adcPort];
+			// ------------------------ //
 			break;
 		}
 		case ADCbusy:
