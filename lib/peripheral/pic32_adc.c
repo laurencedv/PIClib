@@ -90,13 +90,15 @@ void adcISR(U8 adcPort)
 				// ---------------------------------------- //
 
 				*(workPtr->donePtr) = ADC_CONV_DONE;		//Flag the completion
-
-				// -- If single shot reset idle -- //
-				if (!pADxCON2->CSCNA)
-					workPtr->state = ADCidle;
-				// ------------------------------- //
 			}
 			// ---------------------- //
+
+			// -- If single shot reset idle -- //
+			if (!pADxCON2->CSCNA)
+				workPtr->state = ADCidle;
+			else
+				pADxCON1->ASAM = ENABLE;
+			// ------------------------------- //
 
 			break;
 		}
@@ -545,10 +547,10 @@ U8 adcStartScan(U8 adcPort, U16 * resultPtr, U8 * donePtr)
 
 		// -- Start the scan -- //
 		*(workPtr->donePtr) = ADC_CONV_BUSY;		//Set the flag as busy
-		pADxCON1->CLRASAM = 0;				//Don't stop after the interrupt
-		pADxCON1->ASAM = 1;				//Auto mode
-		pADxCON2->CSCNA = 1;				//Start the scan mode
-		pADxCON1->SAMP = 1;				//Start the sampling/conversion
+		pADxCON1->CLRASAM = ENABLE;			//Wait after the interrupt
+		pADxCON2->CSCNA = ENABLE;			//Start the scan mode
+		pADxCON1->ASAM = ENABLE;			//Auto mode
+		//pADxCON1->SAMP = 1;				//Start the sampling/conversion
 		// -------------------- //
 	}
 	return errorCode;
