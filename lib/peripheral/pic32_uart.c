@@ -85,7 +85,7 @@ void uartISR(U8 uartID)
 {
 	U32 interruptCheck = intGetFlag(UART_INT[uartID]);	//Fetch all the flags for UART_1
 	U16 byteNb = 0;
-	static U8 tempBuf[8];
+	static U8 tempBuf[UART_FIFO_LVL+2];
 
 	if (uartSelectPort(uartID) == STD_EC_SUCCESS)
 	{

@@ -49,6 +49,10 @@
 #define ADC_BOOT_TIME			2000			//Stabilisation time at boot in ns
 // ======================= //
 
+// == Calibration ======== //
+#define ADC_CAL_CONV_NB			10
+// ======================= //
+
 // == Mode Selection ===== //
 #define ADC_MODE_SINGLE			0x0
 #define ADC_MODE_CONTINUOUS		0x1
@@ -139,6 +143,24 @@ typedef enum
 	muxIvref = 0x4000,
 	muxVss = 0x8000
 }tADCMuxInput;
+
+typedef union
+{
+	U32 all[5];
+	struct
+	{
+		U8 averaging:1;
+		U8 :7;
+		tADCState state;
+		S16 offsetVal;
+		U16 averagingSampleNb;
+		U16 averagingSampleDoneNb;
+
+		U32 * averagingBuffer;
+		U8 * donePtr;
+		U16 * resultPtr;
+	};
+}tADCcontrol;
 
 // == Register Pointer == //
 //ADxCON1
@@ -337,22 +359,66 @@ U8 adcSetScanInput(U8 adcPort, tADCMuxInput scanInput);
 * @return	tADCScanInput inputMatrix		Input Matrix enabled
 */
 tADCMuxInput adcGetScanInput(U8 adcPort);
+
+/**
+* \fn		U32 adcGetScan(U8 adcPort)
+* @brief	Return the number of enabled input for the scan mode of the selected ADC port
+* @note		WARNING ! If using it with multiple ADC don't forget to re-select it after
+*		calling this function
+* @arg		U8 adcPort				Hardware ADC ID
+* @return	U8 inputNb				Number of input enabled
+*/
+U8 adcGetScanInputeNb(U8 adcPort);
+
+/**
+* \fn		void adcEnableAveraging(U8 adcPort, U16 sampleNb, U8 inputNb)
+* @brief	Enable the auto-averaging function of the ADC
+* @note		Will convert all the enabled input and wait for the specified number of sample
+*		and then average the result and save it in the resultPtr
+* @arg		U8 adcPort				Hardware ADC ID
+* @arg		U16 sampleNb				Number of sample to average out
+* @arg		U8 inputNb				Number of input actually enabled
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+void adcEnableAveraging(U8 adcPort, U16 sampleNb, U8 inputNb);
 // ========================== //
 
 // == Conversion Functions == //
 /**
-* \fn		U32 adcGetScan(U8 adcPort)
-* @brief	Wait for the ADC to be idle, and then initiated conversionNb of conversion on the selected channel
+* \fn		U32 adcConvert(U8 adcPort)
+* @brief	Will start a specified number of conversion on a single channel
 * @note		This function can jam everything...
 *		Super ugly and crappy function, waiting for RTOS to be better
 * @arg		U8 adcPort				Hardware ADC ID
 * @arg		tADCInput adcInput			Analog input to convert
 * @arg		U8 conversionNb				Number of conversion to do and round up (maximum 16)
 * @arg		U16 * resultPtr				Pointer to store the result
-* @arg		U8 * donePtr				Pointer to flag the completion of the conversion
-* @return	U32 adcConversionID			ID of this conversion (used to check if the conversion is done)
+* @arg		U8 * donePtr				Pointer to flag the completion of the conversion (=ADC_CONV_DONE when done)
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
 */
 U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr, U8 * donePtr);
+
+/**
+* \fn		U8 adcStartScan(U8 adcPort, U16 * resultPtr, U8 * donePtr)
+* @brief	Start the scan mode on the previously selected input
+* @note		WARNING ! This function can jam everything...
+*		The $resultPtr must have enough space to store the entire result (use adcGetScanInputNb)
+*		Super ugly and crappy function, waiting for RTOS to be better
+* @arg		U8 adcPort				Hardware ADC ID
+* @arg		U16 * resultPtr				Pointer to store the result
+* @arg		U8 * donePtr				Pointer to flag the completion of the conversion (=ADC_CONV_DONE when done)
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcStartScan(U8 adcPort, U16 * resultPtr, U8 * donePtr);
+
+/**
+* \fn		U8 adcStopScan(U8 adcPort)
+* @brief	Stop the scan mode on the selected ADC
+* @note		Will stop after the actual conversion
+* @arg		U8 adcPort				Hardware ADC ID
+* @return	U8 errorCode				STD Error Code (STD_EC_SUCCESS if successful)
+*/
+U8 adcStopScan(U8 adcPort);
 // ========================== //
 // ############################################## //
 

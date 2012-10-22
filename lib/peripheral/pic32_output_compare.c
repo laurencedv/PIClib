@@ -225,7 +225,7 @@ void pwmSetDuty(U8 ocPort, U32 numerator, U32 denominator)
 			if (denominator <= tempPR)
 			{
 				// Compute and set the new value
-				*pOCxRS = (tempPR/denominator)*numerator;
+				*pOCxRS = (tempPR*numerator)/denominator;
 			}
 		}
 	}
