@@ -31,12 +31,10 @@ tADxCHS * pADxCHS = NULL;
 tADxCSSL * pADxCSSL = NULL;
 U32 * pADxBUF = NULL;
 
+
+const tADCreg * adcRegAddress[ADC_MAX_PORT] = {&AD1CON1};		//Address of the first reg of each peripheral
 tADCcontrol adcControl[ADC_MAX_PORT];					//Control of the ADC
-//S16 adcOffsetValue[ADC_MAX_PORT];					//Calibration offset value result
-//tADCState adcState[ADC_MAX_PORT];					//ADC module actual state
-//U16 * adcResultPtr[ADC_MAX_PORT] = {&globalDump};			//Pointer to store the conversion result
-//U8 * adcDonePtr[ADC_MAX_PORT] = {&globalDump};			//Pointer to flag when the conversions are done
-//U32 adcConversionID[ADC_MAX_PORT];					//ID of the last completed conversion
+U16 adcResultBuffer[ADC_MAX_PORT][ADC_FIFO_LVL];
 // ############################################## //
 
 
@@ -51,82 +49,113 @@ tADCcontrol adcControl[ADC_MAX_PORT];					//Control of the ADC
 */
 void adcISR(U8 adcPort)
 {
+	tADCreg * workADC = adcRegAddress[adcPort];
 	U8 wu0;
-	tADCcontrol * workPtr = &adcControl[adcPort];
-
-	adcSelectPort(adcPort);
 	
-	switch (workPtr->state)
+	// -- Extract everything in the buffer -- //
+	for (wu0 = 0; wu0 < workADC->ADxCON2.SMPI; wu0++)
+		adcControl[adcPort].resultBuffer[wu0] = workADC->ADCxBUF[wu0];
+	// -------------------------------------- //
+}
+
+/**
+* \fn		void adcEngine(U8 adcPort)
+* @brief	Engine function for advance ADC fonction
+* @note		Place this in the infinite loop of the main
+* @arg		U8 adcPort				Hardware ADC ID
+* @return	nothing
+*/
+void adcEngine(U8 adcPort)
+{
+	if (adcPort <= ADC_MAX_PORT)
 	{
-		case ADCbusy:
-		{
-			// -- Averaging --------- //
-			if (workPtr->averaging == ENABLE)
-			{
-				for (wu0 = 0; wu0 < pADxCON2->SMPI; wu0++)
-					workPtr->averagingBuffer[wu0] += (pADxBUF[wu0 << 2]) - workPtr->offsetVal;
+		U8 wu0;
+		tADCcontrol * workCtl = &adcControl[adcPort];
+		tADCreg * workADC = adcRegAddress[adcPort];
 
-				// -- Count the sample -- //
-				workPtr->averagingSampleDoneNb++;
-				if (workPtr->averagingSampleDoneNb >= workPtr->averagingSampleNb)
+		switch (workCtl->state)
+		{
+			case ADCidle:
+			{
+				break;
+			}
+			case ADCconfig:
+			{
+				break;
+			}
+			case ADCbusy:
+			{
+				// -- New conversion result to parse -- //
+				if (workCtl->newResult)
 				{
-					for (wu0 = 0; wu0 < pADxCON2->SMPI; wu0++)
+					// -- Averaging --------- //
+					if (workCtl->averaging == ENABLE)
 					{
-						workPtr->resultPtr[wu0] = (workPtr->averagingBuffer[wu0]) / workPtr->averagingSampleNb;
-						workPtr->averagingBuffer[wu0] = 0;	//Clear the buffer
+						for (wu0 = 0; wu0 < workADC->ADxCON2.SMPI; wu0++)
+							workCtl->averagingBuffer[wu0] += workCtl->resultBuffer[wu0] - workCtl->offsetVal;
+
+						// -- Count the sample -- //
+						workCtl->averagingSampleDoneNb++;
+						if (workCtl->averagingSampleDoneNb >= workCtl->averagingSampleNb)
+						{
+							for (wu0 = 0; wu0 < workADC->ADxCON2.SMPI; wu0++)
+							{
+								workCtl->resultPtr[wu0] = (workCtl->averagingBuffer[wu0]) / workCtl->averagingSampleNb;
+								workCtl->averagingBuffer[wu0] = 0;	//Clear the buffer
+							}
+							workCtl->averagingSampleDoneNb = 0;	//Reset the sample counter
+
+							*(workCtl->donePtr) = ADC_CONV_DONE;	//Flag the completion
+						}
+						// ---------------------- //
 					}
-					workPtr->averagingSampleDoneNb = 0;	//Reset the sample counter
+					// -- Normal operation -- //
+					else
+					{
+						// -- Save the result in the destination -- //
+						for (wu0 = 0; wu0 <= workADC->ADxCON2.SMPI; wu0++)
+							workCtl->resultPtr[wu0] = workCtl->resultBuffer[wu0] - workCtl->offsetVal;
+						// ---------------------------------------- //
 
-					*(workPtr->donePtr) = ADC_CONV_DONE;	//Flag the completion
+						*(workCtl->donePtr) = ADC_CONV_DONE;		//Flag the completion
+					}
+					// ---------------------- //
+
+					// -- If single shot reset idle -- //
+					if (!workADC->ADxCON2.CSCNA)
+						workCtl->state = ADCidle;
+					else
+						workADC->ADxCON1.ASAM = ENABLE;
+					// ------------------------------- //
 				}
-				// ---------------------- //
+				// ------------------------------------ //
+
+				break;
 			}
-			// -- Normal operation -- //
-			else
+			case ADCcalibration:
 			{
-				// -- Save the result in the destination -- //
-				for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
-					workPtr->resultPtr[wu0] = (pADxBUF[wu0 << 2]) - workPtr->offsetVal;
-				// ---------------------------------------- //
+				U32 tempCal = 0;
 
-				*(workPtr->donePtr) = ADC_CONV_DONE;		//Flag the completion
+				// -- Save the calibration result -- //
+				for (wu0 = 0; wu0 < ADC_CAL_CONV_NB; wu0++)
+					tempCal += workCtl->resultBuffer[wu0];
+
+				workCtl->offsetVal = tempCal / ADC_CAL_CONV_NB;
+				workADC->ADxCON2.OFFCAL = DISABLE;
+				// --------------------------------- //
+
+				workCtl->state = workCtl->oldState;		//Reset to the previous state
+
+				break;
 			}
-			// ---------------------- //
+			case ADCerror:
+			{
+				workADC->ADxCON1.ON = DISABLE;		//Stop the ADC
 
-			// -- If single shot reset idle -- //
-			if (!pADxCON2->CSCNA)
-				workPtr->state = ADCidle;
-			else
-				pADxCON1->ASAM = ENABLE;
-			// ------------------------------- //
-
-			break;
+				break;
+			}
+			default:	workCtl->state = ADCerror;
 		}
-		case ADCcalibration:
-		{
-			U32 tempCal = 0;
-
-			// -- Save the calibration result -- //
-			for (wu0 = 0; wu0 < ADC_CAL_CONV_NB; wu0++)
-				tempCal += (pADxBUF[wu0 << 2]);
-
-			workPtr->offsetVal = tempCal/ADC_CAL_CONV_NB;
-			pADxCON2->OFFCAL = DISABLE;
-			// --------------------------------- //
-
-			workPtr->state = ADCidle;
-			
-			break;
-		}
-		default:
-		{
-			// -- Discard the result -- //
-			for (wu0 = 0; wu0 <= pADxCON2->SMPI; wu0++)
-				globalDump = (pADxBUF[wu0 << 2]);
-			// ------------------------ //
-			
-			break;
-		};
 	}
 }
 // ========================== //
@@ -177,7 +206,7 @@ U8 adcInit(U8 adcPort)
 
 		// -- Init control -- //
 		workPtr->offsetVal = 0;
-		workPtr->state = ADCconfig;
+		workPtr->state = ADCidle;
 		workPtr->donePtr = &__adcSafeDonePtr;
 		// ------------------ //
 
@@ -340,21 +369,23 @@ U32 adcGetSampleRate(U8 adcPort)
 */
 U8 adcCalibrate(U8 adcPort)
 {
-	U8 errorCode = adcSelectPort(adcPort);
-
-	if (errorCode == STD_EC_SUCCESS)
+	if (adcPort <= ADC_MAX_PORT)
 	{
-		// -- Init for calibration -- //
-		pADxCON2->OFFCAL = ENABLE;			//Set for calib
-		pADxCON2->SMPI = ADC_CAL_CONV_NB-1;		//Do the specified amount of conversion
-		pADxCON1->ASAM = 1;				//Auto mode
-		pADxCON1->CLRASAM = ENABLE;			//Stop after the interrupt
-		pADxCON1->SAMP = ENABLE;			//Start the conversion
+		tADCreg * workADC = adcRegAddress[adcPort];
 
+		// -- Init for calibration -- //
+		workADC->ADxCON2.OFFCAL = ENABLE;		//Set for calib
+		workADC->ADxCON2.SMPI = ADC_CAL_CONV_NB-1;	//Do the specified amount of conversion
+		workADC->ADxCON1.ASAM = 1;			//Auto mode
+		workADC->ADxCON1.CLRASAM = ENABLE;		//Stop after the interrupt
+		workADC->ADxCON1.SAMP = ENABLE;			//Start the conversion
+
+		adcControl[adcPort].oldState = adcControl[adcPort].state;	//Save the state
 		adcControl[adcPort].state = ADCcalibration;
 		// -------------------------- //
+		return STD_EC_SUCCESS;
 	}
-	return errorCode;
+	return STD_EC_NOTFOUND;
 }
 
 /**
@@ -367,10 +398,15 @@ U8 adcCalibrate(U8 adcPort)
 */
 U8 adcSetScanInput(U8 adcPort, tADCMuxInput scanInput)
 {
-	U8 errorCode = adcSelectPort(adcPort);
-	if (errorCode == STD_EC_SUCCESS)
-		pADxCSSL->CSSL = scanInput;		//Set the selected input
-	return errorCode;
+	if (adcPort <= ADC_MAX_PORT)
+	{
+		tADCreg * workADC = adcRegAddress[adcPort];
+		
+		workADC->ADxCSSL.CSSL = scanInput;		//Set the selected input
+
+		return STD_EC_SUCCESS;
+	}
+	return STD_EC_NOTFOUND;
 }
 
 /**
@@ -382,8 +418,12 @@ U8 adcSetScanInput(U8 adcPort, tADCMuxInput scanInput)
 */
 tADCMuxInput adcGetScanInput(U8 adcPort)
 {
-	if (adcSelectPort(adcPort) == STD_EC_SUCCESS)
-		return pADxCSSL->CSSL;
+	if (adcPort <= ADC_MAX_PORT)
+	{
+		tADCreg * workADC = adcRegAddress[adcPort];
+		
+		return workADC->ADxCSSL.CSSL;
+	}
 	return 0;
 }
 
@@ -395,16 +435,18 @@ tADCMuxInput adcGetScanInput(U8 adcPort)
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	U8 inputNb				Number of input enabled
 */
-U8 adcGetScanInputeNb(U8 adcPort)
+U8 adcGetScanInputNb(U8 adcPort)
 {
-	U8 wu0;
 	U8 inputNb = 0;
 
-	if (adcSelectPort(adcPort) == STD_EC_SUCCESS)
+	if (adcPort <= ADC_MAX_PORT)
 	{
-		for (wu0 = 0;wu0 < 16;wu0++)
+		U8 wu0;
+		tADCreg * workADC = adcRegAddress[adcPort];
+
+		for (wu0 = 0; wu0 < 16; wu0++)
 		{
-			if (pADxCSSL->CSSL & (BIT0 << wu0))
+			if (workADC->ADxCSSL.CSSL & (BIT0 << wu0))
 				inputNb++;
 		}
 	}
@@ -424,21 +466,21 @@ U8 adcGetScanInputeNb(U8 adcPort)
 */
 void adcEnableAveraging(U8 adcPort, U16 sampleNb, U8 inputNb)
 {
-	tADCcontrol * workPtr = &adcControl[adcPort];
-
-	if (adcSelectPort(adcPort) == STD_EC_SUCCESS)
+	if (adcPort <= ADC_MAX_PORT)
 	{
+		tADCcontrol * workCtl = &adcControl[adcPort];
+
 		// -- Allocate the averaging buffer -- //
-		workPtr->averagingBuffer = calloc(inputNb,sizeof(U32));
-		if (workPtr->averagingBuffer != NULL)
+		workCtl->averagingBuffer = calloc(inputNb,sizeof(U32));
+		if (workCtl->averagingBuffer != NULL)
 		// ----------------------------------- //
 		{
 			// Count the allocated ram
 			heapAvailable -= sizeof(U32)*inputNb;
 
-			workPtr->averagingSampleNb = sampleNb;
-			workPtr->averagingSampleDoneNb = 0;
-			workPtr->averaging = ENABLE;
+			workCtl->averagingSampleNb = sampleNb;
+			workCtl->averagingSampleDoneNb = 0;
+			workCtl->averaging = ENABLE;
 		}
 	}
 }
@@ -459,50 +501,52 @@ void adcEnableAveraging(U8 adcPort, U16 sampleNb, U8 inputNb)
 */
 U32 adcConvert(U8 adcPort, tADCInput adcInput, U8 conversionNb, U16 * resultPtr, U8 * donePtr)
 {
-	U8 errorCode;
-	tADCcontrol * workPtr = &adcControl[adcPort];
-
-	errorCode = adcSelectPort(adcPort);
-	if (errorCode == STD_EC_SUCCESS)
+	if (adcPort <= ADC_MAX_PORT)
 	{
+		tADCcontrol * workCtl = &adcControl[adcPort];
+		tADCreg * workADC = adcRegAddress[adcPort];
+
+	
 		// -- Handle boundary -- //
 		if (conversionNb > 16)
 			conversionNb = 16;
 		// --------------------- //
 
 		// Wait for the ADC to be idle
-		while (workPtr->state != ADCidle);
+		while (workCtl->state != ADCidle);
 
 		// -- Select the correct channel -- //
-		pADxCHS->CH0NA = 0;			//Select VrefL as the negative input
-		pADxCHS->CH0SA = adcInput;
+		workADC->ADxCHS.CH0NA = 0;			//Select VrefL as the negative input
+		workADC->ADxCHS.CH0SA = adcInput;
 		// -------------------------------- //
 
 		// -- Save the variables -- //
 		if (donePtr == NULL)
 			return STD_EC_FAIL;			//Point to a safe place
 		else
-			workPtr->donePtr = donePtr;		//Save the done pointer
+			workCtl->donePtr = donePtr;		//Save the done pointer
 
 		if (resultPtr == NULL)
 			return STD_EC_FAIL;			//Point to a safe place
 		else
-			workPtr->resultPtr = resultPtr;		//Save the result pointer
+			workCtl->resultPtr = resultPtr;		//Save the result pointer
 
-		workPtr->state = ADCbusy;
+		workCtl->state = ADCbusy;
 		// ------------------------ //
 
 		// -- Start the conversion -- //
-		*(workPtr->donePtr) = ADC_CONV_BUSY;		//Set the flag as busy
-		pADxCON1->ASAM = 1;				//Auto mode
-		pADxCON1->CLRASAM = 1;				//Stop after SMPI nb of conversion (clear ASAM automaticaly)
-		pADxCON2->SMPI = conversionNb-1;		//Set the number of conversion to do
+		*(workCtl->donePtr) = ADC_CONV_BUSY;		//Set the flag as busy
+		workADC->ADxCON1.ASAM = ENABLE;			//Auto mode
+		workADC->ADxCON1.CLRASAM = ENABLE;			//Stop after SMPI nb of conversion (clear ASAM automaticaly)
+		workADC->ADxCON2.SMPI = conversionNb-1;		//Set the number of conversion to do
 
-		pADxCON1->SAMP = 1;				//Start the sampling/conversion
+		workADC->ADxCON1.SAMP = ENABLE;			//Start the sampling/conversion
 		// -------------------------- //
+
+		return STD_EC_SUCCESS;
 	}
 
-	return errorCode;
+	return STD_EC_NOTFOUND;
 }
 
 /**
@@ -565,15 +609,15 @@ U8 adcStartScan(U8 adcPort, U16 * resultPtr, U8 * donePtr)
 */
 U8 adcStopScan(U8 adcPort)
 {
-	U8 errorCode;
-	
-	errorCode = adcSelectPort(adcPort);
-	if (errorCode == STD_EC_SUCCESS)
+	if (adcPort <= ADC_MAX_PORT)
 	{
-		pADxCON2->CSCNA = 0;				//Stop the scan
-		pADxCON1->CLRASAM = 1;				//Stop the conversion at the next interrupt
+		tADCreg * workADC = adcRegAddress[adcPort];
+		
+		workADC->ADxCON2.CSCNA = DISABLE;		//Stop the scan
+		workADC->ADxCON1.CLRASAM = ENABLE;		//Stop the conversion at the next interrupt
+		return STD_EC_SUCCESS;
 	}
-	return errorCode;
+	return STD_EC_NOTFOUND;
 }
 // ============================= //
 // ############################################## //

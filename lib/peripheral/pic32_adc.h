@@ -144,22 +144,23 @@ typedef enum
 	muxVss = 0x8000
 }tADCMuxInput;
 
-typedef union
+//ADC General Control
+typedef struct
 {
-	U32 all[5];
-	struct
-	{
-		U8 averaging:1;
-		U8 :7;
-		tADCState state;
-		S16 offsetVal;
-		U16 averagingSampleNb;
-		U16 averagingSampleDoneNb;
+	U8 averaging:1;
+	U8 newResult:1;
+	U8 :7;
+	tADCState state;
+	tADCState oldState;
+	S16 offsetVal;
+	U16 averagingSampleNb;
+	U16 averagingSampleDoneNb;
 
-		U32 * averagingBuffer;
-		U8 * donePtr;
-		U16 * resultPtr;
-	};
+	U32 * averagingBuffer;
+	U8 * donePtr;
+	U16 * resultPtr;
+
+	U16 resultBuffer[ADC_FIFO_LVL];
 }tADCcontrol;
 
 // == Register Pointer == //
@@ -264,6 +265,39 @@ typedef union
 		U32 :16;
 	};
 }tADxCSSL;
+
+//Working Pointer Struct
+typedef struct
+{
+	volatile tADxCON1	ADxCON1;
+	volatile tADxCON2	ADxCON2;
+	volatile tADxCON3	ADxCON3;
+	volatile tADxCHS	ADxCHS;
+	volatile tADxCSSL	ADxCSSL;
+	union
+	{
+		volatile U32	ADCxBUF[16];
+		struct
+		{
+			volatile U32		ADCxBUF0;
+			volatile U32		ADCxBUF1;
+			volatile U32		ADCxBUF2;
+			volatile U32		ADCxBUF3;
+			volatile U32		ADCxBUF4;
+			volatile U32		ADCxBUF5;
+			volatile U32		ADCxBUF6;
+			volatile U32		ADCxBUF7;
+			volatile U32		ADCxBUF8;
+			volatile U32		ADCxBUF9;
+			volatile U32		ADCxBUFA;
+			volatile U32		ADCxBUFB;
+			volatile U32		ADCxBUFC;
+			volatile U32		ADCxBUFD;
+			volatile U32		ADCxBUFE;
+			volatile U32		ADCxBUFF;
+		};
+	};
+}tADCreg;
 // ====================== //
 // ############################################## //
 
@@ -368,7 +402,7 @@ tADCMuxInput adcGetScanInput(U8 adcPort);
 * @arg		U8 adcPort				Hardware ADC ID
 * @return	U8 inputNb				Number of input enabled
 */
-U8 adcGetScanInputeNb(U8 adcPort);
+U8 adcGetScanInputNb(U8 adcPort);
 
 /**
 * \fn		void adcEnableAveraging(U8 adcPort, U16 sampleNb, U8 inputNb)
@@ -426,6 +460,7 @@ U8 adcStopScan(U8 adcPort);
 // ############### Internal Define ############## //
 #define	ADC_SAMC_MAX		31
 #define ADC_SAMP_RATE_MAX	1000000
+#define ADC_FIFO_LVL		16
 // ############################################## //
 
 #endif
