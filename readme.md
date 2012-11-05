@@ -8,6 +8,7 @@ PIC18
 -----
 
 Included libs for PIC18:
+### Peripherals
 * ADC
 * Clock control
 * EUSART (software buffer included)
@@ -18,11 +19,11 @@ Included libs for PIC18:
 * Servo Motor (10 servo with 1 timer!)
 * SPI (with advance communication control)
 * Timers
-
+### Soft-Peripherals
 * Real-Time control
 * Ring-Buffer
 * Delay
-
+### Devices
 * LCD HD44780
 * DS18B20 (not complete)
 * nRF24L01+ (not complete)
@@ -33,6 +34,7 @@ PIC32
 -----
 
 Included libs for PIC32:
+### Peripherals
 * ADC
 * Clock control (not complete)
 * CPU (not complete)
@@ -42,8 +44,8 @@ Included libs for PIC32:
 * SPI (with advance communication control)
 * Timers (except the core timer)
 * UART (with advance communication control)
-
+### Soft-Peripherals
 * Real-Time control
 * Ring-Buffer (variable element size)
-
+### Devices
 * nRF24L01+ (not working)
