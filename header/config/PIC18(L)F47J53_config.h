@@ -1,7 +1,7 @@
 /*!
  @file		PIC18(L)F47J53_config.h
  @brief		Configuration bits for PIC18(L)F47J53
-			Only missing are: MSSP7B_EN
+		Only missing are: MSSP7B_EN
  
  @version	0.2
  @note

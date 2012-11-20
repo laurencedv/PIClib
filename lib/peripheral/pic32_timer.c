@@ -245,7 +245,7 @@ U32 timerGetClock(U8 timerPort)
 *		Only work if using the PBCLK as the clock source.
 *		Use the timerInit with the correct parameters for external clock source.
 * @arg		U8 timerPort			Hardware Timer ID
-* @arg		U32 ovfPeriod			Total Period between overflow (in us)
+* @arg		F32 ovfPeriod			Total Period between overflow (in us)
 * @return	U8 errorCode			STD Error Code
 */
 U8 timerSetOverflow(U8 timerPort, F32 ovfPeriod)

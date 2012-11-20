@@ -78,7 +78,7 @@
 
 
 // ############## Processor Family ############## //
-#define	PIC18FxxJ53		1	//PIC 18(L)F 27J13 | 27J53 | 47J13 | 47J53
+#define	PIC18Fx7Jx3		1	//PIC 18(L)F 27J13 | 27J53 | 47J13 | 47J53
 #define PIC18FxxK80		2	//PIC 18(L)F 25K80 | 26K80 | 45K80 | 46K80 | 65K80 | 66K80
 #define PIC18FxxK22		3	//PIC 18(L)F 23K22 | 24K22 | 25K22 | 26K22 | 43K22 | 44K22 | 45K22 | 46K22
 #define PIC32MX1xx		4	//PIC 32MX 110F016[B,C,D] | 120F032[B,C,D] | 130F064[B,C,D] | 150F128[B,C,D]

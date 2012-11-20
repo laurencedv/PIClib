@@ -47,14 +47,6 @@
 
 
 // === Control Functions ===== //
-/**
-* \fn		void clockUpdateBase(void)
-* @brief	Update the base time value with assumed OSC frequency
-* @note
-* @arg		nothing
-* @return	nothing
-*/
-void clockUpdateBase(void);
 // =========================== //
 
 

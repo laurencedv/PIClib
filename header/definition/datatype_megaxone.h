@@ -131,6 +131,65 @@ typedef enum
 #define U64_MAX				(18446744073709551616)
 #define U64_BIT				(64)
 // ############################################## //
+
+
+// ################ Microchip XC8 ############### //
+#elif defined (__XC8)
+// Signed Integer
+typedef signed char			S8;
+typedef signed int			S16;
+typedef signed short long		S24;
+typedef signed long			S32;
+
+// Unsigned Integer
+typedef unsigned char			U8;
+typedef unsigned int			U16;
+typedef unsigned short long		U24;
+typedef unsigned long			U32;
+
+// Float
+typedef float				F32;
+
+//FSM Standard State
+typedef enum
+{
+	unknown = 0,
+	init,
+	idle,
+	busy,
+	fetch,
+	transfer,
+	error
+}tFSMState;
+
+//Limits
+#define S8_MIN				(SCHAR_MIN)
+#define S8_MAX				(SCHAR_MAX)
+#define S8_BIT				(8)
+#define S16_MIN				(INT_MIN)
+#define S16_MAX				(INT_MAX)
+#define S16_BIT				(16)
+#define S24_MIN				(SHRT_MIN)
+#define S24_MAX				(SHRT_MAX)
+#define S24_BIT				(24)
+#define S32_MIN				(LONG_MIN)
+#define S32_MAX				(LONG_MAX)
+#define S32_BIT				(32)
+
+#define U8_MIN				(0)
+#define U8_MAX				(255)
+#define U8_BIT				(8)
+#define U16_MIN				(0)
+#define U16_MAX				(65535)
+#define U16_BIT				(16)
+#define U24_MIN				(0)
+#define U24_MAX				(16777215)
+#define U24_BIT				(24)
+#define U32_MIN				(0)
+#define U32_MAX				(4294967295)
+#define U32_BIT				(32)
+// ############################################## //
+
 #else
 #error This Compiler is not yet compatible!
 #endif

@@ -149,7 +149,7 @@ typedef struct
 {
 	U8 averaging:1;
 	U8 newResult:1;
-	U8 :7;
+	U8 :6;
 	tADCState state;
 	tADCState oldState;
 	S16 offsetVal;

@@ -22,11 +22,8 @@
 
 
 // ################## Variables ################# //
-extern U32 initialOSC;
-extern U16 initialPeriod;
-
-U32 globalCLK;
-U16 globalCLKps;
+U32 globalCLK = OSC;
+U32 globalMIPS = OSC/4;
 // ############################################## //
 
 
@@ -37,18 +34,7 @@ U16 globalCLKps;
 
 
 // === Control Functions ===== //
-/**
-* \fn		void clockUpdateBase(void)
-* @brief	Update the base time value with assumed OSC frequency
-* @note
-* @arg		nothing
-* @return	nothing
-*/
-void clockUpdateBase(void)
-{
-	globalCLK = initialOSC;
-	globalCLKps = initialPeriod;
-}
+
 
 void refoclkSet(U32 desiredCLK)
 {
