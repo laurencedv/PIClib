@@ -149,10 +149,53 @@ typedef union
 
 
 // ############ Primary functions ############### //
+/**
+* \fn		void ccpISR(U8 ccpID)
+* @brief	Interrupt Handler for any CCP port
+* @note		Place this in the correct ISR in the main
+* @arg		U8 ccpID			Hardware CCP ID
+* @return	nothing
+*/
+void ccpISR(U8 ccpID);
+
+/**
+* \fn		void ccpEngine(U8 ccpID)
+* @brief	Engine function for advance CCP fonction
+* @note		Place this in the infinite loop of the main
+* @arg		U8 ccpID			Hardware CCP ID
+* @return	nothing
+*/
+void ccpEngine(U8 ccpID);
+
+/**
+* \fn		U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode)
+* @brief	Initialize a CCP to a stand-by state
+* @note		Start the timer to start the CCP function
+*		This function will not initialise the timer (must be done externally)
+* @arg		U8 ccpID			Hardware CCP ID
+* @arg		U8 timerSetting			Timer to attach to the CCP
+* @arg		U8 mode				Mode to put the CCP into
+* @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
+*/
 void ccpInit(U8 ccpID, U8 timerSetting, U8 mode);
 
+/**
+* \fn		void ccpSetPeriod(U8 ccpID, U16 newPeriod)
+* @brief	Set the Period Register
+* @note
+* @arg		U8 ccpID			Hardware CCP ID
+* @arg		U16 newPeriod			Period value to set (in ns)
+* @return	nothing
+*/
 void ccpSetPeriod(U8 ccpID, U16 newPeriod);
 
+/**
+* \fn		U16 ccpGetPeriod(U8 ccpID)
+* @brief	Return the actual Period value in ns
+* @note
+* @arg		U8 ccpID			Hardware CCP ID
+* @return	U16 newPeriod			Period value (in ns)
+*/
 U16 ccpGetPeriod(U8 ccpID);
 // ############################################## //
 
@@ -191,6 +234,13 @@ void ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator);
 */
 void ccpFastSetDuty(U8 ccpID, U16 newDuty);
 
+/**
+* \fn		U16 ccpGetDuty(U8 ccpID)
+* @brief	Return the duty of the specified CCP
+* @note		The duty as a max width of 10bit
+* @arg		U8 ccpID			Hardware CCP ID
+* @return	U16 duty			Duty value
+*/
 U16 ccpGetDuty(U8 ccpID);
 // ############################################## //
 

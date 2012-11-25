@@ -3,7 +3,7 @@
  @brief		CCP lib for C18 and XC8
 
  @version	0.1
- @note		PWM duty as only a precision of 8bit (datasheet not clear on the 10bit period operation)
+ @note		ccpSetDuty for PWM has only a precision of 8bit (datasheet not clear on the 10bit period operation)
  @todo		
 
  @date		November 11th 2012
@@ -65,6 +65,7 @@ void ccpEngine(U8 ccpID)
 * \fn		U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode)
 * @brief	Initialize a CCP to a stand-by state
 * @note		Start the timer to start the CCP function
+*		This function will not initialise the timer (must be done externally)
 * @arg		U8 ccpID			Hardware CCP ID
 * @arg		U8 timerSetting			Timer to attach to the CCP
 * @arg		U8 mode				Mode to put the CCP into
@@ -125,7 +126,14 @@ U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode)
 	return STD_EC_NOTFOUND;
 }
 
-
+/**
+* \fn		void ccpSetPeriod(U8 ccpID, U16 newPeriod)
+* @brief	Set the Period Register
+* @note
+* @arg		U8 ccpID			Hardware CCP ID
+* @arg		U16 newPeriod			Period value to set (in ns)
+* @return	nothing
+*/
 void ccpSetPeriod(U8 ccpID, U16 newPeriod)
 {
 	if (ccpID < CCP_MAX_ID)
@@ -134,7 +142,13 @@ void ccpSetPeriod(U8 ccpID, U16 newPeriod)
 	}
 }
 
-
+/**
+* \fn		U16 ccpGetPeriod(U8 ccpID)
+* @brief	Return the actual Period value in ns
+* @note
+* @arg		U8 ccpID			Hardware CCP ID
+* @return	U16 newPeriod			Period value (in ns)
+*/
 U16 ccpGetPeriod(U8 ccpID)
 {
 	if (ccpID < CCP_MAX_ID)
@@ -216,8 +230,24 @@ void ccpFastSetDuty(U8 ccpID, U16 newDuty)
 	}
 }
 
+/**
+* \fn		U16 ccpGetDuty(U8 ccpID)
+* @brief	Return the duty of the specified CCP
+* @note		The duty as a max width of 10bit
+* @arg		U8 ccpID			Hardware CCP ID
+* @return	U16 duty			Duty value
+*/
 U16 ccpGetDuty(U8 ccpID)
 {
+	if (ccpID < CCP_MAX_ID)
+	{
+		volatile tCCPReg * workPtr = ccpRegAddress[ccpID];
+		U16 duty;
 
+		duty = workPtr->CCPRxH << 2;				//Get the MS part
+		duty += workPtr->CCPxCON.DCxB;				//Get the LS part
+
+		return duty;
+	}
 }
 // ############################################## //
