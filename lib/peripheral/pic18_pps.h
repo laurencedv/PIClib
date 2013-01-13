@@ -64,54 +64,54 @@
 // --------------------- //
 
 // ------ Input PPS ------ //
-#define PPS_IN_INT1		RPINR1bits.INTR1R	//External Interrupt 1 input
-#define PPS_IN_INT2		RPINR2bits.INTR2R	//External Interrupt 2 input
-#define PPS_IN_INT3		RPINR3bits.INTR3R	//External Interrupt 3 input
-#define PPS_IN_T0CK		RPINR4bits.T0CKR	//Timer 0 Clock input
-#define PPS_IN_T3CK		RPINR6bits.T3CKR	//Timer 3 Clock input
-#define PPS_IN_T5CK		RPINR15bits.T5CKR	//Timer 5 Clock input
-#define PPS_IN_CCP1		RPINR7bits.IC1R		//CCP1 Capture pin
-#define PPS_IN_CCP2		RPINR8bits.IC2R		//CCP2 Capture pin
-#define PPS_IN_CCP3		RPINR9bits.IC3R		//CCP3 Capture pin
-#define PPS_IN_T1G		RPINR12bits.T1GR	//Timer 1 Gate input
-#define PPS_IN_T3G		RPINR13bits.T3GR	//Timer 3 Gate input
-#define PPS_IN_T5G		RPINR14bits.T5GR	//Timer 5 Gate input
-#define PPS_IN_U2RX		RPINR16bits.RX2DT2R	//Eusart 2 Receive (Async)
-#define PPS_IN_U2DT		RPINR16bits.RX2DT2R	//Eusart 2 Data input
-#define PPS_IN_U2CK		RPINR17bits.CK2R	//Eusart 2 Clock input
-#define PPS_IN_SDI2		RPINR21bits.SDI2R	//SPI 2 Data input
-#define PPS_IN_SCK2		RPINR22bits.SCK2R	//SPI 2 Clock input
-#define PPS_IN_SS2		RPINR23bits.SS2R	//SPI 2 Slave Select input
-#define PPS_IN_FLT		RPINR24bits.OCFAR	//PWM Fault input
+#define PPS_IN_INT1		RPINR1		//External Interrupt 1 input
+#define PPS_IN_INT2		RPINR2		//External Interrupt 2 input
+#define PPS_IN_INT3		RPINR3		//External Interrupt 3 input
+#define PPS_IN_T0CK		RPINR4		//Timer 0 Clock input
+#define PPS_IN_T3CK		RPINR6		//Timer 3 Clock input
+#define PPS_IN_T5CK		RPINR15		//Timer 5 Clock input
+#define PPS_IN_CCP1		RPINR7		//CCP1 Capture pin
+#define PPS_IN_CCP2		RPINR8		//CCP2 Capture pin
+#define PPS_IN_CCP3		RPINR9		//CCP3 Capture pin
+#define PPS_IN_T1G		RPINR12		//Timer 1 Gate input
+#define PPS_IN_T3G		RPINR13		//Timer 3 Gate input
+#define PPS_IN_T5G		RPINR14		//Timer 5 Gate input
+#define PPS_IN_U2RX		RPINR16		//Eusart 2 Receive (Async)
+#define PPS_IN_U2DT		RPINR16		//Eusart 2 Data input
+#define PPS_IN_U2CK		RPINR17		//Eusart 2 Clock input
+#define PPS_IN_SDI2		RPINR21		//SPI 2 Data input
+#define PPS_IN_SCK2		RPINR22		//SPI 2 Clock input
+#define PPS_IN_SS2		RPINR23		//SPI 2 Slave Select input
+#define PPS_IN_FLT		RPINR24		//PWM Fault input
 // ------------------------ //
 
 // ------ Output PPS ------ //
-#define PPS_OUT_DIS		0			//RP pin Disable
-#define PPS_OUT_C1OUT		1			//Comparator 1 output
-#define PPS_OUT_C2OUT		2			//Comparator 2 output
-#define PPS_OUT_C3OUT		3			//Comparator 3 output
-#define PPS_OUT_U2TX		6			//Eusart 2 Transmit (Async)
-#define PPS_OUT_U2CK		6			//Eusart 2 Clock output
-#define PPS_OUT_U2DT		7			//Eusart 2 Data ouput
-#define PPS_OUT_SDO2		10			//SPI 2 Data output
-#define PPS_OUT_SCK2		11			//SPI 2 Clock ouput
-#define PPS_OUT_SSDMA		12			//SPI 2 Slave Select DMA output
-#define PPS_OUT_ULPOUT		13			//Ultra Low-Power Wake-up event output
-#define PPS_OUT_CCP1		14			//CCP1 Compare or PWM pin
-#define PPS_OUT_P1A		14			//ECCP1 PWM pin A
-#define PPS_OUT_P1B		15			//ECCP1 PWM pin B
-#define PPS_OUT_P1C		16			//ECCP1 PWM pin C
-#define PPS_OUT_P1D		17			//ECCP1 PWM pin D
-#define PPS_OUT_CCP2		18			//CCP2 Compare or PWM pin
-#define PPS_OUT_P2A		18			//ECCP2 PWM pin A
-#define PPS_OUT_P2B		19			//ECCP2 PWM pin B
-#define PPS_OUT_P2C		20			//ECCP2 PWM pin C
-#define PPS_OUT_P2D		21			//ECCP2 PWM pin D
-#define PPS_OUT_CCP3		22			//CCP3 Compare or PWM pin
-#define PPS_OUT_P3A		22			//ECCP3 PWM pin A
-#define PPS_OUT_P3B		23			//ECCP3 PWM pin B
-#define PPS_OUT_P3C		24			//ECCP3 PWM pin C
-#define PPS_OUT_P3D		25			//ECCP3 PWM pin D
+#define PPS_OUT_DIS		0		//RP pin Disable
+#define PPS_OUT_C1OUT		1		//Comparator 1 output
+#define PPS_OUT_C2OUT		2		//Comparator 2 output
+#define PPS_OUT_C3OUT		3		//Comparator 3 output
+#define PPS_OUT_U2TX		6		//Eusart 2 Transmit (Async)
+#define PPS_OUT_U2CK		6		//Eusart 2 Clock output
+#define PPS_OUT_U2DT		7		//Eusart 2 Data ouput
+#define PPS_OUT_SDO2		10		//SPI 2 Data output
+#define PPS_OUT_SCK2		11		//SPI 2 Clock ouput
+#define PPS_OUT_SSDMA		12		//SPI 2 Slave Select DMA output
+#define PPS_OUT_ULPOUT		13		//Ultra Low-Power Wake-up event output
+#define PPS_OUT_CCP1		14		//CCP1 Compare or PWM pin
+#define PPS_OUT_P1A		14		//ECCP1 PWM pin A
+#define PPS_OUT_P1B		15		//ECCP1 PWM pin B
+#define PPS_OUT_P1C		16		//ECCP1 PWM pin C
+#define PPS_OUT_P1D		17		//ECCP1 PWM pin D
+#define PPS_OUT_CCP2		18		//CCP2 Compare or PWM pin
+#define PPS_OUT_P2A		18		//ECCP2 PWM pin A
+#define PPS_OUT_P2B		19		//ECCP2 PWM pin B
+#define PPS_OUT_P2C		20		//ECCP2 PWM pin C
+#define PPS_OUT_P2D		21		//ECCP2 PWM pin D
+#define PPS_OUT_CCP3		22		//CCP3 Compare or PWM pin
+#define PPS_OUT_P3A		22		//ECCP3 PWM pin A
+#define PPS_OUT_P3B		23		//ECCP3 PWM pin B
+#define PPS_OUT_P3C		24		//ECCP3 PWM pin C
+#define PPS_OUT_P3D		25		//ECCP3 PWM pin D
 // ------------------------ //
 // ############################################## //
 
@@ -167,31 +167,31 @@
 
 
 // ############### Internal Macro ############### //
-#define PPS_POUT_RP0		RPOR0bits.RP0R
-#define PPS_POUT_RP1		RPOR1bits.RP1R
-#define PPS_POUT_RP2		RPOR2bits.RP2R
-#define PPS_POUT_RP3		RPOR3bits.RP3R
-#define PPS_POUT_RP4		RPOR4bits.RP4R
-#define PPS_POUT_RP5		RPOR5bits.RP5R
-#define PPS_POUT_RP6		RPOR6bits.RP6R
-#define PPS_POUT_RP7		RPOR7bits.RP7R
-#define PPS_POUT_RP8		RPOR8bits.RP8R
-#define PPS_POUT_RP9		RPOR9bits.RP9R
-#define PPS_POUT_RP10		RPOR10bits.RP10R
-#define PPS_POUT_RP11		RPOR11bits.RP11R
-#define PPS_POUT_RP12		RPOR12bits.RP12R
-#define PPS_POUT_RP13		RPOR13bits.RP13R
-#define PPS_POUT_RP14		RPOR14bits.RP14R
-#define PPS_POUT_RP15		RPOR15bits.RP15R
-#define PPS_POUT_RP16		RPOR16bits.RP16R
-#define PPS_POUT_RP17		RPOR17bits.RP17R
-#define PPS_POUT_RP18		RPOR18bits.RP18R
-#define PPS_POUT_RP19		RPOR19bits.RP19R
-#define PPS_POUT_RP20		RPOR20bits.RP20R
-#define PPS_POUT_RP21		RPOR21bits.RP21R
-#define PPS_POUT_RP22		RPOR22bits.RP22R
-#define PPS_POUT_RP23		RPOR23bits.RP23R
-#define PPS_POUT_RP24		RPOR24bits.RP24R
+#define PPS_POUT_RP0		RPOR0
+#define PPS_POUT_RP1		RPOR1
+#define PPS_POUT_RP2		RPOR2
+#define PPS_POUT_RP3		RPOR3
+#define PPS_POUT_RP4		RPOR4
+#define PPS_POUT_RP5		RPOR5
+#define PPS_POUT_RP6		RPOR6
+#define PPS_POUT_RP7		RPOR7
+#define PPS_POUT_RP8		RPOR8
+#define PPS_POUT_RP9		RPOR9
+#define PPS_POUT_RP10		RPOR10
+#define PPS_POUT_RP11		RPOR11
+#define PPS_POUT_RP12		RPOR12
+#define PPS_POUT_RP13		RPOR13
+#define PPS_POUT_RP14		RPOR14
+#define PPS_POUT_RP15		RPOR15
+#define PPS_POUT_RP16		RPOR16
+#define PPS_POUT_RP17		RPOR17
+#define PPS_POUT_RP18		RPOR18
+#define PPS_POUT_RP19		RPOR19
+#define PPS_POUT_RP20		RPOR20
+#define PPS_POUT_RP21		RPOR21
+#define PPS_POUT_RP22		RPOR22
+#define PPS_POUT_RP23		RPOR23
+#define PPS_POUT_RP24		RPOR24
 // ############################################## //
 #endif
 

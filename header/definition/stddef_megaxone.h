@@ -103,6 +103,7 @@
 #define STD_EC_TIMEOUT		7
 #define	STD_EC_EMPTY		8
 #define STD_EC_MEMORY		9
+#define STD_EC_DIV0		10
 #define	STD_EC_TOOLARGE		20
 #define STD_EC_TOOSMALL		21
 #define STD_EC_UNDERRUN		254
@@ -176,5 +177,22 @@
 #define	BIT62			(1 << 62)
 #define	BIT63			(1 << 63)
 // ############################################## //
+
+
+// ############### Assembly Macro ############### //
+#ifndef Nop()
+	#define	Nop()		asm(" nop")
+#endif
+#ifndef ClrWdt()
+	#define	ClrWdt()	asm(" clrwdt")
+#endif
+#ifndef Reset()
+	#define	Reset()		asm(" reset")
+#endif
+#ifndef Sleep()
+	#define Sleep()		asm(" sleep")
+#endif
+// ############################################## //
+
 
 #endif

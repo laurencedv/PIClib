@@ -18,7 +18,7 @@
 #include <definition/stddef_megaxone.h>
 
 // Dev Macro
-#include <tool/splitvar_C18.h>
+#include <tool/splitvar_megaxone.h>
 // ############################################## //
 
 

@@ -67,7 +67,7 @@ void ADCISR(void)
 {
 	// -- Save the result -- //
 	pADCResult->data = (U16)((((U16)ADRESH)<<8) + ADRESL);
-	pADCResult->control.done = SET;							//Flag the new result
+	pADCResult->control.done = 1;							//Flag the new result
 	// --------------------- //
 
 
@@ -79,7 +79,7 @@ void ADCISR(void)
 			pADCResult->control.conversionCnt++;
 
 			if (!(pADCResult->control.stop))
-				ADCON0bits.GO_NOT_DONE = SET;				//Start the new conversion
+				ADCON0bits.GO_NOT_DONE = 1;				//Start the new conversion
 			break;
 		}
 		case ADC_MODE_COUNTDOWN:
@@ -87,7 +87,7 @@ void ADCISR(void)
 			pADCResult->control.conversionCnt--;
 
 			if (pADCResult->control.conversionCnt)
-				ADCON0bits.GO_NOT_DONE = SET;				//Start the new conversion
+				ADCON0bits.GO_NOT_DONE = 1;				//Start the new conversion
 
 			break;
 		}
@@ -101,7 +101,7 @@ void ADCISR(void)
 
 			//Start the new conversion if we were not tell to stop
 			if (!(pADCResult->control.stop))
-				ADCON0bits.GO_NOT_DONE = SET;
+				ADCON0bits.GO_NOT_DONE = 1;
 			break;
 		}
 	}
@@ -130,7 +130,7 @@ void ADCInit(void)
 	// ------------------------------ //
 
 	//Enable the ADC
-	ADCON0bits.ADON = SET;
+	ADCON0bits.ADON = 1;
 
 	// -- Init the Interrupt -- //
 	int_adc_init();
@@ -324,11 +324,8 @@ U8 ADCConfInternalRef(U8 settings)
 
 		return STD_EC_SUCCESS;
 		// ------------------------------------------------------------ //
-
-	#elif CPU_FAMILY == PIC18FxxK80
-		//No internal reference
+	#else
 		return STD_EC_SUCCESS;
-
 	#endif
 }
 
@@ -385,15 +382,15 @@ U8 ADCConvert(U8 channel, tADCResult * pResult)
 
 
 		// -- Init the container -- //
-		pResult->control.done = CLEAR;
-		pResult->control.stop = CLEAR;
+		pResult->control.done = 0;
+		pResult->control.stop = 0;
 		pResult->control.conversionCnt = 0;
 		pADCResult = pResult;
 		// ------------------------ //
 
 
 		// -- Start the conversion -- //
-		ADCON0bits.GO_NOT_DONE = SET;
+		ADCON0bits.GO_NOT_DONE = 1;
 		// -------------------------- //
 	}
 	else

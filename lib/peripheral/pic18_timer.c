@@ -22,19 +22,21 @@
 
 
 // ################## Variables ################# //
+extern U32 globalCLK;
+
 // Reg Pointer //
 #if CPU_FAMILY == PIC18Fx7Jx3
-const void * const timerRegAddress[8] = {&TMR0H,&TMR1H,&TMR2,&TMR3H,&TMR4,&TMR5H,&TMR6,&TMR8};
+const void * volatile const timerRegAddress[8] = {&T0CON,&T1CON,&T2CON,&T3CON,&T4CON,&T5CON,&T6CON,&T8CON};
 #elif CPU_FAMILY == PIC18FxxK22
-const void * const timerRegAddress[7] = {&TMR0H,&TMR1H,&TMR2,&TMR3H,&TMR4,&TMR5H,&TMR6};
+const void * volatile const timerRegAddress[7] = {&T0CON,&T1CON,&T2CON,&T3CON,&T4CON,&T5CON,&T6CON};
 #else
-const void * const timerRegAddress[5] = {&TMR0H,&TMR1H,&TMR2,&TMR3H,&TMR4};
+const void * volatile const timerRegAddress[5] = {&T0CON,&T1CON,&T2CON,&T3CON,&T4CON};
 #endif
 // ----------- //
 
 // Prescaler divider //
-const U16 tmr0PrescalerValue[TMR0_CKPS_NB] = {2,4,8,16,32,64,128,256};
-const U8 tmr8PrescalerValue[TMR8_CKPS_NB] = {0,2,4};
+const U16 tmr0PrescalerValue[TMR0_CKPS_NB] = {2,4,8,16,32,64,128,256};		//TO REVISE!!!!
+const U8 tmr8PrescalerValue[TMR8_CKPS_NB] = {0,2,4};				//TO REVISE!!!!
 const U8 tmr16PrescalerValue[TMR16_CKPS_NB] = {0,1,2,3};
 // ----------------- //
 // ############################################## //
@@ -45,9 +47,10 @@ const U8 tmr16PrescalerValue[TMR16_CKPS_NB] = {0,1,2,3};
 /**
 * \fn		U8 timerInit(U8 timerID, U8 option)
 * @brief	Initialise the selected timer with the specified options.
-* @note		Use the Setting Map in the header for correct setting to send to this function
+* @note		Use the Setting Map in the header for correct setting
+*		WARNING: not all setting are valid for any timer!
 *		No sanity check of the settings, will return STD_EC_NOTFOUND if invalid timer ID is inputed.
-*		Option must be | or + (ex: timerInit(0, TMR_DIV_1|TMR_CS_INST|TMR_RISING|TMR_16BIT))
+*		Option must be | or + (ex: timerInit(TIMER_0, TMR_DIV_1|TMR_CS_INST|TMR_RISING|TMR_16BIT))
 * @arg		U8 timerID		Hardware Timer ID
 * @arg		U8 option		Setting to configure for the timer
 * @return	U8 errorCode		STD Error Code (return STD_EC_SUCCESS if successful)
@@ -142,13 +145,19 @@ void timerSetOverflow(U8 timerID, U16 ovfPeriod)
 	{
 		// -- Determine the type of the timer -- //
 		if (timerID == 0)
+		{
 			volatile tTimer0Reg * workTimer = timerRegAddress[0];		//Timer 0
+		}
 		else if (timerID & 0x01)
+		{
 			volatile tTimer16Reg * workTimer = timerRegAddress[timerID];	//16bit Timers
+		}
 		else
+		{
 			volatile tTimer8Reg * workTimer = timerRegAddress[timerID];	//8bit Timers
+		}
 		// ------------------------------------- //
-	
+
 		
 	}
 }
@@ -169,11 +178,17 @@ U16 timerGetOverflow(U8 timerID)
 	{
 		// -- Determine the type of the timer -- //
 		if (timerID == 0)
+		{
 			volatile tTimer0Reg * workTimer = timerRegAddress[0];		//Timer 0
+		}
 		else if (timerID & 0x01)
+		{
 			volatile tTimer16Reg * workTimer = timerRegAddress[timerID];	//16bit Timers
+		}
 		else
+		{
 			volatile tTimer8Reg * workTimer = timerRegAddress[timerID];	//8bit Timers
+		}
 		// ------------------------------------- //
 		
 		
@@ -204,9 +219,9 @@ U16 timerGetTickPeriod(U8 timerID)
 			if (!workTimer->TxCON.TxCS)
 			{
 				if (workTimer->TxCON.PSA)
-					tickPeriod = 250000000 / (globalCLK >> (workTimer->TxCON.TxPS+1));
+					tickPeriod = (U16)((U32)250000000 / (globalCLK >> (workTimer->TxCON.TxPS+1)));
 				else
-					tickPeriod = 250000000 / globalCLK;
+					tickPeriod = (U16)((U32)250000000 / globalCLK);
 			}
 		}
 		// -- Timer 16bit -- //
@@ -215,16 +230,16 @@ U16 timerGetTickPeriod(U8 timerID)
 			volatile tTimer16Reg * workTimer = timerRegAddress[timerID];	
 
 			if (workTimer->TxCON.TMRxCS == 1)				//Clock source is FOSC
-				tickPeriod = 1000000000 / (globalCLK >> workTimer->TxCON.TxCKPS);
+				tickPeriod = (U16)((U32)1000000000 / (globalCLK >> workTimer->TxCON.TxCKPS));
 			else if (workTimer->TxCON.TMRxCS == 0)				//Clock source is FOSC/4
-				tickPeriod = 250000000 / (globalCLK >> workTimer->TxCON.TxCKPS);
+				tickPeriod = (U16)((U32)250000000 / (globalCLK >> workTimer->TxCON.TxCKPS));
 		}
 		// -- Timer 8bit --- //
 		else
 		{
 			volatile tTimer8Reg * workTimer = timerRegAddress[timerID];
 
-			tickPeriod = 250000000 / (globalCLK >> (workTimer->TxCON.TxCKPS << 1));
+			tickPeriod = (U16)((U32)1000000000 /(globalCLK >> (workTimer->TxCON.TxCKPS << 1)));
 		}
 		// ----------------- //
 	}
@@ -355,7 +370,7 @@ void timerSetPR(U8 timerID, U8 data)
 {
 	if (timerID < TIMER_MAX_ID)
 	{
-		if (timerID && (timerID & 0x1 == 0))
+		if (timerID && ((timerID & 0x1) == 0))				//Only 8bit wide Timers have a PR reg
 			((tTimer8Reg *)timerRegAddress[timerID])->PRx = data;
 	}
 }
@@ -371,9 +386,12 @@ U8 timerGetPR(U8 timerID)
 {
 	if (timerID < TIMER_MAX_ID)
 	{
-		if (timerID && (timerID & 0x1 == 0))
+		if (timerID && ((timerID & 0x1) == 0))				//Only 8bit wide Timers have a PR reg
+		{
 			return ((tTimer8Reg *)timerRegAddress[timerID])->PRx;
+		}
 	}
+	return 0;
 }
 // ======================= //
 // ############################################## //

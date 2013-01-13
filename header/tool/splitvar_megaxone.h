@@ -23,17 +23,17 @@ typedef union
 {
 	U8 all;
 
-    struct
-    {
-        U8 b0:1;
-        U8 b1:1;
-        U8 b2:1;
-        U8 b3:1;
-        U8 b4:1;
-        U8 b5:1;
-        U8 b6:1;
-        U8 b7:1;
-    };
+	struct
+	{
+		U8 b0:1;
+		U8 b1:1;
+		U8 b2:1;
+		U8 b3:1;
+		U8 b4:1;
+		U8 b5:1;
+		U8 b6:1;
+		U8 b7:1;
+	};
 
 	struct
 	{
@@ -43,11 +43,11 @@ typedef union
 		U8 pair3:2;
 	};
 
-    struct
-    {
+	struct
+	{
 		U8 nib0:4;
 		U8 nib1:4;
-    };
+	};
 }split8;
 
 //2 Byte splitted into 16bits, 8 pairs, 4 nibbles, and 2 bytes
@@ -55,26 +55,25 @@ typedef union
 {
 	U16 all;
 
-	 struct
-    {
+	struct
+	{
 		U8 b0:1;
-        U8 b1:1;
-        U8 b2:1;
-        U8 b3:1;
-        U8 b4:1;
-        U8 b5:1;
-        U8 b6:1;
-        U8 b7:1;
+		U8 b1:1;
+		U8 b2:1;
+		U8 b3:1;
+		U8 b4:1;
+		U8 b5:1;
+		U8 b6:1;
+		U8 b7:1;
 		U8 b8:1;
-        U8 b9:1;
-        U8 b10:1;
-        U8 b11:1;
-        U8 b12:1;
-        U8 b13:1;
-        U8 b14:1;
-        U8 b15:1;
-
-    };
+		U8 b9:1;
+		U8 b10:1;
+		U8 b11:1;
+		U8 b12:1;
+		U8 b13:1;
+		U8 b14:1;
+		U8 b15:1;
+	};
 
 	struct
 	{
@@ -89,18 +88,18 @@ typedef union
 	};
 
 	struct
-    {
+	{
 		U8 nib0:4;
 		U8 nib1:4;
 		U8 nib2:4;
 		U8 nib3:4;
-    };
+	};
 
 	struct
-    {
-        U8 byte1;
-        U8 byte0;
-    };
+	{
+		U8 byte1;
+		U8 byte0;
+	};
 }split16;
 
 //4 Bytes splitted into 32bits, 16 pairs, 8 nibbles, 4 bytes and 2 halfs
@@ -109,43 +108,43 @@ typedef union
 	U32 all;
 
 	struct
-    {
+	{
 		U8 b0:1;
-        U8 b1:1;
-        U8 b2:1;
-        U8 b3:1;
-        U8 b4:1;
-        U8 b5:1;
-        U8 b6:1;
-        U8 b7:1;
+		U8 b1:1;
+		U8 b2:1;
+		U8 b3:1;
+		U8 b4:1;
+		U8 b5:1;
+		U8 b6:1;
+		U8 b7:1;
 		U8 b8:1;
-        U8 b9:1;
-        U8 b10:1;
-        U8 b11:1;
-        U8 b12:1;
-        U8 b13:1;
-        U8 b14:1;
-        U8 b15:1;
+		U8 b9:1;
+		U8 b10:1;
+		U8 b11:1;
+		U8 b12:1;
+		U8 b13:1;
+		U8 b14:1;
+		U8 b15:1;
 		U8 b16:1;
-        U8 b17:1;
-        U8 b18:1;
-        U8 b19:1;
-        U8 b20:1;
-        U8 b21:1;
-        U8 b22:1;
-        U8 b23:1;
+		U8 b17:1;
+		U8 b18:1;
+		U8 b19:1;
+		U8 b20:1;
+		U8 b21:1;
+		U8 b22:1;
+		U8 b23:1;
 		U8 b24:1;
-        U8 b25:1;
-        U8 b26:1;
-        U8 b27:1;
-        U8 b28:1;
-        U8 b29:1;
-        U8 b30:1;
-        U8 b31:1;
-    };
+		U8 b25:1;
+		U8 b26:1;
+		U8 b27:1;
+		U8 b28:1;
+		U8 b29:1;
+		U8 b30:1;
+		U8 b31:1;
+	};
 
 	struct
-    {
+	{
 		U8 pair0:2;
 		U8 pair1:2;
 		U8 pair2:2;
@@ -162,7 +161,7 @@ typedef union
 		U8 pair13:2;
 		U8 pair14:2;
 		U8 pair15:2;
-    };
+	};
 
 	struct
 	{
@@ -177,12 +176,12 @@ typedef union
 	};
 
 	struct
-    {
+	{
 		U8 byte3;
 		U8 byte2;
 		U8 byte1;
 		U8 byte0;
-    };
+	};
 
 	struct
 	{
@@ -203,69 +202,69 @@ typedef union
 	struct
 	{
 		U8 b0:1;
-        U8 b1:1;
-        U8 b2:1;
-        U8 b3:1;
-        U8 b4:1;
-        U8 b5:1;
-        U8 b6:1;
-        U8 b7:1;
+		U8 b1:1;
+		U8 b2:1;
+		U8 b3:1;
+		U8 b4:1;
+		U8 b5:1;
+		U8 b6:1;
+		U8 b7:1;
 		U8 b8:1;
-        U8 b9:1;
-        U8 b10:1;
-        U8 b11:1;
-        U8 b12:1;
-        U8 b13:1;
-        U8 b14:1;
-        U8 b15:1;
+		U8 b9:1;
+		U8 b10:1;
+		U8 b11:1;
+		U8 b12:1;
+		U8 b13:1;
+		U8 b14:1;
+		U8 b15:1;
 		U8 b16:1;
-        U8 b17:1;
-        U8 b18:1;
-        U8 b19:1;
-        U8 b20:1;
-        U8 b21:1;
-        U8 b22:1;
-        U8 b23:1;
+		U8 b17:1;
+		U8 b18:1;
+		U8 b19:1;
+		U8 b20:1;
+		U8 b21:1;
+		U8 b22:1;
+		U8 b23:1;
 		U8 b24:1;
-        U8 b25:1;
-        U8 b26:1;
-        U8 b27:1;
-        U8 b28:1;
-        U8 b29:1;
-        U8 b30:1;
-        U8 b31:1;
+		U8 b25:1;
+		U8 b26:1;
+		U8 b27:1;
+		U8 b28:1;
+		U8 b29:1;
+		U8 b30:1;
+		U8 b31:1;
 		U8 b32:1;
-        U8 b33:1;
-        U8 b34:1;
-        U8 b35:1;
-        U8 b36:1;
-        U8 b37:1;
-        U8 b38:1;
-        U8 b39:1;
+		U8 b33:1;
+		U8 b34:1;
+		U8 b35:1;
+		U8 b36:1;
+		U8 b37:1;
+		U8 b38:1;
+		U8 b39:1;
 		U8 b40:1;
-        U8 b41:1;
-        U8 b42:1;
-        U8 b43:1;
-        U8 b44:1;
-        U8 b45:1;
-        U8 b46:1;
-        U8 b47:1;
+		U8 b41:1;
+		U8 b42:1;
+		U8 b43:1;
+		U8 b44:1;
+		U8 b45:1;
+		U8 b46:1;
+		U8 b47:1;
 		U8 b48:1;
-        U8 b49:1;
-        U8 b50:1;
-        U8 b51:1;
-        U8 b52:1;
-        U8 b53:1;
-        U8 b54:1;
-        U8 b55:1;
+		U8 b49:1;
+		U8 b50:1;
+		U8 b51:1;
+		U8 b52:1;
+		U8 b53:1;
+		U8 b54:1;
+		U8 b55:1;
 		U8 b56:1;
-        U8 b57:1;
-        U8 b58:1;
-        U8 b59:1;
-        U8 b60:1;
-        U8 b61:1;
-        U8 b62:1;
-        U8 b63:1;
+		U8 b57:1;
+		U8 b58:1;
+		U8 b59:1;
+		U8 b60:1;
+		U8 b61:1;
+		U8 b62:1;
+		U8 b63:1;
 	};
 
 	struct

@@ -31,20 +31,20 @@
 
 // ################## Defines ################### //
 // Application Variable //
-#define		USART_BUF_SIZE				116				//Number of byte for the FIFO RX/TX buffer for each EUSART (max 116)
-#define		USART_PORT_NB				2				//Number of EUSART Module
+#define		USART_BUF_SIZE			116		//Number of byte for the FIFO RX/TX buffer for each EUSART (max 116)
+#define		USART_PORT_NB			2		//Number of EUSART Module
 // -------------------- //
 
 // Hardware Pin //
-#define	    USART1_TX					PORTCbits.RC6	//Tx Pin for EUSART1
-#define	    USART1_TX_DIR				TRISCbits.TRISC6
-#define     USART1_RX					PORTCbits.RC7	//Rx Pin for EUSART1
-#define	    USART1_RX_DIR				TRISCbits.TRISC7
+#define	    USART1_TX				PORTCbits.RC6	//Tx Pin for EUSART1
+#define	    USART1_TX_DIR			TRISCbits.TRISC6
+#define     USART1_RX				PORTCbits.RC7	//Rx Pin for EUSART1
+#define	    USART1_RX_DIR			TRISCbits.TRISC7
 
-#define	    USART2_TX					PORTCbits.RC6	//Tx Pin for EUSART2
-#define	    USART2_TX_DIR				TRISCbits.TRISC6
-#define     USART2_RX					PORTCbits.RC7	//Rx Pin for EUSART2
-#define	    USART2_RX_DIR				TRISCbits.TRISC7
+#define	    USART2_TX				PORTCbits.RC6	//Tx Pin for EUSART2
+#define	    USART2_TX_DIR			TRISCbits.TRISC6
+#define     USART2_RX				PORTCbits.RC7	//Rx Pin for EUSART2
+#define	    USART2_RX_DIR			TRISCbits.TRISC7
 // ------------ //
 
 // Hardware Constant //
@@ -52,36 +52,36 @@
 
 // -- Init Options -- //
 // STD mode //
-#define		USART_MODE_8N1				0				// Standard Mode of 8 data bit, No flowcontrol, 1 stop bit
+#define		USART_MODE_8N1			0		// Standard Mode of 8 data bit, No flowcontrol, 1 stop bit
 // -------- //
 
 // Individual Option //
 //Bit polarity options
-#define		USART_ASYNC_RX_POL_LOW		0b00100000		// Asynchronous Receive polarity is inverted (active-low)
-#define		USART_ASYNC_RX_POL_HIGH		0				// Asynchronous Receive polarity is not inverted (active-high)
-#define		USART_ASYNC_TX_IDLE_LOW		0b00010000		// Asynchronous Transmit idle state is a low level
-#define		USART_ASYNC_TX_IDLE_HIGH	0				// Asynchronous Transmit idle state is a high level
+#define		USART_ASYNC_RX_POL_LOW		0b00100000	// Asynchronous Receive polarity is inverted (active-low)
+#define		USART_ASYNC_RX_POL_HIGH		0		// Asynchronous Receive polarity is not inverted (active-high)
+#define		USART_ASYNC_TX_IDLE_LOW		0b00010000	// Asynchronous Transmit idle state is a low level
+#define		USART_ASYNC_TX_IDLE_HIGH	0		// Asynchronous Transmit idle state is a high level
 
 //Bit number options
-#define		USART_8BIT					0				// 8 bit transfert with no parity and 1 stop bit
-#define		USART_9BIT					0b01000000		// 9 bit transfert with no parity and 1 stop bit
+#define		USART_8BIT			0		// 8 bit transfert with no parity and 1 stop bit
+#define		USART_9BIT			0b01000000	// 9 bit transfert with no parity and 1 stop bit
 
 //TXSTAn
-#define		USART_ASYNC_MODE			0
-#define		USART_SYNC_MODE				0b00000001		// Synchronous mode
+#define		USART_ASYNC_MODE		0
+#define		USART_SYNC_MODE			0b00000001	// Synchronous mode
 
 //RCSTAn
-#define		USART_ADDEN_ON				0b00001000		// Enables address detection
-#define		USART_ADDEN_OFF				0				// Disables address detection
+#define		USART_ADDEN_ON			0b00001000	// Enables address detection
+#define		USART_ADDEN_OFF			0		// Disables address detection
 
 //BAUDCONn
-#define		USART_DATA_POL_LOW			0b00100000		// Data polarity is inverted (active-low)
-#define		USART_DATA_POL_HIGH			0				// Data polarity is not inverted (active-high)
-#define		USART_IDLE_CLK_HIGH			0b00010000		// Idle state for clock is a high level
-#define		USART_IDLE_CLK_LOW			0				// Idle state for clock is a low level
+#define		USART_DATA_POL_LOW		0b00100000	// Data polarity is inverted (active-low)
+#define		USART_DATA_POL_HIGH		0		// Data polarity is not inverted (active-high)
+#define		USART_IDLE_CLK_HIGH		0b00010000	// Idle state for clock is a high level
+#define		USART_IDLE_CLK_LOW		0		// Idle state for clock is a low level
 
-#define		USART_WAKEUP_ON				0b00000010		// RX pin monitored
-#define		USART_WAKEUP_OFF			0				// RX pin not monitored
+#define		USART_WAKEUP_ON			0b00000010	// RX pin monitored
+#define		USART_WAKEUP_OFF		0		// RX pin not monitored
 // ----------------- //
 // ------------------ //
 // ############################################## //
@@ -270,7 +270,7 @@ U8 usartPushFromRam(U8 portID, U8 * arrayPtr, U8 byteNb);
 * @arg		U8 byteNb				Number of byte to send
 * @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 usartPushFromRom(U8 portID, rom const U8 * arrayPtr, U8 byteNb);
+U8 usartPushFromRom(U8 portID, const U8 * arrayPtr, U8 byteNb);
 
 /**
 * \fn		U8 usartPushString(U8 portID, rom const U8 * arrayPtr, U8 delimiter)
@@ -282,7 +282,7 @@ U8 usartPushFromRom(U8 portID, rom const U8 * arrayPtr, U8 byteNb);
 * @arg		rom const U8 * arrayPtr	Pointer to the first element of the array
 * @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 usartPushString(U8 portID, rom const U8 * arrayPtr);
+U8 usartPushString(U8 portID, const U8 * arrayPtr);
 
 /**
 * \fn		U8 usartPullByte(U8 portID)
@@ -327,10 +327,10 @@ U8 usartPullFrame(U8 portID, U8 * destinationPtr, U8 delimiter);
 // ---- Status Functions ---- //
 
 // Function to check if there is data in the reception buffer
-#define	eusart1_datardy()					PIR1bits.RC1IF
+#define	eusart1_datardy()				PIR1bits.RC1IF
 
 // Function to check if the send buffer is empty
-#define eusart1_rdytosend()					TXSTA1bits.TRMT
+#define eusart1_rdytosend()				TXSTA1bits.TRMT
 
 
 // ---- Transfert Functions ---- //
@@ -342,15 +342,15 @@ U8 usartPullFrame(U8 portID, U8 * destinationPtr, U8 delimiter);
 #define eusart1_start_reception()			RCSTA1bits.CREN = SET
 
 // Function to start transmission on EUSART 1
-#define eusart1_start_transmission()		TXSTA1bits.TXEN = SET
+#define eusart1_start_transmission()			TXSTA1bits.TXEN = SET
 
 // Function to start a single reception on EUSART 1
-#define eusart1_start_single_reception()    RCSTA1bits.SREN = SET
+#define eusart1_start_single_reception()		RCSTA1bits.SREN = SET
 
 // Function to return the received data from the EUSART 1
-#define eusart1_get_byte()					RCREG1
+#define eusart1_get_byte()				RCREG1
 
-#define eusart1SendByte(x)					TXREG1 = x
+#define eusart1SendByte(x)				TXREG1 = x
 // =========================== //
 
 // ############################################## //

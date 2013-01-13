@@ -30,23 +30,23 @@ U8 * usartTXREG;
 // ----------- //
 
 // FIFO Buffer //
-#pragma udata arrayRx								//Take a full Ram Bank for the Rx Buf
+#pragma udata arrayRx						//Take a full Ram Bank for the Rx Buf
 volatile U8 usartBufRx[USART_PORT_NB][USART_BUF_SIZE];		//FIFO Buffer for Reception
-volatile U8 usartBufRxIDin[USART_PORT_NB];					//Rx Buf index for write
-volatile U8 usartBufRxIDout[USART_PORT_NB];					//Rx Buf index for read
-volatile U8 usartBufRxSize[USART_PORT_NB];					//Rx Buf actual size
-#pragma udata arrayTx								//Take a full Ram Bank for the Tx Buf
+volatile U8 usartBufRxIDin[USART_PORT_NB];			//Rx Buf index for write
+volatile U8 usartBufRxIDout[USART_PORT_NB];			//Rx Buf index for read
+volatile U8 usartBufRxSize[USART_PORT_NB];			//Rx Buf actual size
+#pragma udata arrayTx						//Take a full Ram Bank for the Tx Buf
 volatile U8 usartBufTx[USART_PORT_NB][USART_BUF_SIZE];		//FIFO Buffer for Transmission
-volatile U8 usartBufTxIDin[USART_PORT_NB];					//Tx Buf index for write
-volatile U8 usartBufTxIDout[USART_PORT_NB];					//Tx Buf index for read
-volatile U8 usartBufTxSize[USART_PORT_NB];					//Tx Buf actual size
+volatile U8 usartBufTxIDin[USART_PORT_NB];			//Tx Buf index for write
+volatile U8 usartBufTxIDout[USART_PORT_NB];			//Tx Buf index for read
+volatile U8 usartBufTxSize[USART_PORT_NB];			//Tx Buf actual size
 #pragma udata
 // ----------- //
 
 // Global Parameters //
 extern U32 globalCLK;
 extern U8 globalDump;
-U32 usartBaudRate[USART_PORT_NB];					//Actual Baud Rate for each EUSART
+U32 usartBaudRate[USART_PORT_NB];				//Actual Baud Rate for each EUSART
 tUsartCtl usartCtl[USART_PORT_NB];
 // ----------------- //
 // ############################################## //
@@ -211,9 +211,11 @@ void usartTxISR(U8 portID)
 */
 U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 {
-	split8 splitedOption = options;
+	split8 splitedOption;
 	U8 wu0;
-	
+
+	splitedOption.all = options;
+
 	// -- Set the reg ptr and Specifics -- //
 	switch (portID)
 	{
@@ -365,25 +367,25 @@ U32 usartSetBaudRate(U8 portID, U32 BaudRate)
 
 	// -- Set the BRG value -- //
 	resultTemp.all = (U16)((globalCLK/BaudRate)/4)-1;
-	*usartSPBRG = resultTemp.lvl1;			//LSB
-	*usartSPBRGH = resultTemp.lvl2;			//MSB
+	*usartSPBRG = resultTemp.byte0;				//LSB
+	*usartSPBRGH = resultTemp.byte1;			//MSB
 	// ----------------------- //
 
 
 	// -- Compute the real Baud Rate -- //
-	resultTemp.lvl1 = *usartSPBRG;
-	resultTemp.lvl2 = *usartSPBRGH;
+	resultTemp.byte0 = *usartSPBRG;
+	resultTemp.byte1 = *usartSPBRGH;
 	usartBaudRate[portID] = globalCLK/(4*(resultTemp.all + 1));
 	// -------------------------------- //
 
 	
 	// -- Start the EUSART -- //
 	usartRCSTA->SPEN = 1;
-	Nop();										//Wait 2 cycle as the Silicon Errata
-	Nop();										//for 18Fx7j53 suggest
+	Nop();							//Wait 2 cycle as the Silicon Errata
+	Nop();							//for 18Fx7j53 suggest
 	// ---------------------- //
 
-	return usartBaudRate[portID];			//Return the real Baud Rate
+	return usartBaudRate[portID];				//Return the real Baud Rate
 }
 
 /**
@@ -560,7 +562,7 @@ U8 usartPushFromRam(U8 portID, U8 * arrayPtr, U8 byteNb)
 * @arg		U8 byteNb				Number of byte to send
 * @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 usartPushFromRom(U8 portID, rom const U8 * arrayPtr, U8 byteNb)
+U8 usartPushFromRom(U8 portID, const U8 * arrayPtr, U8 byteNb)
 {
 	U8 wu0;
 	U8 tempID;
@@ -608,7 +610,7 @@ U8 usartPushFromRom(U8 portID, rom const U8 * arrayPtr, U8 byteNb)
 * @arg		rom const U8 * arrayPtr	Pointer to the first element of the array
 * @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
-U8 usartPushString(U8 portID, rom const U8 * arrayPtr)
+U8 usartPushString(U8 portID, const U8 * arrayPtr)
 {
 	U8 wu0;
 	U8 tempID;

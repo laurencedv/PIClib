@@ -15,6 +15,7 @@
 #define _BITMANIP_MEGAXONE_H 1
 // ################## Includes ################## //
 #include <definition/stddef_megaxone.h>
+#include <definition/datatype_megaxone.h>
 // ############################################## //
 
 
@@ -57,7 +58,27 @@
 
 
 // ################ Microchip XC8 ############### //
-#if defined (__XC8)
+#elif defined (__XC8)
+
+//Reg manip
+#define setREG(reg)			(reg = 0xFF)
+#define clearREG(reg)			(reg = 0xFF)
+#define toggleREG(reg)			(reg ^= 0xFF)
+
+//Bit manip
+#define setBIT(reg,position)		(reg |= (U8)position)
+#define clearBIT(reg,position)		(reg &= (U8)(~position))
+#define toggleBIT(reg,position)		(reg ^= (U8)position)
+#define checkBIT(reg,position)		(reg & ((U8)position))
+#define alignBIT(reg,position)		(checkBIT(reg,position) >> (U8)position)
+
+//Pin manip
+#define setPIN(pin)			(setBIT(CONCAT(LAT,pin ## _PORT),pin))
+#define clearPIN(pin)			(clearBIT(CONCAT(LAT,pin ## _PORT),pin))
+#define togglePIN(pin)			(toggleBIT(CONCAT(LAT,pin ## _PORT),pin))
+#define checkPIN(pin)			(checkBIT(CONCAT(PORT,pin ## _PORT),pin))
+#define inputPIN(pin)			(setBIT(CONCAT(TRIS,pin ## _PORT),pin))
+#define outputPIN(pin)			(clearBIT(CONCAT(TRIS,pin ## _PORT),pin))
 
 // ############################################## //
 

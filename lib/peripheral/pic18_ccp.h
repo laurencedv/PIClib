@@ -1,14 +1,33 @@
 /*!
- @file		pic18_ccp.h
+ @file		pic18_ccp.c
  @brief		CCP lib for C18 and XC8
 
- @version	0.1
- @note		PWM duty as only a precision of 8bit (datasheet not clear on the 10bit period operation)
- @todo
+ @version	0.1.1
+ @note		ccpSetDuty for PWM has only a precision of 8bit (datasheet not clear on the 10bit period operation)
+ @todo		Capture and Compare mode
+		ECCP function
+ 		Engine and ISR functions
 
- @date		November 11th 2012
+ @date		January 13th 2013
  @author	Laurence DV
 */
+
+// ################## Usage #################### //
+/* To init:
+ * timerInit(TIMER_2|TMR_DIV_16);		Initialise the timer 2 with a prescaler of 1:16
+ * ccpInit(CCP_1,CCP_TIMER_1_2,CCP_MODE_PWM);	Initialise the CCP 1 in PWM mode with the associated timer 2 and 1 (Timer 2 used in PWM mode)
+ *						Check the pic's datasheet to see the correct possible timers for the corresponding CCP
+ * ccpSetPeriod(CCP_1,100000);			Set the PWM period to the 100 000 ns, it use precise computation but no float.
+ *						It also use the actual timer tick period, so you need to initialize both the CCP and timer
+ *						before calling this function
+ * ccpSetDuty(CCP_1,0,2);			This set the duty to 0%
+ * timerStart(TIMER_2);				This actually start the timer and therefore the PWM
+ *
+ * To set the duty:
+ * ccpSetDuty(CCP_1,newDuty,Denominator);	It will apply the new ratio newDuty / denominator to CCP_1
+ * ccpFastSetDuty(CCP_1,newDutyRaw);		It will directly put the newDutyRaw into the duty register (max 0xFF)
+ */
+// ############################################## //
 
 #ifndef _PIC18_CCP_H
 #define _PIC18_CCP_H
@@ -31,17 +50,17 @@
 
 // ################# Defines #################### //
 //CCP Mode Selection
-#define CCP_MODE_DISABLE		0	
-#define CCP_MODE_COMPARE_TOGGLE		0x2	
-#define CCP_MODE_CAPTURE_FALLING	0x4	
-#define CCP_MODE_CAPTURE_RISING		0x5	
-#define CCP_MODE_CAPTURE_FALLING_4	0x6	
-#define CCP_MODE_CAPTURE_FALLING_16	0x7	
-#define CCP_MODE_COMPARE_SET_HIGH	0x8	
-#define CCP_MODE_COMPARE_SET_LOW	0x9	
-#define CCP_MODE_COMPARE_INT		0xA	
-#define CCP_MODE_COMPARE_SPECIAL_EVENT	0xB	
-#define CCP_MODE_PWM			0xC	
+#define CCP_MODE_DISABLE			0
+#define CCP_MODE_COMPARE_TOGGLE			0x2
+#define CCP_MODE_CAPTURE_FALLING		0x4
+#define CCP_MODE_CAPTURE_RISING			0x5
+#define CCP_MODE_CAPTURE_FALLING_4		0x6
+#define CCP_MODE_CAPTURE_FALLING_16		0x7
+#define CCP_MODE_COMPARE_SET_HIGH		0x8
+#define CCP_MODE_COMPARE_SET_LOW		0x9
+#define CCP_MODE_COMPARE_INT			0xA
+#define CCP_MODE_COMPARE_SPECIAL_EVENT		0xB
+#define CCP_MODE_PWM				0xC
 
 //CCP Timer Selection	(check Datasheet for the correct config of the correct CCP module)
 #define CCP_TMR_1_2			0
@@ -129,20 +148,20 @@ typedef union
 // Registers structure
 typedef struct
 {
-	volatile tCCPRxH CCPRxH;
-	volatile tCCPRxL CCPRxL;
 	volatile tCCPxCON CCPxCON;
+	volatile tCCPRxL CCPRxL;
+	volatile tCCPRxH CCPRxH;
 }tCCPReg;
 
 // Control structure
 typedef union
 {
-	U8 all[1];
+	U8 all[2];
 	struct
 	{
 		U8 timerID:3;			//Selected timer for the actual mode
-		U8 :1;
-		tFSMState state:4;		//State of the CCP
+		U8 :5;
+		tFSMState state;		//State of the CCP
 	};
 }tCCPCtl;
 // ############################################## //
@@ -177,7 +196,7 @@ void ccpEngine(U8 ccpID);
 * @arg		U8 mode				Mode to put the CCP into
 * @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
-void ccpInit(U8 ccpID, U8 timerSetting, U8 mode);
+U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode);
 
 /**
 * \fn		void ccpSetPeriod(U8 ccpID, U16 newPeriod)
@@ -187,7 +206,7 @@ void ccpInit(U8 ccpID, U8 timerSetting, U8 mode);
 * @arg		U16 newPeriod			Period value to set (in ns)
 * @return	nothing
 */
-void ccpSetPeriod(U8 ccpID, U16 newPeriod);
+void ccpSetPeriod(U8 ccpID, U32 newPeriod);
 
 /**
 * \fn		U16 ccpGetPeriod(U8 ccpID)
@@ -215,14 +234,15 @@ U16 ccpGetCapture(U8 ccpID);
 // ############## PWM functions ################# //
 /**
 * \fn		void ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator)
-* @brief	This function set the PWM duty to a specified ratio 
+* @brief	This function set the PWM duty to a specified ratio
 * @note		This function will check if the duty is compatible with the actual PWM period (use ccpFastSetDuty for direct access)
+*		Will return STD_EC_NOTFOUND if invalid ccpID, STD_EC_DIV0 if denominator = 0, STD_EC_TOOLARGE if denominator < period
 * @arg		U8 ccpID			Hardware CCP ID
 * @arg		U8 numerator			Numerator of the duty ratio
 * @arg		U8 denominator			Denominator of the duty ratio
-* @return	nothing
+* @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
-void ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator);
+U8 ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator);
 
 /**
 * \fn		void ccpFastSetDuty(U8 ccpID, U16 newDuty)
@@ -238,6 +258,7 @@ void ccpFastSetDuty(U8 ccpID, U16 newDuty);
 * \fn		U16 ccpGetDuty(U8 ccpID)
 * @brief	Return the duty of the specified CCP
 * @note		The duty as a max width of 10bit
+*		Currently only 8bit width
 * @arg		U8 ccpID			Hardware CCP ID
 * @return	U16 duty			Duty value
 */

@@ -2,24 +2,26 @@
  @file		pic18_ccp.c
  @brief		CCP lib for C18 and XC8
 
- @version	0.1
+ @version	0.1.1
  @note		ccpSetDuty for PWM has only a precision of 8bit (datasheet not clear on the 10bit period operation)
- @todo		
+ @todo		Capture and Compare mode
+		ECCP functions
+ 		Engine and ISR functions
 
- @date		November 11th 2012
+ @date		January 13th 2013
  @author	Laurence DV
 */
 
+
 // ################# Includes ################### //
-#include <pic18_ccp.h>
+#include "pic18_ccp.h"
 // ############################################## //
 
 
 // ################## Variables ################# //
 #if CPU_FAMILY == PIC18Fx7Jx3
-volatile tCCPReg * const ccpRegAddress[10] = {&CCPR1H,&CCPR2H,&CCPR3H,&CCPR4H,&CCPR5H,&CCPR6H,&CCPR7H,&CCPR8H,&CCPR9H,&CCPR10H};
-
-const U8 ccpTimerMatrix[10][4][2] = {	{{TIMER_1,TIMER_3,TIMER_3,TIMER_3},{TIMER_2,TIMER_4,TIMER_6,TIMER_8}},
+volatile tCCPReg * const ccpRegAddress[10] = {(tCCPReg*)&CCP1CON,(tCCPReg*)&CCP2CON,(tCCPReg*)&CCP3CON,(tCCPReg*)&CCP4CON,(tCCPReg*)&CCP5CON,(tCCPReg*)&CCP6CON,(tCCPReg*)&CCP7CON,(tCCPReg*)&CCP8CON,(tCCPReg*)&CCP9CON,(tCCPReg*)&CCP10CON};
+const U8 ccpTimerMatrix[10][2][4] = {	{{TIMER_1,TIMER_3,TIMER_3,TIMER_3},{TIMER_2,TIMER_4,TIMER_6,TIMER_8}},
 					{{TIMER_1,TIMER_3,TIMER_3,TIMER_3},{TIMER_2,TIMER_4,TIMER_6,TIMER_8}},
 					{{TIMER_1,TIMER_3,TIMER_3,TIMER_3},{TIMER_2,TIMER_4,TIMER_6,TIMER_8}},
 					{{TIMER_1,TIMER_3,TIMER_3,0xFF},{TIMER_2,TIMER_4,TIMER_6,0xFF}},
@@ -29,6 +31,20 @@ const U8 ccpTimerMatrix[10][4][2] = {	{{TIMER_1,TIMER_3,TIMER_3,TIMER_3},{TIMER_
 					{{TIMER_1,TIMER_1,TIMER_1,0xFF},{TIMER_2,TIMER_4,TIMER_6}},
 					{{TIMER_1,TIMER_1,0xFF,0xFF},{TIMER_2,TIMER_4,0xFF,0xFF}},
 					{{TIMER_1,0xFF,0xFF,0xFF},{TIMER_2,0xFF,0xFF,0xFF}}};
+#elif CPU_FAMILY == PIC18FxxK80
+volatile tCCPReg * const ccpRegAddress[10] = {(tCCPReg*)&CCP1CON,(tCCPReg*)&CCP2CON,(tCCPReg*)&CCP3CON,(tCCPReg*)&CCP4CON,(tCCPReg*)&CCP5CON};
+const U8 ccpTimerMatrix[5][2][2] = {	{{TIMER_1,TIMER_3},{TIMER_2,TIMER_4}},
+					{{TIMER_1,TIMER_3},{TIMER_2,TIMER_4}},
+					{{TIMER_1,TIMER_3},{TIMER_2,TIMER_4}},
+					{{TIMER_1,TIMER_3},{TIMER_2,TIMER_4}},
+					{{TIMER_1,TIMER_3},{TIMER_2,TIMER_4}}};
+#elif CPU_FAMILY == PIC18FxxK22
+volatile tCCPReg * const ccpRegAddress[10] = {(tCCPReg*)&CCP1CON,(tCCPReg*)&CCP2CON,(tCCPReg*)&CCP3CON,(tCCPReg*)&CCP4CON,(tCCPReg*)&CCP5CON};
+const U8 ccpTimerMatrix[5][2][4] = {	{{TIMER_1,TIMER_3,TIMER_5,0xFF},{TIMER_2,TIMER_4,TIMER_6,0xFF}},
+					{{TIMER_1,TIMER_3,TIMER_5,0xFF},{TIMER_2,TIMER_4,TIMER_6,0xFF}},
+					{{TIMER_1,TIMER_3,TIMER_5,0xFF},{TIMER_2,TIMER_4,TIMER_6,0xFF}},
+					{{TIMER_1,TIMER_3,TIMER_5,0xFF},{TIMER_2,TIMER_4,TIMER_6,0xFF}},
+					{{TIMER_1,TIMER_3,TIMER_5,0xFF},{TIMER_2,TIMER_4,TIMER_6,0xFF}}};
 #endif
 
 // Control
@@ -78,7 +94,7 @@ U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode)
 		U8 wu0 = 0;
 
 		// -- Init the work Pointer -- //
-		tCCPReg * workPtr = ccpRegAddress[ccpID];
+		volatile tCCPReg * workPtr = ccpRegAddress[ccpID];
 		// --------------------------- //
 
 		// -- Sanity Check -- //
@@ -89,7 +105,7 @@ U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode)
 
 		if (mode > CCP_MODE_COMPARE_SPECIAL_EVENT)			//Check if PWM or Compare/Capture
 			wu0 = 1;
-		wu0 = ccpTimerMatrix[ccpID][timerSetting][wu0];			//Find the correct timer associated
+		wu0 = ccpTimerMatrix[ccpID][wu0][timerSetting];			//Find the correct timer associated
 
 		if (wu0 < 8)							//Check if a valid timer has been found
 			CCPControl[ccpID].timerID = wu0;			//Save the timerID
@@ -110,6 +126,7 @@ U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode)
 			case CCP_8:	CCPTMRS2bits.C8TSEL = timerSetting;	break;
 			case CCP_9:	CCPTMRS2bits.C9TSEL0 = timerSetting;	break;
 			case CCP_10:	CCPTMRS2bits.C10TSEL0 = timerSetting;	break;
+			default:						break;
 		}
 		// ------------------------- //
 		
@@ -134,11 +151,17 @@ U8 ccpInit(U8 ccpID, U8 timerSetting, U8 mode)
 * @arg		U16 newPeriod			Period value to set (in ns)
 * @return	nothing
 */
-void ccpSetPeriod(U8 ccpID, U16 newPeriod)
+void ccpSetPeriod(U8 ccpID, U32 newPeriod)
 {
 	if (ccpID < CCP_MAX_ID)
 	{
-		timerSetPR(CCPControl[ccpID].timerID) = (newPeriod/timerGetTickPeriod(CCPControl[ccpID].timerID)) -1;
+		U32 tempPR;
+
+		tempPR = newPeriod / timerGetTickPeriod(CCPControl[ccpID].timerID);
+
+		if (tempPR > U8_MAX)
+			tempPR = 0xFF;
+		timerSetPR(CCPControl[ccpID].timerID ,tempPR -1);
 	}
 }
 
@@ -153,7 +176,7 @@ U16 ccpGetPeriod(U8 ccpID)
 {
 	if (ccpID < CCP_MAX_ID)
 	{
-		return (timerGetPR(CCPControl[ccpID].timerID)+1)*timerGetTickPeriod(CCPControl[ccpID].timerID);
+		return (timerGetPR(CCPControl[ccpID].timerID) +1) * timerGetTickPeriod(CCPControl[ccpID].timerID);
 	}
 }
 // ############################################## //
@@ -185,12 +208,13 @@ U16 ccpGetCapture(U8 ccpID)
 * \fn		void ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator)
 * @brief	This function set the PWM duty to a specified ratio
 * @note		This function will check if the duty is compatible with the actual PWM period (use ccpFastSetDuty for direct access)
+*		Will return STD_EC_NOTFOUND if invalid ccpID, STD_EC_DIV0 if denominator = 0, STD_EC_TOOLARGE if denominator < period
 * @arg		U8 ccpID			Hardware CCP ID
 * @arg		U8 numerator			Numerator of the duty ratio
 * @arg		U8 denominator			Denominator of the duty ratio
-* @return	nothing
+* @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
-void ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator)
+U8 ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator)
 {
 	if (ccpID < CCP_MAX_ID)
 	{
@@ -206,9 +230,14 @@ void ccpSetDuty(U8 ccpID, U8 numerator, U8 denominator)
 				// -------------------------- //
 
 				ccpFastSetDuty(ccpID,newDuty);		//Set the duty
+
+				return STD_EC_SUCCESS;
 			}
+			return STD_EC_TOOLARGE;
 		}
+		return STD_EC_DIV0;
 	}
+	return STD_EC_NOTFOUND;
 }
 
 /**
@@ -225,8 +254,8 @@ void ccpFastSetDuty(U8 ccpID, U16 newDuty)
 	{
 		volatile tCCPReg * workPtr = ccpRegAddress[ccpID];
 
-		workPtr->CCPRxL = newDuty >> 2;				//Set the MS part
-		workPtr->CCPxCON.DCxB = newDuty & 0x3;			//Set the LS part
+		workPtr->CCPRxL.all = (U8)newDuty;			//Set the MS part
+		//workPtr->CCPxCON.DCxB = newDuty & 0x3;		//Set the LS part
 	}
 }
 
@@ -234,6 +263,7 @@ void ccpFastSetDuty(U8 ccpID, U16 newDuty)
 * \fn		U16 ccpGetDuty(U8 ccpID)
 * @brief	Return the duty of the specified CCP
 * @note		The duty as a max width of 10bit
+*		Currently only 8bit width
 * @arg		U8 ccpID			Hardware CCP ID
 * @return	U16 duty			Duty value
 */
@@ -244,8 +274,8 @@ U16 ccpGetDuty(U8 ccpID)
 		volatile tCCPReg * workPtr = ccpRegAddress[ccpID];
 		U16 duty;
 
-		duty = workPtr->CCPRxH << 2;				//Get the MS part
-		duty += workPtr->CCPxCON.DCxB;				//Get the LS part
+		duty = workPtr->CCPRxH.all;				//Get the MS part
+		//duty += workPtr->CCPxCON.DCxB;			//Get the LS part
 
 		return duty;
 	}

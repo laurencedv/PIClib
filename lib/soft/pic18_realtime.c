@@ -25,20 +25,20 @@ extern U32 globalCLK;
 extern U16 globalCLKps;
 
 // Timer control
-rom const U8 rtTimerPrescaler[TMR0_PRESCALER_NB] = {1,2,4,8,16,32,64,128,256};
+const U8 rtTimerPrescaler[TMR0_PRESCALER_NB] = {1,2,4,8,16,32,64,128,256};
 U16 rtTimerInitValue = 0;
-S8 tickOffset = -24;									//Offset of 1 sysTick (in 탎)
+S8 tickOffset = -24;							//Offset of 1 sysTick (in 탎)
 
 U32 sysTick = 0;
 
-U16 sysTickValue;										//Value of a sysTick (in ms)
-tRealTime upTime;										//Up Time in real time
+U16 sysTickValue;							//Value of a sysTick (in ms)
+tRealTime upTime;							//Up Time in real time
 
 #if (RTCC_SYSTEM == RTCC_SOFTWARE) || (RTCC_SYSTEM == RTCC_EXTERNAL)
-	U16 rtccTickValue;									//number of sysTick for 1 sec (call rtccUpdate)
-	U32 rtccTickNext;									//Next update of the rtcc (in sysTick)
-	tRealTime realTime;									//Software RTCC Time keeping variable
-	U8 rtccCurrentMonthDayNb = 30;						//Number of day in the Current Month
+	U16 rtccTickValue;						//number of sysTick for 1 sec (call rtccUpdate)
+	U32 rtccTickNext;						//Next update of the rtcc (in sysTick)
+	tRealTime realTime;						//Software RTCC Time keeping variable
+	U8 rtccCurrentMonthDayNb = 30;					//Number of day in the Current Month
 #endif
 // ############################################## //
 
@@ -89,13 +89,12 @@ U8 realTimeInit(U32 tickPeriod)
 	U8 wu0;
 	U8 prescalerID;
 	F32 tickPeriodus = (tickPeriod+tickOffset);			//Desired tick period in 탎 (offsetted for real-life exactness)
-	F32 timerCNTus;										//Count period of the timer in 탎
-	F32 timerOVFus;										//Overflow period of the timer in 탎
+	F32 timerCNTus;							//Count period of the timer in 탎
+	F32 timerOVFus;							//Overflow period of the timer in 탎
 
 	// -- Save the value of a sysTick in ms -- //
-	sysTickValue = tickPeriod/1000;						//Should not be more than 64 535
+	sysTickValue = tickPeriod/1000;					//Should not be more than 64 535
 	// --------------------------------------- //
-
 
 	// -- Init the soft rtcc if needed -- //
 	#if RTCC_SYSTEM == RTCC_SOFTWARE
@@ -103,20 +102,14 @@ U8 realTimeInit(U32 tickPeriod)
 	rtccTickValue = 1000/sysTickValue;
 	#endif
 	// ---------------------------------- //
-
-
-	// -- Update the time base -- //
-	clockUpdateBase();
-	// -------------------------- //
-
 	
 	// -- Search the correct Timer Prescaler -- //
 	for (prescalerID = 0; prescalerID < TMR0_PRESCALER_NB; prescalerID++)
 	{
 		timerCNTus = (1/((F32)((globalCLK>>2)/rtTimerPrescaler[prescalerID])))*1000000;	//Compute the Count period with a new prescaler value (in 탎)
-		timerOVFus = (timerCNTus*65536);				//Compute the overflow period (in 탎)
+		timerOVFus = (timerCNTus*65536);			//Compute the overflow period (in 탎)
 		
-		if (timerOVFus > tickPeriodus)					//Check if the overflow period is greater than the desired tick period
+		if (timerOVFus > tickPeriodus)				//Check if the overflow period is greater than the desired tick period
 			break;
 		Nop();
 	}
@@ -128,7 +121,6 @@ U8 realTimeInit(U32 tickPeriod)
 	if (prescalerID)
 		prescalerID+=0x7F;	//Set the prescaler flag and offset 1 back for the correct timer option value
 	// ---------------------------------------- //
-
 
 	// -- Compute the Timer Init value -- //
 	rtTimerInitValue = (U16)((timerOVFus - tickPeriodus)/timerCNTus)-1;
@@ -207,7 +199,6 @@ tRealTime* upTimeGet(void)
 // =========================== //
 
 // ====== RTCC Function ====== //
-
 /**
 * \fn		void rtccInit(void)
 * @brief	Init the software rtcc for software and external mode
@@ -225,7 +216,6 @@ void rtccInit(void)
 		realTime.all[wu0] = 0;
 	// --------------------------------- //
 }
-
 
 void rtccUpdate(void)
 {
@@ -275,7 +265,5 @@ void rtccUpdate(void)
 
 	#endif
 }
-
-
 // =========================== //
 // ############################################## //

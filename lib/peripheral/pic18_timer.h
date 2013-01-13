@@ -36,20 +36,20 @@
 // TMR even	|	Prescaler Flag	|	Postscaler				|	-	|			Prescaler		//
 // #################################################################################################################################################### //
 // ------ Clock Settings ------ //
-//Clock sources		(Timer0 and Timer Odd only)
-#define TMR_CS_INST		0				// FOSC/4				(TMR0 & TMR8)
-#define	TMR_CS_FOSC		0x10				// FOSC					(TMR8)
-#define	TMR_CS_PIN		0x20				// Input from the TxOSC or TxCKI	(TMR0 & TMR8)
+//Clock sources			(Timer0 and Timer Odd only)
+#define TMR_CS_INST		0				// FOSC/4				(TMR0 & TMR16)
+#define	TMR_CS_FOSC		0x10				// FOSC					(TMR16)
+#define	TMR_CS_PIN		0x20				// Input from the TxOSC or TxCKI	(TMR0 & TMR16)
 
 //Prescaler			(All Timer)
 #define	TMR_DIV_256		0x87				//TMR0
 #define	TMR_DIV_128		0x86				//TMR0
 #define	TMR_DIV_64		0x85				//TMR0
 #define TMR_DIV_32		0x84				//TMR0
-#define	TMR_DIV_16		0x83				//TMR0		TMR16
-#define TMR_DIV_8		0x82				//TMR0	TMR8
+#define	TMR_DIV_16		0x83				//TMR0	TMR8
+#define TMR_DIV_8		0x82				//TMR0		TMR16
 #define	TMR_DIV_4		0x81				//TMR0	TMR8	TMR16
-#define	TMR_DIV_2		0x80				//TMR0	TMR8
+#define	TMR_DIV_2		0x80				//TMR0		TMR16
 #define	TMR_DIV_1		0				//TMR0	TMR8	TMR16
 // ---------------------------- //
 
@@ -178,9 +178,9 @@ typedef union
 	U8 all[3];
 	struct
 	{
-		volatile U8 TMRxH;
-		volatile U8 TMRxL;
 		volatile tT0CON TxCON;
+		volatile U8 TMRxL;
+		volatile U8 TMRxH;
 	};
 }tTimer0Reg;
 
@@ -190,9 +190,9 @@ typedef union
 	U8 all[3];
 	struct
 	{
-		volatile U8 TMRx;
-		volatile U8 PRx;
 		volatile tTxCON8 TxCON;
+		volatile U8 PRx;
+		volatile U8 TMRx;
 	};
 }tTimer8Reg;
 
@@ -202,9 +202,9 @@ typedef union
 	U8 all[3];
 	struct
 	{
-		volatile U8 TMRxH;
-		volatile U8 TMRxL;
 		volatile tTxCON16 TxCON;
+		volatile U8 TMRxL;
+		volatile U8 TMRxH;
 	};
 }tTimer16Reg;
 // -------------- //
@@ -338,65 +338,58 @@ U8 timerGetPR(U8 timerID);
 
 // ############### Internal Macro ############### //
 // DO NOT USE THOSE MACRO DIRECTLY // 	(yeah, well you can, but... meh)
-#define	_tmrStart0		__tmrStart(0)
-#define	_tmrStop0		__tmrStop(0)
-#define _tmrSet0(data)		__tmrSet16bit(0,data)
-#define _tmrGet0		__tmrGet16bit(0)
-#define _tmrClear0		__tmrClear16bit(0)
+#define	_tmrStart0		T0CONbits.TMR0ON = 1
+#define	_tmrStop0		T0CONbits.TMR0ON = 0
+#define _tmrSet0(data)		TMR0H = data >> 8; TMR0L = (U8)data
+#define _tmrGet0		(U16)((TMR0H << 8) + TMR0L)
+#define _tmrClear0		TMR0H = 0; TMR0L = 0
 
-#define	_tmrStart1		__tmrStart(1)
-#define	_tmrStop1		__tmrStop(1)
-#define _tmrSet1(data)		__tmrSet16bit(1,data)
-#define _tmrGet1		__tmrGet16bit(1)
-#define _tmrClear1		__tmrClear16bit(1)
+#define	_tmrStart1		T1CONbits.TMR1ON = 1
+#define	_tmrStop1		T1CONbits.TMR1ON = 0
+#define _tmrSet1(data)		TMR1H = data >> 8; TMR1L = (U8)data
+#define _tmrGet1		(U16)((TMR1H << 8) + TMR1L)
+#define _tmrClear1		TMR1H = 0; TMR1L = 0
 
-#define	_tmrStart2		__tmrStart(2)
-#define	_tmrStop2		__tmrStop(2)
-#define _tmrSet2(data)		__tmrSet8bit(2,data)
-#define _tmrGet2		__tmrGet8bit(2)
-#define _tmrClear2		__tmrClear8bit(2)
+#define	_tmrStart2		T2CONbits.TMR2ON = 1
+#define	_tmrStop2		T2CONbits.TMR2ON = 0
+#define _tmrSet2(data)		TMR2 = data
+#define _tmrGet2		TMR2
+#define _tmrClear2		TMR2 = 0
 
-#define	_tmrStart3		__tmrStart(3)
-#define	_tmrStop3		__tmrStop(3)
-#define _tmrSet3(data)		__tmrSet16bit(3,data)
-#define _tmrGet3		__tmrGet16bit(3)
-#define _tmrClear3		__tmrClear16bit(3)
+#define	_tmrStart3		T3CONbits.TMR3ON = 1
+#define	_tmrStop3		T3CONbits.TMR3ON = 0
+#define _tmrSet3(data)		TMR3H = data >> 8; TMR3L = (U8)data
+#define _tmrGet3		(U16)((TMR3H << 8) + TMR3L)
+#define _tmrClear3		TMR3H = 0; TMR3L = 0
 
-#define	_tmrStart4		__tmrStart(4)
-#define	_tmrStop4		__tmrStop(4)
-#define _tmrSet4(data)		__tmrSet8bit(4,data)
-#define _tmrGet4		__tmrGet8bit(4)
-#define _tmrClear4		__tmrClear8bit(4)
+#define	_tmrStart4		T4CONbits.TMR4ON = 1
+#define	_tmrStop4		T4CONbits.TMR4ON = 0
+#define _tmrSet4(data)		TMR4 = data
+#define _tmrGet4		TMR4
+#define _tmrClear4		TMR4 = 0
 
-#if (CPU_FAMILY == PIC18FxxJ53) || (CPU_FAMILY == PIC18FxxK22)
-	#define	_tmrStart5		__tmrStart(5)
-	#define	_tmrStop5		__tmrStop(5)
-	#define _tmrSet5(data)		__tmrSet16bit(5,data)
-	#define _tmrGet5		__tmrGet16bit(5)
-	#define _tmrClear5		__tmrClear16bit(5)
+#if (CPU_FAMILY == PIC18Fx7Jx3) || (CPU_FAMILY == PIC18FxxK22)
+	#define	_tmrStart5		T5CONbits.TMR5ON = 1
+	#define	_tmrStop5		T5CONbits.TMR5ON = 0
+	#define _tmrSet5(data)		TMR5H = data >> 8; TMR5L = (U8)data
+	#define _tmrGet5		(U16)((TMR5H << 8) + TMR5L)
+	#define _tmrClear5		TMR5H = 0; TMR5L = 0
 
-	#define	_tmrStart6		__tmrStart(6)
-	#define	_tmrStop6		__tmrStop(6)
-	#define _tmrSet6(data)		__tmrSet8bit(6,data)
-	#define _tmrGet6		__tmrGet8bit(6)
-	#define _tmrClear6		__tmrClear8bit(6)
-#endif
-#if CPU_FAMILY == PIC18FxxJ53
-	#define	_tmrStart8		__tmrStart(8)
-	#define	_tmrStop8		__tmrStop(8)
-	#define _tmrSet8(data)		__tmrSet8bit(8,data)
-	#define _tmrGet8		__tmrGet8bit(8)
-	#define _tmrClear8		__tmrClear8bit(8)
+	#define	_tmrStart6		T6CONbits.TMR6ON = 1
+	#define	_tmrStop6		T6CONbits.TMR6ON = 0
+	#define _tmrSet6(data)		TMR6 = data
+	#define _tmrGet6		TMR6
+	#define _tmrClear6		TMR6 = 0
 #endif
 
-#define __tmrStart(x)			CONCAT3(T,x,CONbits).CONCAT3(TMR,x,ON) = 1
-#define __tmrStop(x)			CONCAT3(T,x,CONbits).CONCAT3(TMR,x,ON) = 0
-#define __tmrClear16bit(x)		CONCAT3(TMR,x,H) = 0; CONCAT3(TMR,x,L) = 0
-#define	__tmrClear8bit(x)		CONCAT(TMR,x) = 0
-#define __tmrSet16bit(x,data)		CONCAT3(TMR,x,H) = (data>>8); CONCAT3(TMR,x,L) = (U8)data
-#define __tmrSet8bit(x,data)		CONCAT(TMR,x) = data
-#define	__tmrGet16bit(x)		(((U16)CONCAT3(TMR,x,H))<<8)+CONCAT3(TMR,x,L)
-#define __tmrGet8bit(x)			CONCAT(TMR,x)
+#if CPU_FAMILY == PIC18Fx7Jx3
+	//This is the Timer 8 not 7 but it's ID is 7
+	#define	_tmrStart7		T8CONbits.TMR8ON = 1
+	#define	_tmrStop7		T8CONbits.TMR8ON = 0
+	#define _tmrSet7(data)		TMR8 = data
+	#define _tmrGet7		TMR8
+	#define _tmrClear7		TMR8 = 0
+#endif
 // ############################################## //
 
 #endif
