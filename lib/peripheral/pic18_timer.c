@@ -35,8 +35,8 @@ const void * volatile const timerRegAddress[5] = {&T0CON,&T1CON,&T2CON,&T3CON,&T
 // ----------- //
 
 // Prescaler divider //
-const U16 tmr0PrescalerValue[TMR0_CKPS_NB] = {2,4,8,16,32,64,128,256};		//TO REVISE!!!!
-const U8 tmr8PrescalerValue[TMR8_CKPS_NB] = {0,2,4};				//TO REVISE!!!!
+const U8 tmr0PrescalerValue[TMR0_CKPS_NB] = {1,2,3,4,5,6,7,8};
+const U8 tmr8PrescalerValue[TMR8_CKPS_NB] = {0,2,4};
 const U8 tmr16PrescalerValue[TMR16_CKPS_NB] = {0,1,2,3};
 // ----------------- //
 // ############################################## //
@@ -139,26 +139,38 @@ U8 timerInit(U8 timerID, U8 option)
 * @arg		U16 ovfPeriod			Total Period between overflow (in us)
 * @return	nothing
 */
-void timerSetOverflow(U8 timerID, U16 ovfPeriod)
+void timerSetOverflow(U8 timerID, U32 ovfPeriod)
 {
 	if (timerID <= TIMER_MAX_ID)
 	{
 		// -- Determine the type of the timer -- //
 		if (timerID == 0)
 		{
-			volatile tTimer0Reg * workTimer = timerRegAddress[0];		//Timer 0
+			volatile tTimer0Reg * workPtr = timerRegAddress[0];		//Timer 0
 		}
 		else if (timerID & 0x01)
 		{
-			volatile tTimer16Reg * workTimer = timerRegAddress[timerID];	//16bit Timers
+			volatile tTimer16Reg * workPtr = timerRegAddress[timerID];	//16bit Timers
 		}
 		else
 		{
-			volatile tTimer8Reg * workTimer = timerRegAddress[timerID];	//8bit Timers
+			volatile tTimer8Reg * workPtr = timerRegAddress[timerID];	//8bit Timers
 		}
 		// ------------------------------------- //
 
-		
+		// -- Reset Pre and Post scaler -- //
+
+		// ------------------------------- //
+
+		// -- Find the fastest freq needed -- //
+
+		// ---------------------------------- //
+
+		// -- Test if correct -- //
+		// --------------------- //
+
+		// -- Set the overflow match value -- //
+		// ---------------------------------- //
 	}
 }
 
@@ -179,15 +191,15 @@ U16 timerGetOverflow(U8 timerID)
 		// -- Determine the type of the timer -- //
 		if (timerID == 0)
 		{
-			volatile tTimer0Reg * workTimer = timerRegAddress[0];		//Timer 0
+			volatile tTimer0Reg * workPtr = timerRegAddress[0];		//Timer 0
 		}
 		else if (timerID & 0x01)
 		{
-			volatile tTimer16Reg * workTimer = timerRegAddress[timerID];	//16bit Timers
+			volatile tTimer16Reg * workPtr = timerRegAddress[timerID];	//16bit Timers
 		}
 		else
 		{
-			volatile tTimer8Reg * workTimer = timerRegAddress[timerID];	//8bit Timers
+			volatile tTimer8Reg * workPtr = timerRegAddress[timerID];	//8bit Timers
 		}
 		// ------------------------------------- //
 		
@@ -214,12 +226,12 @@ U16 timerGetTickPeriod(U8 timerID)
 		// -- Timer 0 ------ //
 		if (timerID == 0)
 		{
-			volatile tTimer0Reg * workTimer = timerRegAddress[0];
+			volatile tTimer0Reg * workPtr = timerRegAddress[0];
 			
-			if (!workTimer->TxCON.TxCS)
+			if (!workPtr->TxCON.TxCS)
 			{
-				if (workTimer->TxCON.PSA)
-					tickPeriod = (U16)((U32)250000000 / (globalCLK >> (workTimer->TxCON.TxPS+1)));
+				if (workPtr->TxCON.PSA)
+					tickPeriod = (U16)((U32)250000000 / (globalCLK >> (workPtr->TxCON.TxPS+1)));
 				else
 					tickPeriod = (U16)((U32)250000000 / globalCLK);
 			}
@@ -227,19 +239,19 @@ U16 timerGetTickPeriod(U8 timerID)
 		// -- Timer 16bit -- //
 		else if (timerID & 0x01)
 		{
-			volatile tTimer16Reg * workTimer = timerRegAddress[timerID];	
+			volatile tTimer16Reg * workPtr = timerRegAddress[timerID];
 
-			if (workTimer->TxCON.TMRxCS == 1)				//Clock source is FOSC
-				tickPeriod = (U16)((U32)1000000000 / (globalCLK >> workTimer->TxCON.TxCKPS));
-			else if (workTimer->TxCON.TMRxCS == 0)				//Clock source is FOSC/4
-				tickPeriod = (U16)((U32)250000000 / (globalCLK >> workTimer->TxCON.TxCKPS));
+			if (workPtr->TxCON.TMRxCS == 1)				//Clock source is FOSC
+				tickPeriod = (U16)((U32)1000000000 / (globalCLK >> workPtr->TxCON.TxCKPS));
+			else if (workPtr->TxCON.TMRxCS == 0)				//Clock source is FOSC/4
+				tickPeriod = (U16)((U32)250000000 / (globalCLK >> workPtr->TxCON.TxCKPS));
 		}
 		// -- Timer 8bit --- //
 		else
 		{
-			volatile tTimer8Reg * workTimer = timerRegAddress[timerID];
+			volatile tTimer8Reg * workPtr = timerRegAddress[timerID];
 
-			tickPeriod = (U16)((U32)1000000000 /(globalCLK >> (workTimer->TxCON.TxCKPS << 1)));
+			tickPeriod = (U16)((U32)1000000000 /(globalCLK >> (workPtr->TxCON.TxCKPS << 1)));
 		}
 		// ----------------- //
 	}
