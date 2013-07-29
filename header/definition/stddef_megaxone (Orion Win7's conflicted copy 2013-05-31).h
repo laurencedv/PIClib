@@ -181,15 +181,7 @@
 
 
 // ############### Assembly Macro ############### //
-#ifndef Nop()
-	#define Nop()			asm("nop");
-#endif
-#ifndef _Nop
-	#define _Nop			asm("nop");
-#endif
-#ifndef Reset()
-	#define Reset()			asm("reset")
-#endif
+
 // ############################################## //
 
 

@@ -19,6 +19,7 @@
 #include <hardware.h>
 
 // Lib
+#include <time.h>
 #include <peripheral/pic18_clock.h>
 #include <peripheral/pic18_timer.h>
 #include <peripheral/pic18_interrupt.h>
@@ -49,7 +50,7 @@
 typedef union
 {
 	U16 all[9];
-	//tm time;
+	tm time;
 }tRTime;
 
 typedef union

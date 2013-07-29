@@ -4,7 +4,7 @@
 
  @version	0.2.1
  @note		All Function are Non-Blocking
-			Depends on some global parameters in hardware.h
+		Depends on some global parameters in hardware.h
 
  @date		October 29th 2011
  @author	Laurence DV
@@ -101,7 +101,7 @@ void usartRxISR(U8 portID)
 		usartBufRxSize[portID]++;
 
 		if (tempID == USART_BUF_SIZE)
-			usartBufRxIDin[portID] = 0;					//Wrap around the buffer
+			usartBufRxIDin[portID] = 0;				//Wrap around the buffer
 		else
 			usartBufRxIDin[portID] = tempID;			//Save the pointer
 		// ----------------------- //
@@ -111,15 +111,15 @@ void usartRxISR(U8 portID)
 		{
 			usartRCSTA->CREN = 0;
 			usartRCSTA->CREN = 1;
-			Nop();										//Wait 2 cycle as the Silicon Errata
-			Nop();										//for 18Fx7j53 suggest
+			Nop();							//Wait 2 cycle as the Silicon Errata
+			Nop();							//for 18Fx7j53 suggest
 		}
 		// -------------------------- //
 	}
 	//* -- Buffer is full -- *//
 	else
 	{
-		globalDump = *usartRCREG;						//Discard the byte
+		globalDump = *usartRCREG;					//Discard the byte
 		usartCtl[portID].rxFull = 1;					//Flag the overflow
 	}
 	//* -------------------- *//
@@ -202,12 +202,12 @@ void usartTxISR(U8 portID)
 /**
 * \fn		U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 * @brief	Initialize the designated ($portID) EUSART into the designated mode ($options)
-			at the designated speed ($desiredBaudRate)
+		at the designated speed ($desiredBaudRate)
 * @note		Modifiable at run-time.
 * @arg		U8 portID			Hardware EUSART ID
-* @arg		U32 desiredBaudRate	Desired Baud Rate (in baud)
+* @arg		U32 desiredBaudRate		Desired Baud Rate (in baud)
 * @arg		U8 options			Options for the EUSART
-* @return	U8 errorCode		STD Error Code
+* @return	U8 errorCode			STD Error Code
 */
 U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 {
@@ -225,13 +225,13 @@ U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 			usartTXSTA = (tTXSTA*)&TXSTA1;
 			usartRCSTA = (tRCSTA*)&RCSTA1;
 			usartBAUDCON = (tBAUDCON*)&BAUDCON1;
-			TXREG1 = 0;								//Clear the Tx Reg
+			TXREG1 = 0;						//Clear the Tx Reg
 			
 			// Init interrupt
 			int_eusart1rx_init();
 
 			// Set the IO
-			USART1_RX = ~(usartBAUDCON->RXDTP);		//Idle state for RX
+			USART1_RX = ~(usartBAUDCON->RXDTP);			//Idle state for RX
 			if (splitedOption.b0)
 				USART1_TX = usartBAUDCON->TXCKP;		//Idle state for TX
 			else
@@ -248,13 +248,13 @@ U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 			usartTXSTA = (tTXSTA*)&TXSTA2;
 			usartRCSTA = (tRCSTA*)&RCSTA2;
 			usartBAUDCON = (tBAUDCON*)&BAUDCON2;
-			TXREG2 = 0;								//Clear the Tx Reg
+			TXREG2 = 0;						//Clear the Tx Reg
 			
 			// Init interrupt
 			int_eusart2rx_init();
 
 			// Set the IO
-			USART2_RX = ~(usartBAUDCON->RXDTP);		//Idle state for RX
+			USART2_RX = ~(usartBAUDCON->RXDTP);			//Idle state for RX
 			if (splitedOption.b0)
 				USART2_TX = usartBAUDCON->TXCKP;		//Idle state for TX
 			else
@@ -275,9 +275,9 @@ U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 
 
 	// -- Reset all Register -- //
-    usartTXSTA->all = 0;
-    usartRCSTA->all = 0;
-    usartBAUDCON->all = 0;
+	usartTXSTA->all = 0;
+	usartRCSTA->all = 0;
+	usartBAUDCON->all = 0;
 	usartCtl[portID].all = 0;
 	// ------------------------ //
 
@@ -288,11 +288,11 @@ U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 
 
 	// -- Set the Options -- //
-	usartTXSTA->SYNC = splitedOption.b0;	//Sync/Async
-	usartTXSTA->TX9 = splitedOption.b6;		//Set the bit number per frame
+	usartTXSTA->SYNC = splitedOption.b0;			//Sync/Async
+	usartTXSTA->TX9 = splitedOption.b6;			//Set the bit number per frame
 	usartRCSTA->RX9 = splitedOption.b6;
-	usartBAUDCON->RXDTP = splitedOption.b5;	//Set the Rx polarity
-	usartBAUDCON->TXCKP = splitedOption.b4;	//Set the Tx idle state
+	usartBAUDCON->RXDTP = splitedOption.b5;			//Set the Rx polarity
+	usartBAUDCON->TXCKP = splitedOption.b4;			//Set the Tx idle state
 	// --------------------- //
 
 	// Set the baudrate
@@ -300,14 +300,14 @@ U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 
 	// -- Start the EUSART -- //
 	usartTXSTA->TXEN = 1;					//Start the Transmitter
-	Nop();									//Wait 2 cycle as the Silicon Errata
-	Nop();									//for 18Fx7j53 suggest
+	Nop();							//Wait 2 cycle as the Silicon Errata
+	Nop();							//for 18Fx7j53 suggest
 	usartRCSTA->CREN = 1;					//Start the continuous reception
-	Nop();									//Wait 2 cycle as the Silicon Errata
-	Nop();									//for 18Fx7j53 suggest
+	Nop();							//Wait 2 cycle as the Silicon Errata
+	Nop();							//for 18Fx7j53 suggest
 	usartRCSTA->SPEN = 1;					//Enable the Serial Port
-	Nop();									//Wait 2 cycle as the Silicon Errata
-	Nop();									//for 18Fx7j53 suggest
+	Nop();							//Wait 2 cycle as the Silicon Errata
+	Nop();							//for 18Fx7j53 suggest
 	// ---------------------- //
 
 	return STD_EC_SUCCESS;
@@ -317,7 +317,7 @@ U8 usartInit(U8 portID, U32 desiredBaudRate, U8 options)
 * \fn		U8 usartSetBaudRate(U8 portID, U32 desiredBaudRate)
 * @brief	Set the designated EUSART ($portID) at the designated speed ($desiredBaudRate)
 * @note
-* @arg		U8 portID			Hardware EUSART ID
+* @arg		U8 portID		Hardware EUSART ID
 * @arg		U32 BaudRate		Desired Baud Rate (in baud)
 * @return	U32 realBaudRate	Real Baud Rate set (in baud)
 */
@@ -393,7 +393,7 @@ U32 usartSetBaudRate(U8 portID, U32 BaudRate)
 * @brief	Return the actual Baudrate of the designated EUSART ($portID)
 * @note
 * @arg		U8 portID			Hardware EUSART ID
-* @return	U32 desiredBaudRate	Actual Baudrate (in baud)
+* @return	U32 desiredBaudRate		Actual Baudrate (in baud)
 */
 U32 usartGetBaudRate(U8 portID)
 {
@@ -459,8 +459,8 @@ void usartResetBuffer(U8 portID)
 * \fn		U8 usartPushByte(U8 portID, U8 byteToSend)
 * @brief	Send 1 byte trought the software buffer
 * @note		Return STD_EC_OVERFLOW if the buffer is full
-			No detection for invalid portID
-* @arg		U8 portID			Hardware EUSART ID
+		No detection for invalid portID
+* @arg		U8 portID		Hardware EUSART ID
 * @arg		U8 byteToSend		The byte to send
 * @return	U8 errorCode		STD Error Code (STD_EC_SUCCESS if successful)
 */
@@ -481,7 +481,7 @@ U8 usartPushByte(U8 portID, U8 byteToSend)
 		usartBufTxSize[portID]++;
 
 		if (tempID == USART_BUF_SIZE)
-			usartBufTxIDin[portID] = 0;						//Wrap around the buffer
+			usartBufTxIDin[portID] = 0;					//Wrap around the buffer
 		else
 			usartBufTxIDin[portID] = tempID;				//Save the pointer
 		// ----------------------- //
@@ -507,10 +507,10 @@ U8 usartPushByte(U8 portID, U8 byteToSend)
 * \fn		U8 usartPushFromRam(U8 portID, U8 * arrayPtr, U8 byteNb)
 * @brief	Send an array of $byteNb number of byte from the Ram starting at the $arrayPtr
 * @note		Return STD_EC_OVERFLOW if there is not enought space
-			No detection for invalid portID
-* @arg		U8 portID			Hardware EUSART ID
+		No detection for invalid portID
+* @arg		U8 portID		Hardware EUSART ID
 * @arg		U8 * arrayPtr		Pointer to the first element of the array
-* @arg		U8 byteNb			Number of byte to send (max USART_BUF_SIZE)
+* @arg		U8 byteNb		Number of byte to send (max USART_BUF_SIZE)
 * @return	U8 errorCode		STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 usartPushFromRam(U8 portID, U8 * arrayPtr, U8 byteNb)
@@ -528,7 +528,7 @@ U8 usartPushFromRam(U8 portID, U8 * arrayPtr, U8 byteNb)
 			tempID++;
 
 			if (tempID == USART_BUF_SIZE)
-				tempID = 0;									//Wrap around the buffer
+				tempID = 0;						//Wrap around the buffer
 		}
 		usartBufTxIDin[portID] = tempID;					//Retreive the correct pointer
 		// -------------------------------- //
@@ -556,10 +556,10 @@ U8 usartPushFromRam(U8 portID, U8 * arrayPtr, U8 byteNb)
 * \fn		U8 usartPushFromRom(U8 portID, rom const U8 * arrayPtr, U8 byteNb)
 * @brief	Send an array of $byteNb number of byte from the Rom starting at the $arrayPtr
 * @note		Return STD_EC_OVERFLOW if there is not enought space
-			No detection for invalid portID
-* @arg		U8 portID				Hardware EUSART ID
-* @arg		rom const U8 * arrayPtr	Pointer to the first element of the array
-* @arg		U8 byteNb				Number of byte to send
+		No detection for invalid portID
+* @arg		U8 portID			Hardware EUSART ID
+* @arg		rom const U8 * arrayPtr		Pointer to the first element of the array
+* @arg		U8 byteNb			Number of byte to send
 * @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 usartPushFromRom(U8 portID, const U8 * arrayPtr, U8 byteNb)
@@ -574,7 +574,7 @@ U8 usartPushFromRom(U8 portID, const U8 * arrayPtr, U8 byteNb)
 		for (wu0 = 0; wu0 < byteNb; wu0++)
 		{
 			if (tempID == USART_BUF_SIZE)
-				tempID = 0;									//Wrap around the buffer
+				tempID = 0;						//Wrap around the buffer
 
 			usartBufTx[portID][tempID] = arrayPtr[wu0];
 			tempID++;
@@ -605,9 +605,9 @@ U8 usartPushFromRom(U8 portID, const U8 * arrayPtr, U8 byteNb)
 * \fn		U8 usartPushString(U8 portID, rom const U8 * arrayPtr, U8 delimiter)
 * @brief	Send a string from the Rom starting at $arrayPtr
 * @note		Return STD_EC_OVERFLOW if there is not enought space
-			No detection for invalid portID
-* @arg		U8 portID				Hardware EUSART ID
-* @arg		rom const U8 * arrayPtr	Pointer to the first element of the array
+		No detection for invalid portID
+* @arg		U8 portID			Hardware EUSART ID
+* @arg		rom const U8 * arrayPtr		Pointer to the first element of the array
 * @return	U8 errorCode			STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 usartPushString(U8 portID, const U8 * arrayPtr)
@@ -619,7 +619,7 @@ U8 usartPushString(U8 portID, const U8 * arrayPtr)
 	// -- Measure the string -- //
 	while (arrayPtr[byteNb] != '\0')
 	{
-		byteNb++;											//Count a char
+		byteNb++;								//Count a char
 		if (byteNb == USART_BUF_SIZE)						//Break if larger than the buffer
 			break;
 	}
@@ -637,7 +637,7 @@ U8 usartPushString(U8 portID, const U8 * arrayPtr)
 			tempID++;
 
 			if (tempID == USART_BUF_SIZE)
-				tempID = 0;									//Wrap around the buffer
+				tempID = 0;						//Wrap around the buffer
 		}
 		usartBufTxIDin[portID] = tempID;					//Retreive the correct pointer
 		// ------------------------------------------ //
@@ -667,8 +667,8 @@ U8 usartPushString(U8 portID, const U8 * arrayPtr)
 * \fn		U8 usartPullByte(U8 portID)
 * @brief	Extract 1 byte from the usartBufRx in a FIFO manner
 * @note		Must check the buffer size before calling this, or else could return false data
-			No detection for invalid portID
-* @arg		U8 portID			Hardware EUSART ID
+		No detection for invalid portID
+* @arg		U8 portID		Hardware EUSART ID
 * @return	U8 byteReceived		FIFO byte return
 */
 U8 usartPullByte(U8 portID)
@@ -702,10 +702,10 @@ U8 usartPullByte(U8 portID)
 * \fn		U8 usartPullArray(U8 portID, U8 * destinationPtr, U8 byteNb)
 * @brief	Extract an array of $byteNb size from the usartBufRx in a FIFO manner
 * @note		This function check for the bufSize >= byteNb, if not return STD_EC_EMPTY
-			No detection for invalid portID
-* @arg		U8 portID			Hardware EUSART ID
+		No detection for invalid portID
+* @arg		U8 portID		Hardware EUSART ID
 * @arg		U8 * destinationPtr	Pointer to save the resulting array
-* @arg		U8 byteNb			Number of byte to extract
+* @arg		U8 byteNb		Number of byte to extract
 * @return	U8 errorCode		STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 usartPullArray(U8 portID, U8 * destinationPtr, U8 byteNb)
@@ -724,7 +724,7 @@ U8 usartPullArray(U8 portID, U8 * destinationPtr, U8 byteNb)
 			tempID++;
 
 			if (tempID == USART_BUF_SIZE)
-				tempID = 0;									//Wrap around the buffer
+				tempID = 0;						//Wrap around the buffer
 		}
 		usartBufRxIDout[portID] = tempID;					//Save the pointer
 		// -------------------------------------- //
@@ -746,19 +746,19 @@ U8 usartPullArray(U8 portID, U8 * destinationPtr, U8 byteNb)
 * \fn		U8 usartPullFrame(U8 portID, U8 * destinationPtr, U8 delimiter)
 * @brief	Extract an array from the usartBufRx until a $delimiter is found in a FIFO manner
 * @note		You must ensure that enought space in the destination is available for the frame (max USART_BUF_SIZE)
-			This function will first scan for a delimiter, if none found will return 0
-			Also check for coherency with the buffer size (ex: frame found of 20B but buffer contain 10 Byte) will return 0
-			No detection for invalid portID
+		This function will first scan for a delimiter, if none found will return 0
+		Also check for coherency with the buffer size (ex: frame found of 20B but buffer contain 10 Byte) will return 0
+		No detection for invalid portID
 * @arg		U8 portID			Hardware EUSART ID
-* @arg		U8 * destinationPtr	Pointer to save the resulting array
-* @arg		U8 delimiter		Value Representing the end of the frame
+* @arg		U8 * destinationPtr		Pointer to save the resulting array
+* @arg		U8 delimiter			Value Representing the end of the frame
 * @return	U8 nbByte			Number of byte in the frame
 */
 U8 usartPullFrame(U8 portID, U8 * destinationPtr, U8 delimiter)
 {
 	U8 wu0;
 	U8 tempID;
-	U8 byteNb = 0;											//Number of byte in the frame
+	U8 byteNb = 0;									//Number of byte in the frame
 
 	PORTBbits.RB1 = 1;
 
@@ -766,11 +766,11 @@ U8 usartPullFrame(U8 portID, U8 * destinationPtr, U8 delimiter)
 	tempID = usartBufRxIDout[portID];						//Save the pointer locally for faster execution
 	while (usartBufRx[portID][tempID] != delimiter)
 	{
-		byteNb++;											//Count a byte
-		tempID++;											//Move the pointer
+		byteNb++;								//Count a byte
+		tempID++;								//Move the pointer
 
 		if (byteNb == USART_BUF_SIZE)						//No delimiter found
-			return 0;										//Return 0 byte transferred
+			return 0;							//Return 0 byte transferred
 		else if (tempID == USART_BUF_SIZE)					//Wrap around the buffer
 			tempID = 0;
 	}
@@ -793,21 +793,21 @@ U8 usartPullFrame(U8 portID, U8 * destinationPtr, U8 delimiter)
 			tempID++;
 
 			if (tempID == USART_BUF_SIZE)
-				tempID = 0;									//Wrap around the buffer
+				tempID = 0;						//Wrap around the buffer
 		}
 		
 		// -- Skip the delimiter -- //
 		tempID++;
 		if (tempID == USART_BUF_SIZE)
-			tempID = 0;										//Wrap around the buffer
+			tempID = 0;							//Wrap around the buffer
 		// ------------------------ //
 
 		usartBufRxIDout[portID] = tempID;					//Save the pointer
 
 		//Adjust the buffer size
-		usartBufRxSize[portID] -= (byteNb+1);				//Discard the delimiter too
+		usartBufRxSize[portID] -= (byteNb+1);					//Discard the delimiter too
 
-		return byteNb;										//Return the number of byte transferred
+		return byteNb;								//Return the number of byte transferred
 		// ---------------------------------------- //
 	}
 	// -- Old data return 0 byte transferred -- //

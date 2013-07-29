@@ -83,6 +83,13 @@
 // ############################################## //
 
 
+// ############### Internal Define ############## //
+#define	ADC_SAMC_MAX		31
+#define ADC_SAMP_RATE_MAX	1000000
+#define ADC_FIFO_LVL		16
+// ############################################## //
+
+
 // ################# Data Type ################## //
 //ADC Module State
 typedef enum
@@ -454,13 +461,6 @@ U8 adcStartScan(U8 adcPort, U16 * resultPtr, U8 * donePtr);
 */
 U8 adcStopScan(U8 adcPort);
 // ========================== //
-// ############################################## //
-
-
-// ############### Internal Define ############## //
-#define	ADC_SAMC_MAX		31
-#define ADC_SAMP_RATE_MAX	1000000
-#define ADC_FIFO_LVL		16
 // ############################################## //
 
 #endif

@@ -172,15 +172,11 @@ void ccpSetPeriod(U8 ccpID, U32 newPeriod)
 * @arg		U8 ccpID			Hardware CCP ID
 * @return	U16 newPeriod			Period value (in ns)
 */
-U32 ccpGetPeriod(U8 ccpID)
+U16 ccpGetPeriod(U8 ccpID)
 {
 	if (ccpID < CCP_MAX_ID)
 	{
-		U8 tempPR = timerGetPR(CCPControl[ccpID].timerID) +1;
-		U16 tempTick = timerGetTickPeriod(CCPControl[ccpID].timerID);
-
-
-		return  (U32)tempTick * (U32)tempPR;
+		return (timerGetPR(CCPControl[ccpID].timerID) +1) * timerGetTickPeriod(CCPControl[ccpID].timerID);
 	}
 }
 // ############################################## //

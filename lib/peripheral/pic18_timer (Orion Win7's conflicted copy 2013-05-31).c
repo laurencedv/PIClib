@@ -134,12 +134,10 @@ U8 timerInit(U8 timerID, U8 option)
 		volatile tTimer8Reg * workPtr = tmrRegAddress[timerID];
 
 		// -- Set the prescaler -- //
-		switch (option & 0x83)
-		{
-			case TMR_DIV_16:	workPtr->TxCON.TxCKPS = 2; break;
-			case TMR_DIV_4:		workPtr->TxCON.TxCKPS = 1; break;
-			default:		workPtr->TxCON.TxCKPS = 0; break;	//Div by 1
-		}
+		if (option & 0x80)					//Check the prescaler flag
+			workPtr->TxCON.TxCKPS = option & 0x3;
+		else
+			workPtr->TxCON.TxCKPS = 0;			//Set to DIV by 1
 		// ----------------------- //
 
 		// -- Set the postscaler -- //
@@ -311,8 +309,8 @@ U16 timerGetTickPeriod(U8 timerID)
 		{
 			volatile tTimer8Reg * workPtr = tmrRegAddress[timerID];
 
-			// Only work if clock source is FOSC/4
-			tickPeriod = (U16)((U32)1000000000 /(clockGet() >> ((workPtr->TxCON.TxCKPS << 1)+2)));
+			// Only work if clock source is FOSC
+			tickPeriod = (U16)((U32)1000000000 /(clockGet() >> (workPtr->TxCON.TxCKPS << 1)));
 		}
 		// ----------------- //
 	}
@@ -365,17 +363,17 @@ void timerStart(U8 timerID)
 {	
 	switch (timerID)
 	{
-		case TIMER_0:	timerFastStart(0);	break;
-		case TIMER_1:	timerFastStart(1);	break;
-		case TIMER_2:	timerFastStart(2);	break;
-		case TIMER_3:	timerFastStart(3);	break;
-		case TIMER_4:	timerFastStart(4);	break;
+		case TIMER_0:	timerFastStart(TIMER_0);	break;
+		case TIMER_1:	timerFastStart(TIMER_1);	break;
+		case TIMER_2:	timerFastStart(TIMER_2);	break;
+		case TIMER_3:	timerFastStart(TIMER_3);	break;
+		case TIMER_4:	timerFastStart(TIMER_4);	break;
 		#if (CPU_FAMILY == PIC18Fx7Jx3) || (CPU_FAMILY == PIC18FxxK22)
-		case TIMER_5:	timerFastStart(5);	break;
-		case TIMER_6:	timerFastStart(6);	break;
+		case TIMER_5:	timerFastStart(TIMER_5);	break;
+		case TIMER_6:	timerFastStart(TIMER_6);	break;
 		#endif
 		#if CPU_FAMILY == PIC18Fx7Jx3
-		case TIMER_8:	timerFastStart(7);	break;
+		case TIMER_8:	timerFastStart(TIMER_8);	break;
 		#endif
 	}
 }
@@ -391,17 +389,17 @@ void timerStop(U8 timerID)
 {
 	switch (timerID)
 	{
-		case TIMER_0:	timerFastStop(0);		break;
-		case TIMER_1:	timerFastStop(1);		break;
-		case TIMER_2:	timerFastStop(2);		break;
-		case TIMER_3:	timerFastStop(3);		break;
-		case TIMER_4:	timerFastStop(4);		break;
+		case TIMER_0:	timerFastStop(TIMER_0);		break;
+		case TIMER_1:	timerFastStop(TIMER_1);		break;
+		case TIMER_2:	timerFastStop(TIMER_2);		break;
+		case TIMER_3:	timerFastStop(TIMER_3);		break;
+		case TIMER_4:	timerFastStop(TIMER_4);		break;
 		#if (CPU_FAMILY == PIC18Fx7Jx3) || (CPU_FAMILY == PIC18FxxK22)
-		case TIMER_5:	timerFastStop(5);		break;
-		case TIMER_6:	timerFastStop(6);		break;
+		case TIMER_5:	timerFastStop(TIMER_5);		break;
+		case TIMER_6:	timerFastStop(TIMER_6);		break;
 		#endif
 		#if CPU_FAMILY == PIC18Fx7Jx3
-		case TIMER_8:	timerFastStop(7);		break;
+		case TIMER_8:	timerFastStop(TIMER_8);		break;
 		#endif
 	}
 }
@@ -422,17 +420,17 @@ void timerSet(U8 timerID, U16 data)
 {
 		switch(timerID)
 		{
-			case TIMER_0:	timerFastSet(0,data);	break;
-			case TIMER_1:	timerFastSet(1,data);	break;
-			case TIMER_2:	timerFastSet(2,data);	break;
-			case TIMER_3:	timerFastSet(3,data);	break;
-			case TIMER_4:	timerFastSet(4,data);	break;
+			case TIMER_0:	timerFastSet(TIMER_0,data);	break;
+			case TIMER_1:	timerFastSet(TIMER_1,data);	break;
+			case TIMER_2:	timerFastSet(TIMER_2,data);	break;
+			case TIMER_3:	timerFastSet(TIMER_3,data);	break;
+			case TIMER_4:	timerFastSet(TIMER_4,data);	break;
 			#if (CPU_FAMILY == PIC18Fx7Jx3) || (CPU_FAMILY == PIC18FxxK22)
-			case TIMER_5:	timerFastSet(5,data);	break;
-			case TIMER_6:	timerFastSet(6,data);	break;
+			case TIMER_5:	timerFastSet(TIMER_5,data);	break;
+			case TIMER_6:	timerFastSet(TIMER_6,data);	break;
 			#endif
 			#if CPU_FAMILY == PIC18Fx7Jx3
-			case TIMER_8:	timerFastSet(7,data);	break;
+			case TIMER_8:	timerFastSet(TIMER_8,data);	break;
 			#endif
 		}
 }
@@ -449,17 +447,17 @@ U16 timerGet(U8 timerID)
 {
 	switch(timerID)
 	{
-		case TIMER_0:	return timerFastGet(0);
-		case TIMER_1:	return timerFastGet(1);
-		case TIMER_2:	return timerFastGet(2);
-		case TIMER_3:	return timerFastGet(3);
-		case TIMER_4:	return timerFastGet(4);
+		case TIMER_0:	return timerFastGet(TIMER_0);
+		case TIMER_1:	return timerFastGet(TIMER_1);
+		case TIMER_2:	return timerFastGet(TIMER_2);
+		case TIMER_3:	return timerFastGet(TIMER_3);
+		case TIMER_4:	return timerFastGet(TIMER_4);
 		#if (CPU_FAMILY == PIC18Fx7Jx3) || (CPU_FAMILY == PIC18FxxK22)
-		case TIMER_5:	return timerFastGet(5);
-		case TIMER_6:	return timerFastGet(6);
+		case TIMER_5:	return timerFastGet(TIMER_5);
+		case TIMER_6:	return timerFastGet(TIMER_6);
 		#endif
 		#if CPU_FAMILY == PIC18Fx7Jx3
-		case TIMER_8:	return timerFastGet(7);
+		case TIMER_8:	return timerFastGet(TIMER_8);
 		#endif
 		default:	return 0xFFFF;
 	}
@@ -495,8 +493,7 @@ U8 timerGetPR(U8 timerID)
 	{
 		if (timerID && ((timerID & 0x1) == 0))				//Only 8bit wide Timers have a PR reg
 		{
-			U8 tempPR = ((tTimer8Reg *)tmrRegAddress[timerID])->PRx;
-			return tempPR;
+			return ((tTimer8Reg *)tmrRegAddress[timerID])->PRx;
 		}
 	}
 	return 0;

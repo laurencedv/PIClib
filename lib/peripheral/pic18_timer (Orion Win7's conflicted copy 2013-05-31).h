@@ -18,9 +18,6 @@
 //Hardware
 #include <hardware.h>
 
-//Lib
-#include <peripheral/pic18_clock.h>
-
 //Definition
 #include <definition/datatype_megaxone.h>
 #include <definition/stddef_megaxone.h>
@@ -181,7 +178,7 @@ typedef union
 	U8 all[3];
 	struct
 	{
-		volatile U8 _;
+		volatile U8;
 		volatile U16 TMRx;
 	};
 	struct
@@ -210,7 +207,7 @@ typedef union
 	U8 all[3];
 	struct
 	{
-		volatile U8 _;
+		volatile U8;
 		volatile U16 TMRx;
 	};
 	struct
@@ -233,8 +230,6 @@ typedef union
 
 // ################# Prototypes ################# //
 // ==== Control ==== //
-void timerISR(U8 timerID);
-
 /**
 * \fn		U8 timerInit(U8 timerID, U8 option)
 * @brief	Initialise the selected timer with the specified options.
@@ -256,7 +251,7 @@ U8 timerInit(U8 timerID, U8 option);
 * @arg		U16 ovfPeriod			Total Period between overflow (in us)
 * @return	nothing
 */
-void timerSetOverflow(U8 timerID, U32 ovfPeriod);
+void timerSetOverflow(U8 timerID, U16 ovfPeriod);
 
 /**
 * \fn		U16 timerGetOverflow(U8 timerID)
@@ -276,17 +271,7 @@ U32 timerGetOverflow(U8 timerID);
 * @arg		U8 timerID			Hardware Timer ID
 * @return	U16 tickPeriod			Timer's tick period (in ns)
 */
-U16 timerGetTickPeriod(U8 timerID);
-
-/**
-* \fn		U32 timerGetSize(U8 timerID)
-* @brief	Return the total number of count of the timer
-* @note		Mathematicly corect, ex: a 8bit timer would return 256 not 255
-*		This do not consider the tmrInitVal variable
-* @arg		U8 timerID			Hardware Timer ID
-* @return	U32 tempSize			Total count number
-*/
-U32 timerGetSize(U8 timerID);
+U32 timerGetTickPeriod(U8 timerID);
 
 /**
 * \fn		void timerStart(U8 TimerID)

@@ -44,13 +44,13 @@
 #define		INT_TMR8_FLAG			(PIR5bits.TMR8IF && PIE5bits.TMR8IE)
 
 // IO Port
-#define		INT_RB_FLAG			(INTCONbits.RBIF && INTCONbits.RBIE)
+#define		INT_RB_FLAG				(INTCONbits.RBIF && INTCONbits.RBIE)
 #define		INT_INT0_FLAG			(INTCONbits.INT0IF && INTCONbits.INT0IE)
 #define		INT_INT1_FLAG			(INTCON3bits.INT1IF && INTCON3bits.INT1IE)
 #define		INT_INT2_FLAG			(INTCON3bits.INT2IF && INTCON3bits.INT2IE)
 #define		INT_INT3_FLAG			(INTCON3bits.INT3IF && INTCON3bits.INT3IE)
 
-// Analog
+// Analogue
 #define		INT_ADC_FLAG			(PIR1bits.ADIF && PIE1bits.ADIE)
 #define		INT_HLVD_FLAG			(PIR2bits.HLVDIF && PIE2bits.HLVDIE)
 #define		INT_CTMU_FLAG			(PIR3bits.CTMUIF && PIE3bits.CTMUIE)
@@ -94,18 +94,18 @@
 #define		INT_USB_SOF_FLAG		(UIRbits.SOFIF && UIEbits.SOFIE)
 #define		INT_USB_STALL_FLAG		(UIRbits.STALLIF && UIEbits.STALLIE)
 #define		INT_USB_IDLE_FLAG		(UIRbits.IDLEIF && UIEbits.IDLEIE)
-#define		INT_USB_TRANSACTION_FLAG	(UIRbits.TRNIF && UIEbits.TRNIE)
-#define		INT_USB_ACTIVITY_FLAG		(UIRbits.ACTVIF && UIEbits.ACTVIE)
+#define		INT_USB_TRANSACTION_FLAG (UIRbits.TRNIF && UIEbits.TRNIE)
+#define		INT_USB_ACTIVITY_FLAG	(UIRbits.ACTVIF && UIEbits.ACTVIE)
 #define		INT_USB_ERROR_FLAG		(UIRbits.UERRIF && UIEbits.UERRIE)
 #define		INT_USB_RESET_FLAG		(UIRbits.URSTIF && UIEbits.URSTIE)
 
 // USB Errors
-#define		INT_USB_BITSTUFF_FLAG		(UEIRbits.BTSEF && UEIEbits.BTSEE)
-#define		INT_USB_BUSTIMEOUT_FLAG		(UEIRbits.BTOEF && UEIEbits.BTOEE)
-#define		INT_USB_DATASIZE_FLAG		(UEIRbits.DFNEF && UEIEbits.DFNEE)
+#define		INT_USB_BITSTUFF_FLAG	(UEIRbits.BTSEF && UEIEbits.BTSEE)
+#define		INT_USB_BUSTIMEOUT_FLAG	(UEIRbits.BTOEF && UEIEbits.BTOEE)
+#define		INT_USB_DATASIZE_FLAG	(UEIRbits.DFNEF && UEIEbits.DFNEE)
 #define		INT_USB_CRC16_FLAG		(UEIRbits.CRC16EF && UEIEbits.CRC16EE)
 #define		INT_USB_CRC5_FLAG		(UEIRbits.CRC5EF && UEIEbits.CRC5EE)
-#define		INT_USB_PIDCHECK_FLAG		(UEIRbits.PIDEF && UEIEbits.PIDEE)
+#define		INT_USB_PIDCHECK_FLAG	(UEIRbits.PIDEF && UEIEbits.PIDEE)
 // ############################################## //
 
 
@@ -116,7 +116,7 @@
 #define		int_high_prio_en()		INTCONbits.GIEH = 1
 #define		int_high_prio_dis()		INTCONbits.GIEH = 0
 #define		int_peripheral_en()		INTCONbits.PEIE = 1
-#define		int_peripheral_dis()		INTCONbits.PEIE = 0
+#define		int_peripheral_dis()	INTCONbits.PEIE = 0
 #define		int_low_prio_en()		INTCONbits.GIEL = 1
 #define		int_low_prio_dis()		INTCONbits.GIEL = 0
 #define		int_priority_en()		RCONbits.IPEN = 1
@@ -138,13 +138,13 @@
 #define		int_tmr8_prio(_int_prio_lvl)		IPR5bits.TMR8IP = _int_prio_lvl
 
 // IO Port
-#define		int_rb_prio(_int_prio_lvl)		INTCON2bits.RBIP = _int_prio_lvl
+#define		int_rb_prio(_int_prio_lvl)			INTCON2bits.RBIP = _int_prio_lvl
 #define		int_int1_prio(_int_prio_lvl)		INTCON3bits.INT1IP = _int_prio_lvl
 #define		int_int2_prio(_int_prio_lvl)		INTCON3bits.INT2IP = _int_prio_lvl
 #define		int_int3_prio(_int_prio_lvl)		INTCON2bits.INT3IP = _int_prio_lvl
 
 // Analogue
-#define		int_adc_prio(_int_prio_lvl)		IPR1bits.ADIP = _int_prio_lvl
+#define		int_adc_prio(_int_prio_lvl)			IPR1bits.ADIP = _int_prio_lvl
 #define		int_hlvd_prio(_int_prio_lvl)		IPR2bits.HLVDIP = _int_prio_lvl
 #define		int_ctmu_prio(_int_prio_lvl)		IPR3bits.CTMUIP = _int_prio_lvl
 
@@ -178,12 +178,12 @@
 #define		int_ccp10_prio(_int_prio_lvl)		IPR4bits.CCP10IP = _int_prio_lvl
 
 // Other
-#define		int_pmp_prio(_int_prio_lvl)		IPR1bits.PMPIP = _int_prio_lvl
-#define		int_osc_prio(_int_prio_lvl)		IPR2bits.OSCFIP = _int_prio_lvl
+#define		int_pmp_prio(_int_prio_lvl)			IPR1bits.PMPIP = _int_prio_lvl
+#define		int_osc_prio(_int_prio_lvl)			IPR2bits.OSCFIP = _int_prio_lvl
 #define		int_rtcc_prio(_int_prio_lvl)		IPR3bits.RTCCIP = _int_prio_lvl
 
 // USB
-#define		int_usb_prio(_int_prio_lvl)		IPR2bits.USBIP = _int_prio_lvl
+#define		int_usb_prio(_int_prio_lvl)			IPR2bits.USBIP = _int_prio_lvl
 
 
 // ------ General Interrupt ------ //
@@ -193,7 +193,7 @@
 #define		int_tmr0_clr()			INTCONbits.TMR0IF = 0
 
 #define		int_rb_init()			INTCONbits.RBIF = 0; INTCONbits.RBIE = 1
-#define		int_rb_en()			INTCONbits.RBIE = 1
+#define		int_rb_en()				INTCONbits.RBIE = 1
 #define		int_rb_dis()			INTCONbits.RBIE = 0
 #define		int_rb_clr()			INTCONbits.RBIF = 0
 
@@ -296,16 +296,16 @@
 #define		int_ctmu_clr()			PIR3bits.CTMUIF = 0
 
 // EUSART
-#define		int_eusart1rx_init()		PIE1bits.RC1IE = 1
+#define		int_eusart1rx_init()	PIE1bits.RC1IE = 1
 #define		int_eusart1rx_en()		PIE1bits.RC1IE = 1
 #define		int_eusart1rx_dis()		PIE1bits.RC1IE = 0
-#define		int_eusart1tx_init()		TXREG1 = 0; PIE1bits.TX1IE = 1
+#define		int_eusart1tx_init()	TXREG1 = 0; PIE1bits.TX1IE = 1
 #define		int_eusart1tx_en()		PIE1bits.TX1IE = 1
 #define		int_eusart1tx_dis()		PIE1bits.TX1IE = 0
-#define		int_eusart2rx_init()		PIE3bits.RC2IE = 1
+#define		int_eusart2rx_init()	PIE3bits.RC2IE = 1
 #define		int_eusart2rx_en()		PIE3bits.RC2IE = 1
 #define		int_eusart2rx_dis()		PIE3bits.RC2IE = 0
-#define		int_eusart2tx_init()		TXREG2 = 0; PIE3bits.TX2IE = 1
+#define		int_eusart2tx_init()	TXREG2 = 0; PIE3bits.TX2IE = 1
 #define		int_eusart2tx_en()		PIE3bits.TX2IE = 1
 #define		int_eusart2tx_dis()		PIE3bits.TX2IE = 0
 

@@ -41,7 +41,7 @@ tSPITransactionState spiFSMState[SPI_MAX_PORT];
 * \fn		U8 spiSelectPort(U8 spiPort)
 * @brief	Correctly point all reg pointers for a designated SPI port
 * @note		Will return STD_EC_NOTFOUND if an invalid port is given
-* @arg		U8 spiPort						Hardware SPI ID
+* @arg		U8 spiPort					Hardware SPI ID
 * @return	U8 errorCode					STD Error Code (STD_EC_SUCCESS if successful)
 */
 U8 spiSelectPort(U8 spiPort)
@@ -75,8 +75,8 @@ U8 spiSelectPort(U8 spiPort)
 * \fn		void spiMasterEngine(U8 spiPort, U32 interruptFlags)
 * @brief	SPI Transaction Engine, control the transaction system in master mode
 * @note		This function must be placed in the correct ISR
-*			This Function assume the Enhanced Buffer is enable
-* @arg		U8 spiPort						Hardware SPI ID
+*		This Function assume the Enhanced Buffer is enable
+* @arg		U8 spiPort					Hardware SPI ID
 * @arg		U32 interruptFlags				Interrupt flags for the corresponding SPI port (Aligned to 0)
 * @return	nothing
 */
@@ -115,7 +115,7 @@ void spiMasterISR(U8 spiPort, U32 interruptFlags)
 		switch (spiFSMState[spiPort])
 		{
 			// == SPISfetch a new Transaction ===== //
-			case SPISfetch:
+
 			{
 				// -- Check for pending transaction -- //
 				if (rBufGetUsedSpace(spiTransactionList[spiPort]))

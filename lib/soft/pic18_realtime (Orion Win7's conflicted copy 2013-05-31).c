@@ -101,7 +101,7 @@ U8 realTimeInit(U32 tickPeriod)
 
 	// -- Init the timer -- //
 	timerInit(TIMER_0,0);
-	timerSetOverflow(TIMER_0,tickPeriod/1000);
+	timerSetOverflow(TIMER_0,tickPeriod/1000)
 	timerStart(TIMER_0);
 	// -------------------- //
 
@@ -127,7 +127,6 @@ U8 realTimeInit(U32 tickPeriod)
 */
 void upTimeUpdate(void)
 {
-	/*
 	//Add a Tick (in ms) to the global millis count
 	upTime.millis += sysTickValue;
 
@@ -159,7 +158,6 @@ void upTimeUpdate(void)
 		}
 	}
 	// ------------------------------------------- //
-	*/
 }
 
 /**

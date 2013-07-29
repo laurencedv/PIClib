@@ -586,7 +586,7 @@ U8 adcStartScan(U8 adcPort, U16 * resultPtr, U8 * donePtr)
 		// ------------------------ //
 
 		// -- Count the number of conversion -- //
-		pADxCON2->SMPI = adcGetScanInputeNb(adcPort) -1;//Set the number of conversion to do
+		pADxCON2->SMPI = adcGetScanInputNb(adcPort) -1;//Set the number of conversion to do
 		// ------------------------------------ //
 
 		// -- Start the scan -- //

@@ -2,20 +2,20 @@
 // PIC18(L)F46K22
 
 // ---------- Clock ---------- //
-#pragma config FOSC = INTIO67		//Setting OSC to internal with IO on RA6 and RA7
+#pragma config FOSC = INTIO67			//Setting OSC to internal with IO on RA6 and RA7
 #pragma config PLLCFG = OFF			//PLL x4 disabled
-#pragma config PRICLKEN = ON		//Primary Clock always ON
+#pragma config PRICLKEN = ON			//Primary Clock always ON
 #pragma config FCMEN = ON			//Fail-safe Clock Monitor enabled
 #pragma config IESO = OFF			//OSC switch over mode disabled
 
 // ----------Execution Monitoring ---------- //
 #pragma config PWRTEN = ON			//Power-up Timer enabled
-#pragma config BOREN = SBORDIS		//Brown-out reset enabled in hardware only
+#pragma config BOREN = SBORDIS			//Brown-out reset enabled in hardware only
 #pragma config BORV = 250			//Brown-out level to 2.5V
 #pragma config WDTEN = OFF			//Watchdog disabled
 
 // ---------- Special function ---------- //
-#pragma config MCLRE = EXTMCLR		//MCLR pin enabled (RE3 disabled)
+#pragma config MCLRE = EXTMCLR			//MCLR pin enabled (RE3 disabled)
 #pragma config PBADEN = OFF			//Port B 0-5 Digital IO on reset
 #pragma config STVREN = ON			//Stack over/underflow cause reset
 #pragma config XINST = ON			//Instruction set extended and indexed adressing mode enable

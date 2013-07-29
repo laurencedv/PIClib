@@ -47,14 +47,6 @@
 
 
 // === Control Functions ===== //
-/**
-* \fn		U32 clockGet(void)
-* @brief	Return the current frequency of the main Clock
-* @note		Also known as FOSC, not the internal instruction freq (div by 4)
-* @arg		nothing
-* @return	U32 globalCLK		Main Clock in Hz
-*/
-U32 clockGet(void);
 // =========================== //
 
 

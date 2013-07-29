@@ -215,7 +215,7 @@ void ccpSetPeriod(U8 ccpID, U32 newPeriod);
 * @arg		U8 ccpID			Hardware CCP ID
 * @return	U16 newPeriod			Period value (in ns)
 */
-U32 ccpGetPeriod(U8 ccpID);
+U16 ccpGetPeriod(U8 ccpID);
 // ############################################## //
 
 
